@@ -1,6 +1,6 @@
 package managerController
 
-import "github.com/gofiber/fiber"
+import "github.com/gofiber/fiber/v2"
 
 func HandleGetAll(c *fiber.Ctx) error 
 func HandleGetById(c *fiber.Ctx) error

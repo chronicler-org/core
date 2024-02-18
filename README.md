@@ -11,11 +11,11 @@ Back-ednd do projeto `chronicler`, realizado como trabalho para a matéria de En
 ### Rodando o projeto na sua máquina local
 - Para configurar o projeto em sua máquina, após clonar o repositório, basta utilizar o seguinte comando no terminal:
 ```sh
-    go mod tidy
+go mod tidy
 ```
 - Para rodar o projeto em sua máquina, basta utilizar o seguinte comando:
 ```sh
-     air
+air
 ```
 
 ## Padrões de projeto 

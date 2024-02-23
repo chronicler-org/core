@@ -9,13 +9,13 @@ import (
 func main() {
 	app := fiber.New()
 
-  app.Use(logger.New())
+	app.Use(logger.New())
 
 	app.Get("/", func(c *fiber.Ctx) error {
 		return c.SendString("Hello, World!")
 	})
 
-  app.Mount("/managers", managerRouter.NewManagerRouter())
-  
-	app.Listen(":3000")
+	app.Mount("/managers", managerRouter.NewManagerRouter())
+
+	app.Listen(":8080")
 }

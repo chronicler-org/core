@@ -17,10 +17,15 @@ Back-ednd do projeto `chronicler`, realizado como trabalho para a matéria de En
 go mod tidy
 ```
 
-- Para rodar o projeto em sua máquina, basta utilizar o seguinte comando:
+- Para subir os containers docker em sua máquina, basta utilizar o seguinte comando:
 
 ```sh
-air
+docker compose up --build -d
+```
+Dessa forma, seu container estará disponível para ser acessado na porta `8080` e você será capaz de testar todas as rotas.
+- Para conseguir visualizar os logs gerados pela aplicação, basta uitilizar o seguinte comando:
+```sh
+docker logs go_api -f
 ```
 
 ## Padrões de projeto

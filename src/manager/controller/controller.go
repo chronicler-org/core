@@ -1,98 +1,81 @@
 package managerController
 
 import (
-	managerModel "github.com/chronicler-org/core/src/manager/model"
+	managerDTO "github.com/chronicler-org/core/src/manager/dto"
+	"github.com/chronicler-org/core/src/manager/service"
 	"github.com/gofiber/fiber/v2"
-	"github.com/google/uuid"
 )
 
+type ManagerController struct {
+  service *managerService.ManagerService
+}
 
-func HandleGetAll(c *fiber.Ctx) error {
-  var db = managerModel.InitHandler()
-
-  managers, err := db.FindAll()
+func InitManagerController (s *managerService.ManagerService) *ManagerController {
+  return &ManagerController{
+    service: s,
+  } 
+}
+func (controller *ManagerController) HandleFindAll (c *fiber.Ctx) error {
+  managers, err := controller.service.FindAll()
   if err != nil {
     return c.SendStatus(fiber.StatusInternalServerError)
   }
-
   return c.Status(fiber.StatusOK).JSON(managers)
 }
 
-func HandleGetById(c *fiber.Ctx) error {
-  db := managerModel.InitHandler()
+func (controller *ManagerController) HandleFindByID(c *fiber.Ctx) error {
+  id := c.Params("id")
 
-  manager, err := db.FindByID(c.Params("id"))
+  manager, err := controller.service.FindByID(id)
   if err != nil {
     return c.SendStatus(fiber.StatusInternalServerError)
-  }
-  if manager.ID == uuid.Nil {
-    return c.SendStatus(fiber.StatusNotFound)
   }
 
   return c.Status(fiber.StatusOK).JSON(manager)
 }
 
-func HandleCreateManager(c *fiber.Ctx) error {
-  var db = managerModel.InitHandler()
+func (controller *ManagerController) HandleCreateManager(c *fiber.Ctx) error {
+  var managerDTO managerDTO.CreateManagerDTO
 
-  var manager managerModel.CreateManagerDTO
-  err := c.BodyParser(&manager)
+  err := c.BodyParser(&managerDTO)
   if err != nil {
     return c.SendStatus(fiber.StatusBadRequest)
   }
 
-  newUserID, err := db.Create(&manager)
+  newManagerID, err := controller.service.Create(managerDTO)
   if err != nil {
     return c.SendStatus(fiber.StatusInternalServerError)
   }
 
   return c.Status(fiber.StatusOK).JSON(fiber.Map{
-    "location": newUserID,
+    "location": newManagerID,
   })
 }
 
-func HandleUpdateManager(c *fiber.Ctx) error {
-  var db = managerModel.InitHandler()
+func (controller *ManagerController) HandleUpdateManager(c *fiber.Ctx) error {
+  var managerDTO managerDTO.UpdateManagerDTO
 
-  id := c.Params("id")
-
-  var updateData managerModel.CreateManagerDTO
-  err := c.BodyParser(&updateData)
-
+  err := c.BodyParser(&managerDTO)
   if err != nil {
     return c.SendStatus(fiber.StatusBadRequest)
   }
-  
-  managerToUpdate, err := db.FindByID(id)
-  if managerToUpdate.ID == uuid.Nil {
-    return c.SendStatus(fiber.StatusNotFound)
-  }
 
-  err = db.Update(&managerToUpdate, &updateData)
+  id := c.Params("id")
 
+  managerUpdated, err := controller.service.Update(id, managerDTO) 
   if err != nil {
     return c.SendStatus(fiber.StatusInternalServerError)
   }
 
-  return c.Status(fiber.StatusOK).JSON(managerToUpdate)
+  return c.Status(fiber.StatusOK).JSON(managerUpdated)
 }
 
-func HandleDeleteManager(c *fiber.Ctx) error {
-  db := managerModel.InitHandler()
+func (controller *ManagerController) HandleDeleteManager(c *fiber.Ctx) error {
   id := c.Params("id")
 
-  manager, err := db.FindByID(id)
+  err := controller.service.Delete(id)
   if err != nil {
     return c.SendStatus(fiber.StatusInternalServerError)
   }
-  if manager.ID == uuid.Nil {
-    return c.SendStatus(fiber.StatusNotFound)
-  }
-
-  err = db.Delete(id)
-  if err != nil {
-    return c.SendStatus(fiber.StatusBadRequest)
-  }
-  
-  return c.Status(fiber.StatusOK).JSON(manager)
+  return c.SendStatus(fiber.StatusOK)
 }

@@ -6,17 +6,20 @@ import (
 	"github.com/chronicler-org/core/src/manager/dto"
 	"github.com/chronicler-org/core/src/manager/model"
 	"github.com/chronicler-org/core/src/manager/repository"
+	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type ManagerService struct {
   repository *managerRepository.ManagerRepository
+  validate *validator.Validate
 }
 
-func InitManagerService(r *managerRepository.ManagerRepository) *ManagerService{
+func InitManagerService(r *managerRepository.ManagerRepository, v *validator.Validate) *ManagerService{
   return &ManagerService{
     repository: r,
+    validate: v,
   }
 }
 
@@ -25,6 +28,15 @@ func (service *ManagerService) FindByID (id string) (managerModel.Manager, error
 }
 
 func (service *ManagerService) Create (dto managerDTO.CreateManagerDTO) (uuid.UUID, error) {
+  err := service.validate.Struct(&dto)
+  if err != nil {
+    return uuid.Nil, err
+  }
+
+  if !dto.Validate() {
+    return uuid.Nil, nil
+  }
+
   newPassword, err := bcrypt.GenerateFromPassword([]byte(dto.Password), 10)
   if err != nil {
     return uuid.Nil, err

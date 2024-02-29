@@ -10,7 +10,6 @@ type CreateCustomerDTO struct {
 	Email     string    `validate:"required,max=50" json:"email"`
 	Phone     string    `validate:"required,max=11" json:"phone"`
 	Job       string    `validate:"required" json:"job"`
-	Password  string    `validate:"required,min=8" json:"password"`
 	BirthDate time.Time `validate:"required" json:"birth_date"`
 }
 

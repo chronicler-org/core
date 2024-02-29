@@ -13,7 +13,6 @@ type Customer struct {
 	Email     string    `json:"email"`
 	Phone     string    `json:"phone"`
 	Job       string    `json:"job"`
-	Password  string    `json:"-"`
 	BirthDate time.Time `json:"birth_date"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`

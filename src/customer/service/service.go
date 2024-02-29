@@ -49,10 +49,6 @@ func (service *CustomerService) Update(id string, dto customerDTO.UpdateCustomer
 	if updatedCustomer.ID == uuid.Nil {
 		return updatedCustomer, err
 	}
-
-	if dto.CPF != "" {
-		updatedCustomer.CPF = dto.CPF
-	}
 	if dto.Name != "" {
 		updatedCustomer.Name = dto.Name
 	}

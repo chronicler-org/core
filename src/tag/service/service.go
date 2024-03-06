@@ -54,7 +54,7 @@ func (service *TagService) Update(id string, dto tagDTO.UpdateTagDTO) (tagModel.
 		updatedTag.Title = dto.Title
 	}
 	if dto.Color != "" {
-		updatedTag.Title = dto.Title
+		updatedTag.Color = dto.Color
 	}
 
 	updatedTag.UpdatedAt = time.Now()

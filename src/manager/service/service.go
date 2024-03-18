@@ -6,96 +6,98 @@ import (
 	"github.com/chronicler-org/core/src/manager/dto"
 	"github.com/chronicler-org/core/src/manager/model"
 	"github.com/chronicler-org/core/src/manager/repository"
+	serviceErrors "github.com/chronicler-org/core/src/utils/errors"
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type ManagerService struct {
-  repository *managerRepository.ManagerRepository
-  validate *validator.Validate
+	repository *managerRepository.ManagerRepository
+	validate   *validator.Validate
 }
 
-func InitManagerService(r *managerRepository.ManagerRepository, v *validator.Validate) *ManagerService{
-  return &ManagerService{
-    repository: r,
-    validate: v,
-  }
+func InitManagerService(r *managerRepository.ManagerRepository, v *validator.Validate) *ManagerService {
+	return &ManagerService{
+		repository: r,
+		validate:   v,
+	}
 }
 
-func (service *ManagerService) FindByID (id string) (managerModel.Manager, error) {
-  return service.repository.FindByID(id)
+func (service *ManagerService) FindByID(id string) (managerModel.Manager, error) {
+	return service.repository.FindByID(id)
 }
 
-func (service *ManagerService) Create (dto managerDTO.CreateManagerDTO) (uuid.UUID, error) {
-  err := service.validate.Struct(&dto)
-  if err != nil {
-    return uuid.Nil, err
-  }
+func (service *ManagerService) Create(dto managerDTO.CreateManagerDTO) (uuid.UUID, error) {
+	err := service.validate.Struct(&dto)
+	if err != nil {
+		return uuid.Nil, err
+	}
 
-  if !dto.Validate() {
-    return uuid.Nil, nil
-  }
+	if !dto.Validate() {
+		return uuid.Nil, serviceErrors.NewError(serviceErrors.BadRequestError, "CPF inválido")
+	}
 
-  newPassword, err := bcrypt.GenerateFromPassword([]byte(dto.Password), 10)
-  if err != nil {
-    return uuid.Nil, err
-  }
+	newPassword, err := bcrypt.GenerateFromPassword([]byte(dto.Password), 10)
+	if err != nil {
+		return uuid.Nil, err
+	}
 
-  model := managerModel.Manager {
-    ID: uuid.New(),
-    Name: dto.Name,
-    CPF: dto.CPF,
-    Password: string(newPassword),
-    BirthDate: dto.BirthDate,
-    CreatedAt: time.Now(),
-    UpdatedAt: time.Now(),
-  } 
+	model := managerModel.Manager{
+		ID:        uuid.New(),
+		Name:      dto.Name,
+		CPF:       dto.CPF,
+		Email:     dto.Email,
+		Password:  string(newPassword),
+		BirthDate: dto.BirthDate,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	}
 
-  err = service.repository.Create(model)
+	err = service.repository.Create(model)
 
-  return model.ID, err
+	return model.ID, err
 }
 
-func (service *ManagerService) Update (id string, dto managerDTO.UpdateManagerDTO) (managerModel.Manager, error) {
-  updatedManager, err := service.repository.FindByID(id) 
-  if err != nil {
-    return updatedManager, err
-  }
-  if updatedManager.ID == uuid.Nil {
-    return updatedManager, err
-  }
+func (service *ManagerService) Update(id string, dto managerDTO.UpdateManagerDTO) (managerModel.Manager, error) {
+	updatedManager, err := service.repository.FindByID(id)
+	if err != nil {
+		return updatedManager, err
+	}
+	if updatedManager.ID == uuid.Nil {
+		return updatedManager, serviceErrors.NewError(serviceErrors.NotFoundError, "Gerente não encontrado")
+	}
 
-  if dto.CPF != "" {
-    updatedManager.CPF = dto.CPF
-  }  
-  if dto.Name != "" {
-    updatedManager.Name = dto.Name
-  }
-  if dto.Email != "" {
-    updatedManager.Email = dto.Email
-  }
-  if dto.Password != "" {
-    newPassword, err := bcrypt.GenerateFromPassword([]byte(dto.CPF), 10)
-    if err != nil {
-      return managerModel.Manager{}, err
-    }
-    updatedManager.Password = string(newPassword)
-  }
-  if !dto.BirthDate.IsZero() {
-    updatedManager.BirthDate = dto.BirthDate
-  }
-  updatedManager.UpdatedAt = time.Now()
+	if dto.CPF != "" {
+		updatedManager.CPF = dto.CPF
+	}
+	if dto.Name != "" {
+		updatedManager.Name = dto.Name
+	}
+	if dto.Email != "" {
+		updatedManager.Email = dto.Email
+	}
+	if dto.Password != "" {
+		newPassword, err := bcrypt.GenerateFromPassword([]byte(dto.CPF), 10)
+		if err != nil {
+			return managerModel.Manager{}, err
+		}
+		updatedManager.Password = string(newPassword)
+	}
+	if !dto.BirthDate.IsZero() {
+		updatedManager.BirthDate = dto.BirthDate
+	}
+	updatedManager.UpdatedAt = time.Now()
 
-  err = service.repository.Update(updatedManager)
+	err = service.repository.Update(updatedManager)
 
-  return updatedManager, err
+	return updatedManager, err
 }
 
-func (service *ManagerService) FindAll () ([]managerModel.Manager, error) {
-  return service.repository.FindAll()
+func (service *ManagerService) FindAll() ([]managerModel.Manager, error) {
+	return service.repository.FindAll()
 }
 
-func (service *ManagerService) Delete (id string) error {
-  return service.repository.Delete(id)
+func (service *ManagerService) Delete(id string) error {
+	return service.repository.Delete(id)
 }

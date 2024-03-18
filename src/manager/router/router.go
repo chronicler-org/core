@@ -9,19 +9,18 @@ import (
 )
 
 func NewManagerRouter() *fiber.App {
-  router := fiber.New()
+	router := fiber.New()
 
-  
-  repository := managerRepository.InitManagerRepository()
-  validate := validator.New()
-  service := managerService.InitManagerService(repository, validate)
-  controller := managerController.InitManagerController(service)
+	repository := managerRepository.InitManagerRepository()
+	validate := validator.New()
+	service := managerService.InitManagerService(repository, validate)
+	controller := managerController.InitManagerController(service)
 
-  router.Get("/", controller.HandleFindAll)
-  router.Get(":id", controller.HandleFindByID)
-  router.Post("/", controller.HandleCreateManager)
-  router.Patch(":id", controller.HandleUpdateManager)
-  router.Delete(":id", controller.HandleDeleteManager)
+	router.Get("/", controller.HandleFindAll)
+	router.Get(":id", controller.HandleFindByID)
+	router.Post("/", controller.HandleCreateManager)
+	router.Patch(":id", controller.HandleUpdateManager)
+	router.Delete(":id", controller.HandleDeleteManager)
 
-  return router
-} 
+	return router
+}

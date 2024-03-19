@@ -9,6 +9,7 @@ import (
 )
 
 func NewManagerRouter() *fiber.App {
+
 	router := fiber.New()
 
 	repository := managerRepository.InitManagerRepository()

@@ -6,6 +6,7 @@ import (
 	customerDTO "github.com/chronicler-org/core/src/customer/dto"
 	customerModel "github.com/chronicler-org/core/src/customer/model"
 	customerRepository "github.com/chronicler-org/core/src/customer/repository"
+	serviceErrors "github.com/chronicler-org/core/src/utils/errors"
 	"github.com/google/uuid"
 )
 
@@ -24,6 +25,7 @@ func (service *CustomerService) FindByID(id string) (customerModel.Customer, err
 }
 
 func (service *CustomerService) Create(dto customerDTO.CreateCustomerDTO) (uuid.UUID, error) {
+	// implementar validacao de dados
 	model := customerModel.Customer{
 		ID:        uuid.New(),
 		CPF:       dto.CPF,
@@ -42,12 +44,13 @@ func (service *CustomerService) Create(dto customerDTO.CreateCustomerDTO) (uuid.
 }
 
 func (service *CustomerService) Update(id string, dto customerDTO.UpdateCustomerDTO) (customerModel.Customer, error) {
+	// implementar validacao de dados
 	updatedCustomer, err := service.repository.FindByID(id)
 	if err != nil {
 		return updatedCustomer, err
 	}
 	if updatedCustomer.ID == uuid.Nil {
-		return updatedCustomer, err
+		return updatedCustomer, serviceErrors.NewError("Cliente não encontrado")
 	}
 	if dto.Name != "" {
 		updatedCustomer.Name = dto.Name

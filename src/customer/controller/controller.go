@@ -1,8 +1,11 @@
 package customerController
 
 import (
+	"errors"
+
 	customerDTO "github.com/chronicler-org/core/src/customer/dto"
 	customerService "github.com/chronicler-org/core/src/customer/service"
+	serviceErrors "github.com/chronicler-org/core/src/utils/errors"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -45,7 +48,15 @@ func (controller *CustomerController) HandleCreateCustomer(c *fiber.Ctx) error {
 
 	newCustomerID, err := controller.service.Create(customerDTO)
 	if err != nil {
-		return c.SendStatus(fiber.StatusInternalServerError)
+		target := &serviceErrors.ServiceError{}
+		if errors.As(err, &target) {
+			c.Status(fiber.StatusBadRequest)
+		} else {
+			c.Status(fiber.StatusInternalServerError)
+		}
+		return c.JSON(fiber.Map{
+			"message": err.Error(),
+		})
 	}
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
@@ -65,7 +76,15 @@ func (controller *CustomerController) HandleUpdateCustomer(c *fiber.Ctx) error {
 
 	customerUpdated, err := controller.service.Update(id, customerDTO)
 	if err != nil {
-		return c.SendStatus(fiber.StatusInternalServerError)
+		target := &serviceErrors.ServiceError{}
+		if errors.As(err, &target) {
+			c.Status(fiber.StatusBadRequest)
+		} else {
+			c.Status(fiber.StatusInternalServerError)
+		}
+		return c.JSON(fiber.Map{
+			"message": err.Error(),
+		})
 	}
 
 	return c.Status(fiber.StatusOK).JSON(customerUpdated)

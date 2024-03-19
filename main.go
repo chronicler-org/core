@@ -3,6 +3,7 @@ package main
 import (
 	customerRouter "github.com/chronicler-org/core/src/customer/router"
 	managerRouter "github.com/chronicler-org/core/src/manager/router"
+	tagRouter "github.com/chronicler-org/core/src/tag/router"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 )
@@ -18,6 +19,7 @@ func main() {
 
 	app.Mount("/manager", managerRouter.NewManagerRouter())
 	app.Mount("/customer", customerRouter.NewCustomerRouter())
+	app.Mount("/tag", tagRouter.NewTagRouter())
 
 	app.Listen(":8080")
 }

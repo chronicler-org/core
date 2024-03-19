@@ -35,7 +35,7 @@ func (service *ManagerService) Create(dto managerDTO.CreateManagerDTO) (uuid.UUI
 	}
 
 	if !dto.Validate() {
-		return uuid.Nil, serviceErrors.NewError(serviceErrors.BadRequestError, "CPF inválido")
+		return uuid.Nil, serviceErrors.NewError("CPF inválido")
 	}
 
 	newPassword, err := bcrypt.GenerateFromPassword([]byte(dto.Password), 10)
@@ -65,7 +65,7 @@ func (service *ManagerService) Update(id string, dto managerDTO.UpdateManagerDTO
 		return updatedManager, err
 	}
 	if updatedManager.ID == uuid.Nil {
-		return updatedManager, serviceErrors.NewError(serviceErrors.NotFoundError, "Gerente não encontrado")
+		return updatedManager, serviceErrors.NewError("Gerente não encontrado")
 	}
 
 	if dto.CPF != "" {

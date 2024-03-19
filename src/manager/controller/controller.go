@@ -76,7 +76,7 @@ func (controller *ManagerController) HandleUpdateManager(c *fiber.Ctx) error {
 	if err != nil {
 		target := &serviceErrors.ServiceError{}
 		if errors.As(err, &target) {
-			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 				"message": err.Error(),
 			})
 		}

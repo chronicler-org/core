@@ -6,6 +6,7 @@ import (
 	tagDTO "github.com/chronicler-org/core/src/tag/dto"
 	tagModel "github.com/chronicler-org/core/src/tag/model"
 	tagRepository "github.com/chronicler-org/core/src/tag/repository"
+	serviceErrors "github.com/chronicler-org/core/src/utils/errors"
 	"github.com/google/uuid"
 )
 
@@ -25,7 +26,7 @@ func (service *TagService) FindByID(id string) (tagModel.Tag, error) {
 
 func (service *TagService) Create(dto tagDTO.CreateTagDTO) (uuid.UUID, error) {
 	if !dto.ValidateHexColor() {
-		return uuid.Nil, nil
+		return uuid.Nil, serviceErrors.NewError("erro ao validar o codigo hex para a cor da tag")
 	}
 	model := tagModel.Tag{
 		ID:        uuid.New(),
@@ -42,7 +43,7 @@ func (service *TagService) Create(dto tagDTO.CreateTagDTO) (uuid.UUID, error) {
 
 func (service *TagService) Update(id string, dto tagDTO.UpdateTagDTO) (tagModel.Tag, error) {
 	updatedTag, err := service.repository.FindByID(id)
-
+	// implementar validaçao da tag
 	if err != nil {
 		return updatedTag, err
 	}

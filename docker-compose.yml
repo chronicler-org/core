@@ -12,6 +12,11 @@ services:
       DATABASE_URL: ${DATABASE_URL}
     networks:
       - go_api_network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
 
   database:
     image: postgres:latest
@@ -28,6 +33,11 @@ services:
       - pg_data:/var/lib/postgres/data
     networks:
       - go_api_network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 256M
 
 volumes:
   pg_data:

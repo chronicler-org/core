@@ -35,7 +35,7 @@ func (service *ManagerService) Create(dto managerDTO.CreateManagerDTO) (uuid.UUI
 	}
 
 	if !dto.Validate() {
-		return uuid.Nil, serviceErrors.NewError("CPF inválido")
+		return uuid.Nil, serviceErrors.NewError("CPF ou Email inválido")
 	}
 
 	newPassword, err := bcrypt.GenerateFromPassword([]byte(dto.Password), 10)
@@ -69,13 +69,19 @@ func (service *ManagerService) Update(id string, dto managerDTO.UpdateManagerDTO
 	}
 
 	if dto.CPF != "" {
-		updatedManager.CPF = dto.CPF
+		if dto.ValidateCPF() {
+			updatedManager.CPF = dto.CPF
+		}
+		return updatedManager, serviceErrors.NewError("novo CPF é inválido")
 	}
 	if dto.Name != "" {
 		updatedManager.Name = dto.Name
 	}
 	if dto.Email != "" {
-		updatedManager.Email = dto.Email
+		if dto.ValidateEmail() {
+			updatedManager.Email = dto.Email
+		}
+		return updatedManager, serviceErrors.NewError("novo email é Email invalido")
 	}
 	if dto.Password != "" {
 		newPassword, err := bcrypt.GenerateFromPassword([]byte(dto.CPF), 10)

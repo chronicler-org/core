@@ -1,7 +1,10 @@
 package managerDTO
 
 import (
+	"net/mail"
 	"time"
+
+	"github.com/klassmann/cpfcnpj"
 )
 
 type UpdateManagerDTO struct {
@@ -12,10 +15,11 @@ type UpdateManagerDTO struct {
 	BirthDate time.Time `json:"birth_date,omitempty"`
 }
 
-func (dto *UpdateManagerDTO) ValidateEmail() bool {
-	return true
+func (dto *UpdateManagerDTO) ValidateCPF() bool {
+	return cpfcnpj.ValidateCPF(dto.CPF)
 }
 
-func (dto *UpdateManagerDTO) ValidateCPF() bool {
-	return true
+func (dto *UpdateManagerDTO) ValidateEmail() bool {
+	_, err := mail.ParseAddress(dto.Email)
+	return err == nil
 }

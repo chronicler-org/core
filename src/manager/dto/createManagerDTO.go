@@ -1,6 +1,7 @@
 package managerDTO
 
 import (
+	"net/mail"
 	"time"
 
 	"github.com/klassmann/cpfcnpj"
@@ -15,5 +16,10 @@ type CreateManagerDTO struct {
 }
 
 func (dto *CreateManagerDTO) Validate() bool {
-	return cpfcnpj.ValidateCPF(dto.CPF)
+	return cpfcnpj.ValidateCPF(dto.CPF) && dto.validateEmail()
+}
+
+func (dto *CreateManagerDTO) validateEmail() bool {
+	_, err := mail.ParseAddress(dto.Email)
+	return err == nil
 }

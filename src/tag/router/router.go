@@ -17,8 +17,8 @@ func NewTagRouter() *fiber.App {
 	router.Get("/", controller.HandleFindAll)
 	router.Get(":id", controller.HandleFindByID)
 	router.Post("/", controller.HandleCreateTag)
-	router.Patch("/", controller.HandleUpdateTag)
-	router.Delete("/", controller.HandleDeleteTag)
+	router.Patch("/:id", controller.HandleUpdateTag)
+	router.Delete("/:id", controller.HandleDeleteTag)
 
 	return router
 }

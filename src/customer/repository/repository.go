@@ -1,11 +1,7 @@
 package customerRepository
 
 import (
-	"os"
-
 	customerModel "github.com/chronicler-org/core/src/customer/model"
-	"github.com/gofiber/fiber/v2/log"
-	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
@@ -13,20 +9,9 @@ type CustomerRepository struct {
 	db *gorm.DB
 }
 
-func initDB() *gorm.DB {
-	dbURL := os.Getenv("DATABASE_URL")
-	db, err := gorm.Open(postgres.Open(dbURL), &gorm.Config{})
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	db.AutoMigrate(&customerModel.Customer{})
-	return db
-}
-
-func InitCustomerRepository() *CustomerRepository {
+func InitCustomerRepository(db *gorm.DB) *CustomerRepository {
 	return &CustomerRepository{
-		db: initDB(),
+		db: db,
 	}
 }
 

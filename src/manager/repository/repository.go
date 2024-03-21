@@ -1,11 +1,7 @@
 package managerRepository
 
 import (
-	"os"
-
 	managerModel "github.com/chronicler-org/core/src/manager/model"
-	"github.com/gofiber/fiber/v2/log"
-	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
@@ -13,20 +9,9 @@ type ManagerRepository struct {
 	db *gorm.DB
 }
 
-func initDB() *gorm.DB {
-	dbURL := os.Getenv("DATABASE_URL")
-	db, err := gorm.Open(postgres.Open(dbURL), &gorm.Config{})
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	db.AutoMigrate(&managerModel.Manager{})
-	return db
-}
-
-func InitManagerRepository() *ManagerRepository {
+func InitManagerRepository(db *gorm.DB) *ManagerRepository {
 	return &ManagerRepository{
-		db: initDB(),
+		db: db,
 	}
 }
 

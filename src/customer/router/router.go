@@ -5,20 +5,17 @@ import (
 	customerRepository "github.com/chronicler-org/core/src/customer/repository"
 	customerService "github.com/chronicler-org/core/src/customer/service"
 	"github.com/gofiber/fiber/v2"
+	"gorm.io/gorm"
 )
 
-func NewCustomerRouter() *fiber.App {
-	router := fiber.New()
-
-	repository := customerRepository.InitCustomerRepository()
+func InitCustomerRouter(router *fiber.App, db *gorm.DB) {
+	repository := customerRepository.InitCustomerRepository(db)
 	service := customerService.InitCustomerService(repository)
 	controller := customerController.InitCustomerController(service)
 
-	router.Get("/", controller.HandleFindAll)
-	router.Get(":id", controller.HandleFindByID)
-	router.Post("/", controller.HandleCreateCustomer)
-	router.Patch(":id", controller.HandleUpdateCustomer)
-	router.Delete(":id", controller.HandleDeleteCustomer)
-
-	return router
+	router.Get("/customer", controller.HandleFindAll)
+	router.Get("/customer/:id", controller.HandleFindByID)
+	router.Post("/customer", controller.HandleCreateCustomer)
+	router.Patch("/customer/:id", controller.HandleUpdateCustomer)
+	router.Delete("/customer/:id", controller.HandleDeleteCustomer)
 }

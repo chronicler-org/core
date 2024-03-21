@@ -4,24 +4,16 @@ import (
 	"encoding/json"
 	"time"
 	"math"
+	appDTO "github.com/chronicler-org/core/src/app/dto"
 )
 
-type MetaData struct {
-	Count           int       `json:"count"`
-	Page            int       `json:"page"`
-	TotalPages      int       `json:"totalPages"`
-	TotalCount      int       `json:"totalCount"`
-	Limit           int       `json:"limit"`
-	RequestDateTime time.Time `json:"requestDateTime"`
-}
-
-type ApiResponse struct {
-	Meta            MetaData       `json:"meta"`
+type PaginateResponse struct {
+	Meta            appDTO.MetaDTO `json:"meta"`
 	Result          []interface{}  `json:"result"`
 }
 
-func Paginate(data []interface{}, page int, totalCount int, limit int) ApiResponse {
-	meta := MetaData {
+func Paginate(data []interface{}, page int, totalCount int, limit int) PaginateResponse {
+	meta := appDTO.MetaDTO {
 		Count: len(data),
 		Page: page,
 		TotalPages: int(math.Ceil(float64(totalCount) / float64(limit))),
@@ -36,8 +28,8 @@ func Paginate(data []interface{}, page int, totalCount int, limit int) ApiRespon
 	}
 }
 
-func PaginateSingle(data interface{}) ApiResponse {
-	meta := MetaData {
+func PaginateSingle(data interface{}) PaginateResponse {
+	meta := appDTO.MetaDTO {
 		Count: 1,
 		Page: 1,
 		TotalPages: 1,
@@ -49,6 +41,27 @@ func PaginateSingle(data interface{}) ApiResponse {
 	return ApiResponse {
 		Meta: meta,
 		Result: data
+	}
+}
+
+type PaginateErrorResponse struct {
+	Meta            appDTO.MetaDTO           `json:"meta"`
+	Errors          []appDTO.CustomErrorDTO  `json:"errors"`
+}
+
+func PaginateError(errors []appDTO.CustomErrorDTO) PaginateErrorResponse {
+	meta := appDTO.MetaDTO {
+		Count: len(errors),
+		Page: 1,
+		TotalPages: 1,
+		TotalCount: len(errors),
+		Limit: 1,
+		RequestDateTime: time.Now(),
+	}
+
+	return ApiErrorResponse {
+		Meta: meta,
+		errors: errors
 	}
 }
 

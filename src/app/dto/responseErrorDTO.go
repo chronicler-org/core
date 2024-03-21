@@ -9,7 +9,7 @@ import (
 type CustomError struct {
 	Code            string    `json:"code"`
 	Title           string    `json:"title"`
-	Detail          int       `json:"detail"`
+	Detail          string       `json:"detail"`
 }
 
 type ApiErrorResponse struct {

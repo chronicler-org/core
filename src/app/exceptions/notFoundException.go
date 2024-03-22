@@ -1,14 +1,11 @@
-package exceptions
+package appExceptions
 
-import (
-	"github.com/chronicler-org/core/src/app/dto"
-	"github.com/chronicler-org/core/src/app/exceptions"
-)
+import appDto "github.com/chronicler-org/core/src/app/dto"
 
 type TNotFoundException struct {
 	HttpException
 }
 
-func NotFoundException(errors []CustomErrorDTO) *TNotFoundException {
-	return &TNotFoundException{HttpException: HttpException{Errors: errors, Status: 404}}
+func NotFoundException(errors []appDto.CustomErrorDTO) *TNotFoundException {
+	return &TNotFoundException{HttpException: HttpException{Errors: errors, StatuCode: 404}}
 }

@@ -1,9 +1,6 @@
-package dto
+package appDto
 
-import (
-	"encoding/json"
-	"time"
-)
+import "time"
 
 type MetaDTO struct {
 	Count           int       `json:"count"`

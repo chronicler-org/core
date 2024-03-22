@@ -1,23 +1,23 @@
-package exceptions
+package appExceptions
 
 import (
-	"github.com/chronicler-org/core/src/app/dto"
-	"github.com/chronicler-org/core/src/app/utils"
+	appDto "github.com/chronicler-org/core/src/app/dto"
+	appUtil "github.com/chronicler-org/core/src/app/utils"
 )
 
 type HttpException struct {
-	Errors []CustomErrorDTO
-	Status int
+	Errors    []appDto.CustomErrorDTO
+	StatuCode int
 }
 
-func (he *HttpException) getStatus() int {
-	return he.Status
+func (he *HttpException) getStatusCode() int {
+	return he.StatuCode
 }
 
-func (he *HttpException) getErrors() []CustomErrorDTO {
+func (he *HttpException) getErrors() []appDto.CustomErrorDTO {
 	return he.Errors
 }
 
-func (he *HttpException) getPaginateResponse() PaginateErrorResponse {
-	return PaginateError(he.getErrors())
+func (he *HttpException) getErrorPagination() appUtil.PaginateErrorResponse {
+	return appUtil.PaginateError(he.getErrors())
 }

@@ -7,5 +7,5 @@ type TForbiddenException struct {
 }
 
 func ForbiddenException(error appDto.CustomErrorDTO) *TForbiddenException {
-	return &TForbiddenException{HttpException: HttpException{Errors: []appDto.CustomErrorDTO{error}, StatuCode: 403}}
+	return &TForbiddenException{HttpException: HttpException{Errors: []appDto.CustomErrorDTO{error}, StatusCode: 403}}
 }

@@ -7,5 +7,5 @@ type TBadRequestException struct {
 }
 
 func BadRequestException(errors []appDto.CustomErrorDTO) *TBadRequestException {
-	return &TBadRequestException{HttpException: HttpException{Errors: errors, StatuCode: 400}}
+	return &TBadRequestException{HttpException: HttpException{Errors: errors, StatusCode: 400}}
 }

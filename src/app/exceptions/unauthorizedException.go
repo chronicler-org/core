@@ -7,5 +7,5 @@ type TUnauthorizedException struct {
 }
 
 func UnauthorizedException(error appDto.CustomErrorDTO) *TUnauthorizedException {
-	return &TUnauthorizedException{HttpException: HttpException{Errors: []appDto.CustomErrorDTO{error}, StatuCode: 401}}
+	return &TUnauthorizedException{HttpException: HttpException{Errors: []appDto.CustomErrorDTO{error}, StatusCode: 401}}
 }

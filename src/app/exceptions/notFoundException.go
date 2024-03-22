@@ -8,5 +8,5 @@ type TNotFoundException struct {
 
 func NotFoundException(error appDto.CustomErrorDTO) *TNotFoundException {
 	return &TNotFoundException{
-		HttpException: HttpException{Errors: []appDto.CustomErrorDTO{error}, StatuCode: 404}}
+		HttpException: HttpException{Errors: []appDto.CustomErrorDTO{error}, StatusCode: 404}}
 }

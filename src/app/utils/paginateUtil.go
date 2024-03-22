@@ -9,7 +9,7 @@ import (
 
 type PaginateResponse struct {
 	Meta   appDto.MetaDTO `json:"meta"`
-	Result []interface{}  `json:"result"`
+	Result interface{}  `json:"result"`
 }
 
 func Paginate(data []interface{}, page int, totalCount int, limit int) PaginateResponse {
@@ -38,14 +38,9 @@ func PaginateSingle(data interface{}) PaginateResponse {
 		RequestDateTime: time.Now(),
 	}
 
-	result, ok := data.([]interface{})
-	if !ok {
-		result = []interface{}{data}
-	}
-
 	return PaginateResponse{
 		Meta:   meta,
-		Result: result,
+		Result: data,
 	}
 }
 

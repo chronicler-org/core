@@ -3,6 +3,8 @@ package managerService
 import (
 	"time"
 
+	"github.com/chronicler-org/core/src/app/exceptions"
+
 	"github.com/chronicler-org/core/src/manager/dto"
 	"github.com/chronicler-org/core/src/manager/model"
 	"github.com/chronicler-org/core/src/manager/repository"
@@ -65,7 +67,7 @@ func (service *ManagerService) Update(id string, dto managerDTO.UpdateManagerDTO
 		return updatedManager, err
 	}
 	if updatedManager.ID == uuid.Nil {
-		return updatedManager, serviceErrors.NewError("Gerente não encontrado")
+		return updatedManager, appException.NotFoundException()()
 	}
 
 	if dto.CPF != "" {

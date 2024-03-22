@@ -1,4 +1,4 @@
-package appExceptions
+package appException
 
 import appDto "github.com/chronicler-org/core/src/app/dto"
 
@@ -6,6 +6,6 @@ type TForbiddenException struct {
 	HttpException
 }
 
-func ForbiddenException(errors []appDto.CustomErrorDTO) *TForbiddenException {
-	return &TForbiddenException{HttpException: HttpException{Errors: errors, StatuCode: 403}}
+func ForbiddenException(error appDto.CustomErrorDTO) *TForbiddenException {
+	return &TForbiddenException{HttpException: HttpException{Errors: []appDto.CustomErrorDTO{error}, StatuCode: 403}}
 }

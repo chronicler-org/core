@@ -1,4 +1,4 @@
-package appExceptions
+package appException
 
 import appDto "github.com/chronicler-org/core/src/app/dto"
 

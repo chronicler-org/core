@@ -2,7 +2,6 @@ package appException
 
 import (
 	appDto "github.com/chronicler-org/core/src/app/dto"
-	appUtil "github.com/chronicler-org/core/src/app/utils"
 )
 
 type HttpException struct {
@@ -10,16 +9,12 @@ type HttpException struct {
 	StatusCode int
 }
 
-func (he *HttpException) getStatusCode() int {
+func (he *HttpException) GetStatusCode() int {
 	return he.StatusCode
 }
 
-func (he *HttpException) getErrors() []appDto.CustomErrorDTO {
+func (he *HttpException) GetErrors() []appDto.CustomErrorDTO {
 	return he.Errors
-}
-
-func (he *HttpException) getErrorPagination() appUtil.PaginateErrorResponse {
-	return appUtil.PaginateError(he.getErrors())
 }
 
 func (he *HttpException) Error() string {

@@ -5,20 +5,17 @@ import (
 	tagRepository "github.com/chronicler-org/core/src/tag/repository"
 	tagService "github.com/chronicler-org/core/src/tag/service"
 	"github.com/gofiber/fiber/v2"
+	"gorm.io/gorm"
 )
 
-func NewTagRouter() *fiber.App {
-	router := fiber.New()
-
-	repository := tagRepository.InitTagRepository()
+func InitTagRouter(router *fiber.App, db *gorm.DB) {
+	repository := tagRepository.InitTagRepository(db)
 	service := tagService.InitTagService(repository)
 	controller := tagController.InitTagController(service)
 
-	router.Get("/", controller.HandleFindAll)
-	router.Get(":id", controller.HandleFindByID)
-	router.Post("/", controller.HandleCreateTag)
-	router.Patch("/:id", controller.HandleUpdateTag)
-	router.Delete("/:id", controller.HandleDeleteTag)
-
-	return router
+	router.Get("/tag", controller.HandleFindAll)
+	router.Get("/tag/:id", controller.HandleFindByID)
+	router.Post("/tag", controller.HandleCreateTag)
+	router.Patch("/tag/:id", controller.HandleUpdateTag)
+	router.Delete("/tag/:id", controller.HandleDeleteTag)
 }

@@ -80,8 +80,9 @@ func (service *ManagerService) Update(id string, dto managerDTO.UpdateManagerDTO
 	if dto.Email != "" {
 		if dto.ValidateEmail() {
 			updatedManager.Email = dto.Email
+		} else {
+			return updatedManager, serviceErrors.NewError("novo email é Email invalido")
 		}
-		return updatedManager, serviceErrors.NewError("novo email é Email invalido")
 	}
 	if dto.Password != "" {
 		newPassword, err := bcrypt.GenerateFromPassword([]byte(dto.CPF), 10)

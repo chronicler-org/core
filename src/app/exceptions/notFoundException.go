@@ -1,6 +1,10 @@
 package appException
 
-import appDto "github.com/chronicler-org/core/src/app/dto"
+import (
+	"net/http"
+
+	appDto "github.com/chronicler-org/core/src/app/dto"
+)
 
 type TNotFoundException struct {
 	HttpException
@@ -8,5 +12,5 @@ type TNotFoundException struct {
 
 func NotFoundException(error appDto.CustomErrorDTO) *TNotFoundException {
 	return &TNotFoundException{
-		HttpException: HttpException{Errors: []appDto.CustomErrorDTO{error}, StatusCode: 404}}
+		HttpException: HttpException{Errors: []appDto.CustomErrorDTO{error}, StatusCode: http.StatusNotFound}}
 }

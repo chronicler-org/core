@@ -1,6 +1,7 @@
 package managerRouter
 
 import (
+	appUtil "github.com/chronicler-org/core/src/app/utils"
 	"github.com/chronicler-org/core/src/manager/controller"
 	"github.com/chronicler-org/core/src/manager/repository"
 	"github.com/chronicler-org/core/src/manager/service"
@@ -17,7 +18,7 @@ func InitManagerRouter(router *fiber.App, db *gorm.DB) {
 	controller := managerController.InitManagerController(service)
 
 	router.Get("/manager", controller.HandleFindAll)
-	router.Get("/manager/:id", controller.HandleFindByID)
+	router.Get("/manager/:id", appUtil.Controller(controller.HandleFindByID))
 	router.Post("/manager", controller.HandleCreateManager)
 	router.Patch("/manager/:id", controller.HandleUpdateManager)
 	router.Delete("/manager/:id", controller.HandleDeleteManager)

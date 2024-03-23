@@ -21,7 +21,7 @@ func (repository *ManagerRepository) Create(manager managerModel.Manager) error 
 
 func (repository *ManagerRepository) FindByID(id string) (managerModel.Manager, error) {
 	var manager managerModel.Manager
-	err := repository.db.Find(&manager, "id = ?", id).Error
+	err := repository.db.Where("id = ?", id).First(&manager).Error
 	return manager, err
 }
 

@@ -7,14 +7,14 @@ import (
 )
 
 type Tag struct {
-	ID uuid.UUID `gorm:primarykey`
-	StreetName string `json:"streetName`
-	Neighborhood string `json:"neighborhood"`
-	Number string `json:"number"`
-	City string `json:"city"`
-	Estate string `json:"estate"`
-	CEP string `json:"cep"`
-	Complement string `json:"complement"`
-	CreatedAt time.Time	`json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	ID 						uuid.UUID	`gorm:"primarykey"`
+	CEP 					string		`json:"cep"`
+	City 					string 		`json:"city"`
+	Number 				string		`json:"number"`
+	Estate 				string		`json:"estate"`
+	StreetName 		string		`json:"streetName"`
+	Complement 		string		`json:"complement"`
+	Neighborhood	string 		`json:"neighborhood"`
+	CreatedAt			time.Time	`json:"created_at"`
+	UpdatedAt 		time.Time `json:"updated_at"`
 }

@@ -6,7 +6,7 @@ import (
 	"github.com/google/uuid"
 )
 
-type Tag struct {
+type Address struct {
 	ID 						uuid.UUID	`gorm:"primarykey"`
 	CEP 					string		`json:"cep"`
 	City 					string 		`json:"city"`

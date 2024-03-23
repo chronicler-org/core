@@ -7,22 +7,15 @@ import (
 	appDto "github.com/chronicler-org/core/src/app/dto"
 )
 
-type TInternalServerErrorException struct {
-	HttpException
-}
-
-func InternalServerErrorException(message string) *TInternalServerErrorException {
+func InternalServerErrorException(message string) *HttpException {
 	statusText := http.StatusText(http.StatusInternalServerError)
 	code := strings.ReplaceAll(strings.ToUpper(statusText), " ", "_")
 
-	return &TInternalServerErrorException{
-		HttpException: HttpException{
-			Errors: []appDto.CustomErrorDTO{{
-				Code:   code,
-				Title:  message,
-				Detail: message,
-			}},
-			StatusCode: http.StatusInternalServerError,
-		},
+	return &HttpException{
+		Errors: []appDto.CustomErrorDTO{{
+			Code:   code,
+			Title:  message,
+		}},
+		StatusCode: http.StatusInternalServerError,
 	}
 }

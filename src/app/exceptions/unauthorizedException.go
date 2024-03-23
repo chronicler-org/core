@@ -6,10 +6,9 @@ import (
 	appDto "github.com/chronicler-org/core/src/app/dto"
 )
 
-type TUnauthorizedException struct {
-	HttpException
-}
-
-func UnauthorizedException(error appDto.CustomErrorDTO) *TUnauthorizedException {
-	return &TUnauthorizedException{HttpException: HttpException{Errors: []appDto.CustomErrorDTO{error}, StatusCode: http.StatusUnauthorized}}
+func UnauthorizedException(error appDto.CustomErrorDTO) *HttpException {
+	return &HttpException{
+		Errors:     []appDto.CustomErrorDTO{error},
+		StatusCode: http.StatusUnauthorized,
+	}
 }

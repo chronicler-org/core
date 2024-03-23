@@ -19,7 +19,7 @@ func (he *HttpException) GetErrors() []appDto.CustomErrorDTO {
 
 func (he *HttpException) Error() string {
 	if len(he.Errors) > 0 {
-		return he.Errors[0].Title
+		return he.Errors[0].Code
 	}
 	return ""
 }

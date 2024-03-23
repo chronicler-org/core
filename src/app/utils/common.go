@@ -12,15 +12,15 @@ func Controller(handler func(*fiber.Ctx) (PaginateResponse, error)) func(*fiber.
 		result, err := handler(c)
 
 		if err != nil {
-			target := &appException.HttpException{}
+			var target *appException.HttpException
 
 			if errors.As(err, &target) {
 				paginateError := PaginateError(target.GetErrors())
-				c.Status(target.GetStatusCode()).JSON(paginateError)
+				return c.Status(target.GetStatusCode()).JSON(paginateError)
 			} else {
 				internalServerException := appException.InternalServerErrorException(err.Error())
 				paginateError := PaginateError(internalServerException.GetErrors())
-				c.Status(fiber.StatusInternalServerError).JSON(paginateError)
+				return c.Status(fiber.StatusInternalServerError).JSON(paginateError)
 			}
 		}
 		return c.Status(200).JSON(result)

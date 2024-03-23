@@ -31,7 +31,6 @@ func (controller *ManagerController) HandleFindByID(c *fiber.Ctx) (appUtil.Pagin
 	id := c.Params("id")
 
 	manager, err := controller.service.FindByID(id)
-
 	return appUtil.PaginateSingle(manager), err
 }
 

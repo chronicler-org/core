@@ -43,6 +43,5 @@ func (repository *ManagerRepository) Count() (int64, error) {
 }
 
 func (repository *ManagerRepository) Delete(id string) error {
-	err := repository.db.Delete(&managerModel.Manager{}, "id = ?", id).Error
-	return err
+	return repository.db.Delete(&managerModel.Manager{}, "id = ?", id).Error
 }

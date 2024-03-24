@@ -1,19 +1,15 @@
 package managerService
 
 import (
-	"errors"
 	"time"
 
-	appException "github.com/chronicler-org/core/src/app/exceptions"
 	managerDTO "github.com/chronicler-org/core/src/manager/dto"
-	managerExceptionMessage "github.com/chronicler-org/core/src/manager/messages"
 	managerModel "github.com/chronicler-org/core/src/manager/model"
 	managerRepository "github.com/chronicler-org/core/src/manager/repository"
 	serviceErrors "github.com/chronicler-org/core/src/utils/errors"
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
-	"gorm.io/gorm"
 )
 
 type ManagerService struct {
@@ -31,21 +27,13 @@ func InitManagerService(r *managerRepository.ManagerRepository, v *validator.Val
 func (service *ManagerService) FindByID(id string) (managerModel.Manager, error) {
 	manager, err := service.repository.FindByID(id)
 
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return manager, appException.NotFoundException(managerExceptionMessage.MANAGER_NOT_FOUND)
-	}
 	return manager, err
 }
 
-func (service *ManagerService) Create(dto managerDTO.CreateManagerDTO) (uuid.UUID, error) {
-	err := service.validate.Struct(&dto)
-	if err != nil {
-		return uuid.Nil, err
-	}
-
+func (service *ManagerService) Create(dto managerDTO.CreateManagerDTO) (managerModel.Manager, error) {
 	newPassword, err := bcrypt.GenerateFromPassword([]byte(dto.Password), 10)
 	if err != nil {
-		return uuid.Nil, err
+		return managerModel.Manager{}, err
 	}
 
 	model := managerModel.Manager{
@@ -61,7 +49,7 @@ func (service *ManagerService) Create(dto managerDTO.CreateManagerDTO) (uuid.UUI
 
 	err = service.repository.Create(model)
 
-	return model.ID, err
+	return model, err
 }
 
 func (service *ManagerService) Update(id string, dto managerDTO.UpdateManagerDTO) (managerModel.Manager, error) {

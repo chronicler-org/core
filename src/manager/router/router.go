@@ -22,7 +22,7 @@ func InitManagerRouter(router *fiber.App, db *gorm.DB) {
 	router.Get("/manager", controller.HandleFindAll)
 	router.Get("/manager/:id", appUtil.Controller(controller.HandleFindByID))
 
-	router.Post("/manager",  middleware.Validate(&managerDTO.CreateManagerDTO{}), controller.HandleCreateManager)
+	router.Post("/manager", middleware.Validate(&managerDTO.CreateManagerDTO{}), appUtil.Controller(controller.HandleCreateManager))
 
 	router.Patch("/manager/:id", controller.HandleUpdateManager)
 	router.Delete("/manager/:id", controller.HandleDeleteManager)

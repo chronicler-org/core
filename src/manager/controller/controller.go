@@ -1,13 +1,10 @@
 package managerController
 
 import (
-	"errors"
-
 	appDto "github.com/chronicler-org/core/src/app/dto"
 	appUtil "github.com/chronicler-org/core/src/app/utils"
 	managerDTO "github.com/chronicler-org/core/src/manager/dto"
 	managerService "github.com/chronicler-org/core/src/manager/service"
-	serviceErrors "github.com/chronicler-org/core/src/utils/errors"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -46,28 +43,15 @@ func (controller *ManagerController) HandleCreateManager(c *fiber.Ctx) (appUtil.
 	return appUtil.PaginateSingle(managerCreated), err
 }
 
-func (controller *ManagerController) HandleUpdateManager(c *fiber.Ctx) error {
+func (controller *ManagerController) HandleUpdateManager(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
 	var managerDTO managerDTO.UpdateManagerDTO
-
-	err := c.BodyParser(&managerDTO)
-	if err != nil {
-		return c.SendStatus(fiber.StatusBadRequest)
-	}
+	c.BodyParser(&managerDTO)
 
 	id := c.Params("id")
 
 	managerUpdated, err := controller.service.Update(id, managerDTO)
-	if err != nil {
-		target := &serviceErrors.ServiceError{}
-		if errors.As(err, &target) {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-				"message": err.Error(),
-			})
-		}
-		return c.SendStatus(fiber.StatusInternalServerError)
-	}
 
-	return c.Status(fiber.StatusOK).JSON(managerUpdated)
+	return appUtil.PaginateSingle(managerUpdated), err
 }
 
 func (controller *ManagerController) HandleDeleteManager(c *fiber.Ctx) (appUtil.PaginateResponse, error) {

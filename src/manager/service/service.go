@@ -6,11 +6,11 @@ import (
 
 	appDto "github.com/chronicler-org/core/src/app/dto"
 	appException "github.com/chronicler-org/core/src/app/exceptions"
+	appUtil "github.com/chronicler-org/core/src/app/utils"
 	managerDTO "github.com/chronicler-org/core/src/manager/dto"
 	managerExceptionMessage "github.com/chronicler-org/core/src/manager/messages"
 	managerModel "github.com/chronicler-org/core/src/manager/model"
 	managerRepository "github.com/chronicler-org/core/src/manager/repository"
-	serviceErrors "github.com/chronicler-org/core/src/utils/errors"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
@@ -58,45 +58,22 @@ func (service *ManagerService) Create(dto managerDTO.CreateManagerDTO) (managerM
 }
 
 func (service *ManagerService) Update(id string, dto managerDTO.UpdateManagerDTO) (managerModel.Manager, error) {
-	updatedManager, err := service.repository.FindByID(id)
+	managerExists, err := service.FindByID(id)
 	if err != nil {
-		return updatedManager, err
-	}
-	if updatedManager.ID == uuid.Nil {
-		return updatedManager, serviceErrors.NewError("Gerente não encontrado")
+		return managerModel.Manager{}, err
 	}
 
-	if dto.CPF != "" {
-		if dto.ValidateCPF() {
-			updatedManager.CPF = dto.CPF
-		}
-		return updatedManager, serviceErrors.NewError("novo CPF é inválido")
-	}
-	if dto.Name != "" {
-		updatedManager.Name = dto.Name
-	}
-	if dto.Email != "" {
-		if dto.ValidateEmail() {
-			updatedManager.Email = dto.Email
-		} else {
-			return updatedManager, serviceErrors.NewError("novo email é Email invalido")
-		}
-	}
+	appUtil.UpdateModelFromDTO(&managerExists, dto)
 	if dto.Password != "" {
-		newPassword, err := bcrypt.GenerateFromPassword([]byte(dto.CPF), 10)
-		if err != nil {
-			return managerModel.Manager{}, err
+		newPassword, err := bcrypt.GenerateFromPassword([]byte(dto.Password), 10)
+		if err == nil {
+			managerExists.Password = string(newPassword)
 		}
-		updatedManager.Password = string(newPassword)
 	}
-	if !dto.BirthDate.IsZero() {
-		updatedManager.BirthDate = dto.BirthDate
-	}
-	updatedManager.UpdatedAt = time.Now()
 
-	err = service.repository.Update(updatedManager)
-
-	return updatedManager, err
+	managerExists.UpdatedAt = time.Now()
+	err = service.repository.Update(managerExists)
+	return managerExists, err
 }
 
 func (service *ManagerService) FindAll(dto appDto.PaginationDTO) (int64, []managerModel.Manager, error) {

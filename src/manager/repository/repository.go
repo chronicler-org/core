@@ -29,10 +29,17 @@ func (repository *ManagerRepository) Update(updatedManager managerModel.Manager)
 	return repository.db.Save(updatedManager).Error
 }
 
-func (repository *ManagerRepository) FindAll() ([]managerModel.Manager, error) {
+func (repository *ManagerRepository) FindAll(limit, page int) ([]managerModel.Manager, error) {
 	var managers []managerModel.Manager
-	err := repository.db.Find(&managers).Error
+	offset := (page - 1) * limit
+	err := repository.db.Limit(limit).Offset(offset).Find(&managers).Error
 	return managers, err
+}
+
+func (repository *ManagerRepository) Count() (int64, error) {
+	var count int64
+	err := repository.db.Model(&managerModel.Manager{}).Count(&count).Error
+	return count, err
 }
 
 func (repository *ManagerRepository) Delete(id string) error {

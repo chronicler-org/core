@@ -15,6 +15,7 @@ func InternalServerErrorException(message string) *HttpException {
 		Errors: []appDto.CustomErrorDTO{{
 			Code:   code,
 			Title:  message,
+			Detail: message,
 		}},
 		StatusCode: http.StatusInternalServerError,
 	}

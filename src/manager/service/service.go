@@ -43,10 +43,6 @@ func (service *ManagerService) Create(dto managerDTO.CreateManagerDTO) (uuid.UUI
 		return uuid.Nil, err
 	}
 
-	if !dto.Validate() {
-		return uuid.Nil, serviceErrors.NewError("CPF ou Email inválido")
-	}
-
 	newPassword, err := bcrypt.GenerateFromPassword([]byte(dto.Password), 10)
 	if err != nil {
 		return uuid.Nil, err

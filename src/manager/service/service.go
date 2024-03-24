@@ -11,7 +11,6 @@ import (
 	managerModel "github.com/chronicler-org/core/src/manager/model"
 	managerRepository "github.com/chronicler-org/core/src/manager/repository"
 	serviceErrors "github.com/chronicler-org/core/src/utils/errors"
-	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
@@ -19,13 +18,11 @@ import (
 
 type ManagerService struct {
 	repository *managerRepository.ManagerRepository
-	validate   *validator.Validate
 }
 
-func InitManagerService(r *managerRepository.ManagerRepository, v *validator.Validate) *ManagerService {
+func InitManagerService(r *managerRepository.ManagerRepository) *ManagerService {
 	return &ManagerService{
 		repository: r,
-		validate:   v,
 	}
 }
 

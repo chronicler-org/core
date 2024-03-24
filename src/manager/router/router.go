@@ -8,7 +8,6 @@ import (
 	managerDTO "github.com/chronicler-org/core/src/manager/dto"
 	managerRepository "github.com/chronicler-org/core/src/manager/repository"
 	managerService "github.com/chronicler-org/core/src/manager/service"
-	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
 )
@@ -16,8 +15,7 @@ import (
 func InitManagerRouter(router *fiber.App, db *gorm.DB) {
 
 	repository := managerRepository.InitManagerRepository(db)
-	validate := validator.New()
-	service := managerService.InitManagerService(repository, validate)
+	service := managerService.InitManagerService(repository)
 	controller := managerController.InitManagerController(service)
 
 	router.Get("/manager", middleware.Validate(nil, &appDto.PaginationDTO{}), appUtil.Controller(controller.HandleFindAll))

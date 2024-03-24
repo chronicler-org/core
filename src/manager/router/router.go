@@ -1,10 +1,12 @@
 package managerRouter
 
 import (
+	"github.com/chronicler-org/core/src/app/middleware"
 	appUtil "github.com/chronicler-org/core/src/app/utils"
-	"github.com/chronicler-org/core/src/manager/controller"
-	"github.com/chronicler-org/core/src/manager/repository"
-	"github.com/chronicler-org/core/src/manager/service"
+	managerController "github.com/chronicler-org/core/src/manager/controller"
+	managerDTO "github.com/chronicler-org/core/src/manager/dto"
+	managerRepository "github.com/chronicler-org/core/src/manager/repository"
+	managerService "github.com/chronicler-org/core/src/manager/service"
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
@@ -19,7 +21,9 @@ func InitManagerRouter(router *fiber.App, db *gorm.DB) {
 
 	router.Get("/manager", controller.HandleFindAll)
 	router.Get("/manager/:id", appUtil.Controller(controller.HandleFindByID))
-	router.Post("/manager", controller.HandleCreateManager)
+
+	router.Post("/manager", middleware.Validate(&managerDTO.CreateManagerDTO{}), appUtil.Controller(controller.HandleCreateManager))
+
 	router.Patch("/manager/:id", controller.HandleUpdateManager)
 	router.Delete("/manager/:id", controller.HandleDeleteManager)
 

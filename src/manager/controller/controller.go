@@ -34,29 +34,14 @@ func (controller *ManagerController) HandleFindByID(c *fiber.Ctx) (appUtil.Pagin
 	return appUtil.PaginateSingle(manager), err
 }
 
-func (controller *ManagerController) HandleCreateManager(c *fiber.Ctx) error {
+func (controller *ManagerController) HandleCreateManager(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
 	var managerDTO managerDTO.CreateManagerDTO
 
-	err := c.BodyParser(&managerDTO)
-	if err != nil {
-		return c.SendStatus(fiber.StatusBadRequest)
-	}
+	c.BodyParser(&managerDTO)
 
-	newManagerID, err := controller.service.Create(managerDTO)
+	managerCreated, err := controller.service.Create(managerDTO)
 
-	if err != nil {
-		target := &serviceErrors.ServiceError{}
-		if errors.As(err, &target) {
-			return c.Status(fiber.ErrBadRequest.Code).JSON(fiber.Map{
-				"message": err.Error(),
-			})
-		}
-		return c.SendStatus(fiber.StatusInternalServerError)
-	}
-
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"location": newManagerID,
-	})
+	return appUtil.PaginateSingle(managerCreated), err
 }
 
 func (controller *ManagerController) HandleUpdateManager(c *fiber.Ctx) error {

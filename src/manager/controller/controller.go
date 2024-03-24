@@ -70,12 +70,9 @@ func (controller *ManagerController) HandleUpdateManager(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(managerUpdated)
 }
 
-func (controller *ManagerController) HandleDeleteManager(c *fiber.Ctx) error {
+func (controller *ManagerController) HandleDeleteManager(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
 	id := c.Params("id")
 
-	err := controller.service.Delete(id)
-	if err != nil {
-		return c.SendStatus(fiber.StatusInternalServerError)
-	}
-	return c.SendStatus(fiber.StatusOK)
+	managerDeleted, err := controller.service.Delete(id)
+	return appUtil.PaginateSingle(managerDeleted), err
 }

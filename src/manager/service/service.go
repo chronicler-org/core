@@ -1,16 +1,20 @@
 package managerService
 
 import (
+	"errors"
 	"time"
 
 	appDto "github.com/chronicler-org/core/src/app/dto"
+	appException "github.com/chronicler-org/core/src/app/exceptions"
 	managerDTO "github.com/chronicler-org/core/src/manager/dto"
+	managerExceptionMessage "github.com/chronicler-org/core/src/manager/messages"
 	managerModel "github.com/chronicler-org/core/src/manager/model"
 	managerRepository "github.com/chronicler-org/core/src/manager/repository"
 	serviceErrors "github.com/chronicler-org/core/src/utils/errors"
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
 )
 
 type ManagerService struct {
@@ -28,7 +32,10 @@ func InitManagerService(r *managerRepository.ManagerRepository, v *validator.Val
 func (service *ManagerService) FindByID(id string) (managerModel.Manager, error) {
 	manager, err := service.repository.FindByID(id)
 
-	return manager, err
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return manager, appException.NotFoundException(managerExceptionMessage.MANAGER_NOT_FOUND)
+	}
+	return manager, nil
 }
 
 func (service *ManagerService) Create(dto managerDTO.CreateManagerDTO) (managerModel.Manager, error) {
@@ -105,6 +112,15 @@ func (service *ManagerService) FindAll(dto appDto.PaginationDTO) (int64, []manag
 	return totalCount, managers, err
 }
 
-func (service *ManagerService) Delete(id string) error {
-	return service.repository.Delete(id)
+func (service *ManagerService) Delete(id string) (managerModel.Manager, error) {
+	managerExists, err := service.FindByID(id)
+	if err != nil {
+		return managerModel.Manager{}, err
+	}
+
+	err = service.repository.Delete(id)
+	if err != nil {
+		return managerModel.Manager{}, err
+	}
+	return managerExists, nil
 }

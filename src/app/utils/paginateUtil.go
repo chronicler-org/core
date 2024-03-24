@@ -2,6 +2,7 @@ package appUtil
 
 import (
 	"math"
+	"reflect"
 
 	appDto "github.com/chronicler-org/core/src/app/dto"
 )
@@ -11,9 +12,12 @@ type PaginateResponse struct {
 	Result interface{}    `json:"result"`
 }
 
-func Paginate(data []interface{}, page int, totalCount int, limit int) PaginateResponse {
+func Paginate(data interface{}, totalCount int64, page int, limit int) PaginateResponse {
+	dataSlice := reflect.ValueOf(data)
+	count := dataSlice.Len()
+
 	meta := appDto.MetaDTO{
-		Count:      len(data),
+		Count:      count,
 		Page:       page,
 		TotalPages: int(math.Ceil(float64(totalCount) / float64(limit))),
 		TotalCount: totalCount,
@@ -51,7 +55,7 @@ func PaginateError(errors []appDto.CustomErrorDTO) PaginateErrorResponse {
 		Count:      len(errors),
 		Page:       1,
 		TotalPages: 1,
-		TotalCount: len(errors),
+		TotalCount: int64(len(errors)),
 		Limit:      1,
 	}
 

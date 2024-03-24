@@ -3,6 +3,7 @@ package managerController
 import (
 	"errors"
 
+	appDto "github.com/chronicler-org/core/src/app/dto"
 	appUtil "github.com/chronicler-org/core/src/app/utils"
 	managerDTO "github.com/chronicler-org/core/src/manager/dto"
 	managerService "github.com/chronicler-org/core/src/manager/service"
@@ -19,12 +20,13 @@ func InitManagerController(s *managerService.ManagerService) *ManagerController 
 		service: s,
 	}
 }
-func (controller *ManagerController) HandleFindAll(c *fiber.Ctx) error {
-	managers, err := controller.service.FindAll()
-	if err != nil {
-		return c.SendStatus(fiber.StatusInternalServerError)
-	}
-	return c.Status(fiber.StatusOK).JSON(managers)
+func (controller *ManagerController) HandleFindAll(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
+	var paginationDto appDto.PaginationDTO
+	c.QueryParser(&paginationDto)
+
+	totalCount, managers, err := controller.service.FindAll(paginationDto)
+
+	return appUtil.Paginate(managers, totalCount, paginationDto.GetPage(), paginationDto.GetLimit()), err
 }
 
 func (controller *ManagerController) HandleFindByID(c *fiber.Ctx) (appUtil.PaginateResponse, error) {

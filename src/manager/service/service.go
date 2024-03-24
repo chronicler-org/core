@@ -3,6 +3,7 @@ package managerService
 import (
 	"time"
 
+	appDto "github.com/chronicler-org/core/src/app/dto"
 	managerDTO "github.com/chronicler-org/core/src/manager/dto"
 	managerModel "github.com/chronicler-org/core/src/manager/model"
 	managerRepository "github.com/chronicler-org/core/src/manager/repository"
@@ -94,8 +95,14 @@ func (service *ManagerService) Update(id string, dto managerDTO.UpdateManagerDTO
 	return updatedManager, err
 }
 
-func (service *ManagerService) FindAll() ([]managerModel.Manager, error) {
-	return service.repository.FindAll()
+func (service *ManagerService) FindAll(dto appDto.PaginationDTO) (int64, []managerModel.Manager, error) {
+	totalCount, err := service.repository.Count()
+	if err != nil {
+		return 0, nil, err
+	}
+
+	managers, err := service.repository.FindAll(dto.GetLimit(), dto.GetPage())
+	return totalCount, managers, err
 }
 
 func (service *ManagerService) Delete(id string) error {

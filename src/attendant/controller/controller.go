@@ -1,11 +1,12 @@
 package attendantController
 
 import (
+	"github.com/gofiber/fiber/v2"
+
 	appDto "github.com/chronicler-org/core/src/app/dto"
 	appUtil "github.com/chronicler-org/core/src/app/utils"
 	attendantDTO "github.com/chronicler-org/core/src/attendant/dto"
 	attendantService "github.com/chronicler-org/core/src/attendant/service"
-	"github.com/gofiber/fiber/v2"
 )
 
 type AttendantController struct {

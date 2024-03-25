@@ -4,6 +4,10 @@ import (
 	"errors"
 	"time"
 
+	"github.com/google/uuid"
+	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
+
 	appDto "github.com/chronicler-org/core/src/app/dto"
 	appException "github.com/chronicler-org/core/src/app/exceptions"
 	appUtil "github.com/chronicler-org/core/src/app/utils"
@@ -11,9 +15,6 @@ import (
 	attendantExceptionMessage "github.com/chronicler-org/core/src/attendant/messages"
 	attendantModel "github.com/chronicler-org/core/src/attendant/model"
 	attendantRepository "github.com/chronicler-org/core/src/attendant/repository"
-	"github.com/google/uuid"
-	"golang.org/x/crypto/bcrypt"
-	"gorm.io/gorm"
 )
 
 type AttendantService struct {
@@ -27,8 +28,8 @@ func InitAttendantService(r *attendantRepository.AttendantRepository) *Attendant
 }
 
 func (service *AttendantService) FindByID(id string) (attendantModel.Attendant, error) {
-	managerPtr, err := service.repository.FindByID(id)
-	manager, _ := managerPtr.(*attendantModel.Attendant)
+	result, err := service.repository.FindByID(id)
+	manager, _ := result.(*attendantModel.Attendant)
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return *manager, appException.NotFoundException(attendantExceptionMessage.ATTENDANT_NOT_FOUND)

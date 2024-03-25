@@ -1,4 +1,4 @@
-package customerModel
+package attendantModel
 
 import (
 	"time"
@@ -6,13 +6,12 @@ import (
 	"github.com/google/uuid"
 )
 
-type Customer struct {
+type Attendant struct {
 	ID        uuid.UUID `gorm:"primarykey"`
-	CPF       string    `json:"cpf"`
+	CPF       string    `gorm:"uniqueIndex" json:"cpf"`
 	Name      string    `json:"name"`
-	Email     string    `json:"email"`
-	Phone     string    `json:"phone"`
-	Job       string    `json:"job"`
+	Email     string    `gorm:"uniqueIndex" json:"email"`
+	Password  string    `json:"-"`
 	BirthDate time.Time `json:"birth_date"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`

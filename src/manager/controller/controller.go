@@ -1,12 +1,12 @@
 package managerController
 
 import (
-	"errors"
-
-	managerDTO "github.com/chronicler-org/core/src/manager/dto"
-	"github.com/chronicler-org/core/src/manager/service"
-	serviceErrors "github.com/chronicler-org/core/src/utils/errors"
 	"github.com/gofiber/fiber/v2"
+
+	appDto "github.com/chronicler-org/core/src/app/dto"
+	appUtil "github.com/chronicler-org/core/src/app/utils"
+	managerDTO "github.com/chronicler-org/core/src/manager/dto"
+	managerService "github.com/chronicler-org/core/src/manager/service"
 )
 
 type ManagerController struct {
@@ -18,80 +18,46 @@ func InitManagerController(s *managerService.ManagerService) *ManagerController 
 		service: s,
 	}
 }
-func (controller *ManagerController) HandleFindAll(c *fiber.Ctx) error {
-	managers, err := controller.service.FindAll()
-	if err != nil {
-		return c.SendStatus(fiber.StatusInternalServerError)
-	}
-	return c.Status(fiber.StatusOK).JSON(managers)
+func (controller *ManagerController) HandleFindAll(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
+	var paginationDTO appDto.PaginationDTO
+	c.QueryParser(&paginationDTO)
+
+	totalCount, managers, err := controller.service.FindAll(paginationDTO)
+
+	return appUtil.Paginate(managers, totalCount, paginationDTO.GetPage(), paginationDTO.GetLimit()), err
 }
 
-func (controller *ManagerController) HandleFindByID(c *fiber.Ctx) error {
+func (controller *ManagerController) HandleFindByID(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
 	id := c.Params("id")
 
 	manager, err := controller.service.FindByID(id)
-	if err != nil {
-		return c.SendStatus(fiber.StatusInternalServerError)
-	}
-
-	return c.Status(fiber.StatusOK).JSON(manager)
+	return appUtil.PaginateSingle(manager), err
 }
 
-func (controller *ManagerController) HandleCreateManager(c *fiber.Ctx) error {
-	var managerDTO managerDTO.CreateManagerDTO
+func (controller *ManagerController) HandleCreateManager(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
+	var createManagerDTO managerDTO.CreateManagerDTO
 
-	err := c.BodyParser(&managerDTO)
-	if err != nil {
-		return c.SendStatus(fiber.StatusBadRequest)
-	}
+	c.BodyParser(&createManagerDTO)
 
-	newManagerID, err := controller.service.Create(managerDTO)
+	managerCreated, err := controller.service.Create(createManagerDTO)
 
-	if err != nil {
-		target := &serviceErrors.ServiceError{}
-		if errors.As(err, &target) {
-			return c.Status(fiber.ErrBadRequest.Code).JSON(fiber.Map{
-				"message": err.Error(),
-			})
-		}
-		return c.SendStatus(fiber.StatusInternalServerError)
-	}
-
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"location": newManagerID,
-	})
+	return appUtil.PaginateSingle(managerCreated), err
 }
 
-func (controller *ManagerController) HandleUpdateManager(c *fiber.Ctx) error {
-	var managerDTO managerDTO.UpdateManagerDTO
-
-	err := c.BodyParser(&managerDTO)
-	if err != nil {
-		return c.SendStatus(fiber.StatusBadRequest)
-	}
+func (controller *ManagerController) HandleUpdateManager(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
+	var updateManagerDTO managerDTO.UpdateManagerDTO
+	c.BodyParser(&updateManagerDTO)
 
 	id := c.Params("id")
 
-	managerUpdated, err := controller.service.Update(id, managerDTO)
-	if err != nil {
-		target := &serviceErrors.ServiceError{}
-		if errors.As(err, &target) {
-			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-				"message": err.Error(),
-			})
-		}
-		return c.SendStatus(fiber.StatusInternalServerError)
-	}
+	managerUpdated, err := controller.service.Update(id, updateManagerDTO)
 
-	return c.Status(fiber.StatusOK).JSON(managerUpdated)
+	return appUtil.PaginateSingle(managerUpdated), err
 }
 
-func (controller *ManagerController) HandleDeleteManager(c *fiber.Ctx) error {
+func (controller *ManagerController) HandleDeleteManager(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
 	id := c.Params("id")
 
-	err := controller.service.Delete(id)
-	if err != nil {
-		return c.SendStatus(fiber.StatusInternalServerError)
-	}
-	return c.SendStatus(fiber.StatusOK)
+	managerDeleted, err := controller.service.Delete(id)
+	return appUtil.PaginateSingle(managerDeleted), err
 }

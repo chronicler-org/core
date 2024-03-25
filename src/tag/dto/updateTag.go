@@ -3,7 +3,7 @@ package tagDTO
 import "strings"
 
 type UpdateTagDTO struct {
-	Title string `validate:"max=20" json:"name,omitempty"`
+	Name  string `validate:"max=20" json:"name,omitempty"`
 	Color string `validate:"max=20" json:"color,omitempty"`
 }
 

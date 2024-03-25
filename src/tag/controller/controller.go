@@ -3,10 +3,12 @@ package tagController
 import (
 	"errors"
 
+	"github.com/gofiber/fiber/v2"
+
+	appUtil "github.com/chronicler-org/core/src/app/utils"
 	tagDTO "github.com/chronicler-org/core/src/tag/dto"
 	tagService "github.com/chronicler-org/core/src/tag/service"
 	serviceErrors "github.com/chronicler-org/core/src/utils/errors"
-	"github.com/gofiber/fiber/v2"
 )
 
 type TagController struct {
@@ -19,7 +21,7 @@ func InitTagController(s *tagService.TagService) *TagController {
 	}
 }
 
-func (controller *TagController) HandleFindAll(c *fiber.Ctx) error {
+func (controller *TagController) HandleFindAll(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
 	tags, err := controller.service.FindAll()
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -29,7 +31,7 @@ func (controller *TagController) HandleFindAll(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(tags)
 }
 
-func (controller *TagController) HandleFindByID(c *fiber.Ctx) error {
+func (controller *TagController) HandleFindByID(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
 	id := c.Params("id")
 	tag, err := controller.service.FindByID(id)
 	if err != nil {
@@ -40,7 +42,7 @@ func (controller *TagController) HandleFindByID(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(tag)
 }
 
-func (controller *TagController) HandleCreateTag(c *fiber.Ctx) error {
+func (controller *TagController) HandleCreateTag(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
 	var tagDTO tagDTO.CreateTagDTO
 
 	err := c.BodyParser(&tagDTO)
@@ -68,7 +70,7 @@ func (controller *TagController) HandleCreateTag(c *fiber.Ctx) error {
 	})
 }
 
-func (controller *TagController) HandleUpdateTag(c *fiber.Ctx) error {
+func (controller *TagController) HandleUpdateTag(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
 	var tagDTO tagDTO.UpdateTagDTO
 
 	err := c.BodyParser(&tagDTO)
@@ -96,7 +98,7 @@ func (controller *TagController) HandleUpdateTag(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(tagUpdated)
 }
 
-func (controller *TagController) HandleDeleteTag(c *fiber.Ctx) error {
+func (controller *TagController) HandleDeleteTag(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
 	id := c.Params("id")
 
 	err := controller.service.Delete(id)

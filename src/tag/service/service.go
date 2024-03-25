@@ -3,11 +3,12 @@ package tagService
 import (
 	"time"
 
+	"github.com/google/uuid"
+
 	tagDTO "github.com/chronicler-org/core/src/tag/dto"
 	tagModel "github.com/chronicler-org/core/src/tag/model"
 	tagRepository "github.com/chronicler-org/core/src/tag/repository"
 	serviceErrors "github.com/chronicler-org/core/src/utils/errors"
-	"github.com/google/uuid"
 )
 
 type TagService struct {

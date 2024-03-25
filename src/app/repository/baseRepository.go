@@ -1,6 +1,8 @@
 package appRepository
 
 import (
+	"reflect"
+
 	"gorm.io/gorm"
 )
 
@@ -21,9 +23,11 @@ func (r *BaseRepository) Create(data interface{}) error {
 }
 
 func (r *BaseRepository) FindByID(id interface{}) (interface{}, error) {
-	var result interface{}
-	err := r.db.Where("id = ?", id).First(&result).Error
-	return result, err
+	modelType := reflect.TypeOf(r.model)
+	modelPtr := reflect.New(modelType).Interface()
+
+	err := r.db.Where("id = ?", id).First(modelPtr).Error
+	return modelPtr, err
 }
 
 func (r *BaseRepository) Update(data interface{}) error {

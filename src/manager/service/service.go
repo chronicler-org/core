@@ -4,6 +4,10 @@ import (
 	"errors"
 	"time"
 
+	"github.com/google/uuid"
+	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
+
 	appDto "github.com/chronicler-org/core/src/app/dto"
 	appException "github.com/chronicler-org/core/src/app/exceptions"
 	appUtil "github.com/chronicler-org/core/src/app/utils"
@@ -11,9 +15,6 @@ import (
 	managerExceptionMessage "github.com/chronicler-org/core/src/manager/messages"
 	managerModel "github.com/chronicler-org/core/src/manager/model"
 	managerRepository "github.com/chronicler-org/core/src/manager/repository"
-	"github.com/google/uuid"
-	"golang.org/x/crypto/bcrypt"
-	"gorm.io/gorm"
 )
 
 type ManagerService struct {
@@ -27,12 +28,13 @@ func InitManagerService(r *managerRepository.ManagerRepository) *ManagerService 
 }
 
 func (service *ManagerService) FindByID(id string) (managerModel.Manager, error) {
-	manager, err := service.repository.FindByID(id)
+	result, err := service.repository.FindByID(id)
+	manager, _ := result.(*managerModel.Manager)
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return manager, appException.NotFoundException(managerExceptionMessage.MANAGER_NOT_FOUND)
+		return *manager, appException.NotFoundException(managerExceptionMessage.MANAGER_NOT_FOUND)
 	}
-	return manager, nil
+	return *manager, nil
 }
 
 func (service *ManagerService) Create(dto managerDTO.CreateManagerDTO) (managerModel.Manager, error) {
@@ -77,13 +79,12 @@ func (service *ManagerService) Update(id string, dto managerDTO.UpdateManagerDTO
 }
 
 func (service *ManagerService) FindAll(dto appDto.PaginationDTO) (int64, []managerModel.Manager, error) {
-	totalCount, err := service.repository.Count()
+	var managers []managerModel.Manager
+	totalCount, err := service.repository.FindAll(dto.GetLimit(), dto.GetPage(), &managers)
 	if err != nil {
 		return 0, nil, err
 	}
-
-	managers, err := service.repository.FindAll(dto.GetLimit(), dto.GetPage())
-	return totalCount, managers, err
+	return totalCount, managers, nil
 }
 
 func (service *ManagerService) Delete(id string) (managerModel.Manager, error) {

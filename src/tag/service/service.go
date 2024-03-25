@@ -1,15 +1,19 @@
 package tagService
 
 import (
+	"errors"
 	"time"
 
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 
 	appDto "github.com/chronicler-org/core/src/app/dto"
+	appException "github.com/chronicler-org/core/src/app/exceptions"
+	appUtil "github.com/chronicler-org/core/src/app/utils"
 	tagDTO "github.com/chronicler-org/core/src/tag/dto"
+	tagExceptionMessage "github.com/chronicler-org/core/src/tag/messages"
 	tagModel "github.com/chronicler-org/core/src/tag/model"
 	tagRepository "github.com/chronicler-org/core/src/tag/repository"
-	serviceErrors "github.com/chronicler-org/core/src/utils/errors"
 )
 
 type TagService struct {
@@ -23,48 +27,39 @@ func InitTagService(r *tagRepository.TagRepository) *TagService {
 }
 
 func (service *TagService) FindByID(id string) (tagModel.Tag, error) {
-	return service.repository.FindByID(id)
+	result, err := service.repository.FindByID(id)
+	tag, _ := result.(*tagModel.Tag)
+
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return *tag, appException.NotFoundException(tagExceptionMessage.TAG_NOT_FOUND)
+	}
+	return *tag, nil
 }
 
-func (service *TagService) Create(dto tagDTO.CreateTagDTO) (uuid.UUID, error) {
-	if !dto.ValidateHexColor() {
-		return uuid.Nil, serviceErrors.NewError("erro ao validar o codigo hex para a cor da tag")
-	}
+func (service *TagService) Create(dto tagDTO.CreateTagDTO) (tagModel.Tag, error) {
 	model := tagModel.Tag{
 		ID:        uuid.New(),
-		Title:     dto.Title,
+		Name:      dto.Name,
 		Color:     dto.Color,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}
-
 	err := service.repository.Create(model)
 
-	return model.ID, err
+	return model, err
 }
 
 func (service *TagService) Update(id string, dto tagDTO.UpdateTagDTO) (tagModel.Tag, error) {
-	updatedTag, err := service.repository.FindByID(id)
-	// implementar validaçao da tag
+	tagExists, err := service.FindByID(id)
 	if err != nil {
-		return updatedTag, err
-	}
-	if updatedTag.ID == uuid.Nil {
-		return updatedTag, err
+		return tagModel.Tag{}, err
 	}
 
-	if dto.Title != "" {
-		updatedTag.Title = dto.Title
-	}
-	if dto.Color != "" {
-		updatedTag.Color = dto.Color
-	}
+	appUtil.UpdateModelFromDTO(&tagExists, dto)
 
-	updatedTag.UpdatedAt = time.Now()
-
-	err = service.repository.Update(updatedTag)
-
-	return updatedTag, err
+	tagExists.UpdatedAt = time.Now()
+	err = service.repository.Update(tagExists)
+	return tagExists, err
 }
 
 func (service *TagService) FindAll(dto appDto.PaginationDTO) (int64, []tagModel.Tag, error) {

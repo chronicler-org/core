@@ -3,10 +3,11 @@ package customerController
 import (
 	"errors"
 
+	"github.com/gofiber/fiber/v2"
+
 	customerDTO "github.com/chronicler-org/core/src/customer/dto"
 	customerService "github.com/chronicler-org/core/src/customer/service"
 	serviceErrors "github.com/chronicler-org/core/src/utils/errors"
-	"github.com/gofiber/fiber/v2"
 )
 
 type CustomerController struct {

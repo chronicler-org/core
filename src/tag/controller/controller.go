@@ -1,14 +1,12 @@
 package tagController
 
 import (
-	"errors"
-
 	"github.com/gofiber/fiber/v2"
 
+	appDto "github.com/chronicler-org/core/src/app/dto"
 	appUtil "github.com/chronicler-org/core/src/app/utils"
 	tagDTO "github.com/chronicler-org/core/src/tag/dto"
 	tagService "github.com/chronicler-org/core/src/tag/service"
-	serviceErrors "github.com/chronicler-org/core/src/utils/errors"
 )
 
 type TagController struct {
@@ -22,90 +20,45 @@ func InitTagController(s *tagService.TagService) *TagController {
 }
 
 func (controller *TagController) HandleFindAll(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
-	tags, err := controller.service.FindAll()
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"message": err.Error(),
-		})
-	}
-	return c.Status(fiber.StatusOK).JSON(tags)
+	var paginationDTO appDto.PaginationDTO
+	c.QueryParser(&paginationDTO)
+
+	totalCount, tags, err := controller.service.FindAll(paginationDTO)
+
+	return appUtil.Paginate(tags, totalCount, paginationDTO.GetPage(), paginationDTO.GetLimit()), err
 }
 
 func (controller *TagController) HandleFindByID(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
 	id := c.Params("id")
+
 	tag, err := controller.service.FindByID(id)
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"message": err.Error(),
-		})
-	}
-	return c.Status(fiber.StatusOK).JSON(tag)
+	return appUtil.PaginateSingle(tag), err
 }
 
 func (controller *TagController) HandleCreateTag(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
-	var tagDTO tagDTO.CreateTagDTO
+	var createTagDTO tagDTO.CreateTagDTO
 
-	err := c.BodyParser(&tagDTO)
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": "erro ao tentar extrair dados do body",
-		})
-	}
+	c.BodyParser(&createTagDTO)
 
-	newTagID, err := controller.service.Create(tagDTO)
-	if err != nil {
-		target := &serviceErrors.ServiceError{}
-		if errors.As(err, &target) {
-			c.Status(fiber.StatusBadRequest)
-		} else {
-			c.Status(fiber.StatusInternalServerError)
-		}
-		return c.JSON(fiber.Map{
-			"message": err.Error(),
-		})
-	}
+	tagCreated, err := controller.service.Create(createTagDTO)
 
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"location": newTagID,
-	})
+	return appUtil.PaginateSingle(tagCreated), err
 }
 
 func (controller *TagController) HandleUpdateTag(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
-	var tagDTO tagDTO.UpdateTagDTO
-
-	err := c.BodyParser(&tagDTO)
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": "erro ao tentar extrair dados do body",
-		})
-	}
+	var updateTagDTO tagDTO.UpdateTagDTO
+	c.BodyParser(&updateTagDTO)
 
 	id := c.Params("id")
 
-	tagUpdated, err := controller.service.Update(id, tagDTO)
-	if err != nil {
-		target := &serviceErrors.ServiceError{}
-		if errors.As(err, &target) {
-			c.Status(fiber.StatusBadRequest)
-		} else {
-			c.Status(fiber.StatusInternalServerError)
-		}
-		return c.JSON(fiber.Map{
-			"message": err.Error(),
-		})
-	}
+	tagUpdated, err := controller.service.Update(id, updateTagDTO)
 
-	return c.Status(fiber.StatusOK).JSON(tagUpdated)
+	return appUtil.PaginateSingle(tagUpdated), err
 }
 
 func (controller *TagController) HandleDeleteTag(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
 	id := c.Params("id")
 
-	err := controller.service.Delete(id)
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"message": err.Error(),
-		})
-	}
-	return c.SendStatus(fiber.StatusOK)
+	tagDeleted, err := controller.service.Delete(id)
+	return appUtil.PaginateSingle(tagDeleted), err
 }

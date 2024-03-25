@@ -5,6 +5,7 @@ import (
 
 	"github.com/google/uuid"
 
+	appDto "github.com/chronicler-org/core/src/app/dto"
 	tagDTO "github.com/chronicler-org/core/src/tag/dto"
 	tagModel "github.com/chronicler-org/core/src/tag/model"
 	tagRepository "github.com/chronicler-org/core/src/tag/repository"
@@ -66,10 +67,24 @@ func (service *TagService) Update(id string, dto tagDTO.UpdateTagDTO) (tagModel.
 	return updatedTag, err
 }
 
-func (service *TagService) FindAll() ([]tagModel.Tag, error) {
-	return service.repository.FindAll()
+func (service *TagService) FindAll(dto appDto.PaginationDTO) (int64, []tagModel.Tag, error) {
+	var tags []tagModel.Tag
+	totalCount, err := service.repository.FindAll(dto.GetLimit(), dto.GetPage(), &tags)
+	if err != nil {
+		return 0, nil, err
+	}
+	return totalCount, tags, nil
 }
 
-func (service *TagService) Delete(id string) error {
-	return service.repository.Delete(id)
+func (service *TagService) Delete(id string) (tagModel.Tag, error) {
+	tagExists, err := service.FindByID(id)
+	if err != nil {
+		return tagModel.Tag{}, err
+	}
+
+	err = service.repository.Delete(id)
+	if err != nil {
+		return tagModel.Tag{}, err
+	}
+	return tagExists, nil
 }

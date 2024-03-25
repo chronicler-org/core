@@ -8,9 +8,9 @@ import (
 
 type Customer struct {
 	ID        uuid.UUID `gorm:"primarykey"`
-	CPF       string    `json:"cpf"`
+	CPF       string    `gorm:"uniqueIndex" json:"cpf"`
 	Name      string    `json:"name"`
-	Email     string    `json:"email"`
+	Email     string    `gorm:"uniqueIndex" json:"email"`
 	Phone     string    `json:"phone"`
 	Job       string    `json:"job"`
 	BirthDate time.Time `json:"birth_date"`

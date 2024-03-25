@@ -9,11 +9,11 @@ import (
 
 	appDto "github.com/chronicler-org/core/src/app/dto"
 	appException "github.com/chronicler-org/core/src/app/exceptions"
+	appUtil "github.com/chronicler-org/core/src/app/utils"
 	customerDTO "github.com/chronicler-org/core/src/customer/dto"
 	customerExceptionMessage "github.com/chronicler-org/core/src/customer/messages"
 	customerModel "github.com/chronicler-org/core/src/customer/model"
 	customerRepository "github.com/chronicler-org/core/src/customer/repository"
-	serviceErrors "github.com/chronicler-org/core/src/utils/errors"
 )
 
 type CustomerService struct {
@@ -36,7 +36,7 @@ func (service *CustomerService) FindByID(id string) (customerModel.Customer, err
 	return *customer, nil
 }
 
-func (service *CustomerService) Create(dto customerDTO.CreateCustomerDTO) (uuid.UUID, error) {
+func (service *CustomerService) Create(dto customerDTO.CreateCustomerDTO) (customerModel.Customer, error) {
 	model := customerModel.Customer{
 		ID:        uuid.New(),
 		CPF:       dto.CPF,
@@ -51,38 +51,20 @@ func (service *CustomerService) Create(dto customerDTO.CreateCustomerDTO) (uuid.
 
 	err := service.repository.Create(model)
 
-	return model.ID, err
+	return model, err
 }
 
 func (service *CustomerService) Update(id string, dto customerDTO.UpdateCustomerDTO) (customerModel.Customer, error) {
-	// implementar validacao de dados
-	updatedCustomer, err := service.repository.FindByID(id)
+	customerExists, err := service.FindByID(id)
 	if err != nil {
-		return updatedCustomer, err
+		return customerModel.Customer{}, err
 	}
-	if updatedCustomer.ID == uuid.Nil {
-		return updatedCustomer, serviceErrors.NewError("Cliente não encontrado")
-	}
-	if dto.Name != "" {
-		updatedCustomer.Name = dto.Name
-	}
-	if dto.Email != "" {
-		updatedCustomer.Email = dto.Email
-	}
-	if dto.Phone != "" {
-		updatedCustomer.Phone = dto.Phone
-	}
-	if dto.Job != "" {
-		updatedCustomer.Job = dto.Job
-	}
-	if !dto.BirthDate.IsZero() {
-		updatedCustomer.BirthDate = dto.BirthDate
-	}
-	updatedCustomer.UpdatedAt = time.Now()
 
-	err = service.repository.Update(updatedCustomer)
+	appUtil.UpdateModelFromDTO(&customerExists, dto)
 
-	return updatedCustomer, err
+	customerExists.UpdatedAt = time.Now()
+	err = service.repository.Update(customerExists)
+	return customerExists, err
 }
 
 func (service *CustomerService) FindAll(dto appDto.PaginationDTO) (int64, []customerModel.Customer, error) {

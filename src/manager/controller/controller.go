@@ -1,11 +1,12 @@
 package managerController
 
 import (
+	"github.com/gofiber/fiber/v2"
+
 	appDto "github.com/chronicler-org/core/src/app/dto"
 	appUtil "github.com/chronicler-org/core/src/app/utils"
 	managerDTO "github.com/chronicler-org/core/src/manager/dto"
 	managerService "github.com/chronicler-org/core/src/manager/service"
-	"github.com/gofiber/fiber/v2"
 )
 
 type ManagerController struct {
@@ -18,12 +19,12 @@ func InitManagerController(s *managerService.ManagerService) *ManagerController 
 	}
 }
 func (controller *ManagerController) HandleFindAll(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
-	var paginationDto appDto.PaginationDTO
-	c.QueryParser(&paginationDto)
+	var paginationDTO appDto.PaginationDTO
+	c.QueryParser(&paginationDTO)
 
-	totalCount, managers, err := controller.service.FindAll(paginationDto)
+	totalCount, managers, err := controller.service.FindAll(paginationDTO)
 
-	return appUtil.Paginate(managers, totalCount, paginationDto.GetPage(), paginationDto.GetLimit()), err
+	return appUtil.Paginate(managers, totalCount, paginationDTO.GetPage(), paginationDTO.GetLimit()), err
 }
 
 func (controller *ManagerController) HandleFindByID(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
@@ -34,22 +35,22 @@ func (controller *ManagerController) HandleFindByID(c *fiber.Ctx) (appUtil.Pagin
 }
 
 func (controller *ManagerController) HandleCreateManager(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
-	var managerDTO managerDTO.CreateManagerDTO
+	var createManagerDTO managerDTO.CreateManagerDTO
 
-	c.BodyParser(&managerDTO)
+	c.BodyParser(&createManagerDTO)
 
-	managerCreated, err := controller.service.Create(managerDTO)
+	managerCreated, err := controller.service.Create(createManagerDTO)
 
 	return appUtil.PaginateSingle(managerCreated), err
 }
 
 func (controller *ManagerController) HandleUpdateManager(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
-	var managerDTO managerDTO.UpdateManagerDTO
-	c.BodyParser(&managerDTO)
+	var updateManagerDTO managerDTO.UpdateManagerDTO
+	c.BodyParser(&updateManagerDTO)
 
 	id := c.Params("id")
 
-	managerUpdated, err := controller.service.Update(id, managerDTO)
+	managerUpdated, err := controller.service.Update(id, updateManagerDTO)
 
 	return appUtil.PaginateSingle(managerUpdated), err
 }

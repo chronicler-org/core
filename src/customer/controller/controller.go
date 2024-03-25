@@ -1,13 +1,12 @@
 package customerController
 
 import (
-	"errors"
-
 	"github.com/gofiber/fiber/v2"
 
+	appDto "github.com/chronicler-org/core/src/app/dto"
+	appUtil "github.com/chronicler-org/core/src/app/utils"
 	customerDTO "github.com/chronicler-org/core/src/customer/dto"
 	customerService "github.com/chronicler-org/core/src/customer/service"
-	serviceErrors "github.com/chronicler-org/core/src/utils/errors"
 )
 
 type CustomerController struct {
@@ -20,83 +19,46 @@ func InitCustomerController(s *customerService.CustomerService) *CustomerControl
 	}
 }
 
-func (controller *CustomerController) HandleFindAll(c *fiber.Ctx) error {
-	customers, err := controller.service.FindAll()
-	if err != nil {
-		return c.SendStatus(fiber.StatusInternalServerError)
-	}
-	return c.Status(fiber.StatusOK).JSON(customers)
+func (controller *CustomerController) HandleFindAll(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
+	var paginationDto appDto.PaginationDTO
+	c.QueryParser(&paginationDto)
+
+	totalCount, customers, err := controller.service.FindAll(paginationDto)
+
+	return appUtil.Paginate(customers, totalCount, paginationDto.GetPage(), paginationDto.GetLimit()), err
 }
 
-func (controller *CustomerController) HandleFindByID(c *fiber.Ctx) error {
+func (controller *CustomerController) HandleFindByID(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
 	id := c.Params("id")
 
 	customer, err := controller.service.FindByID(id)
-	if err != nil {
-		return c.SendStatus(fiber.StatusInternalServerError)
-	}
-
-	return c.Status(fiber.StatusOK).JSON(customer)
+	return appUtil.PaginateSingle(customer), err
 }
 
-func (controller *CustomerController) HandleCreateCustomer(c *fiber.Ctx) error {
-	var customerDTO customerDTO.CreateCustomerDTO
+func (controller *CustomerController) HandleCreateCustomer(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
+	var createCustomerDTO customerDTO.CreateCustomerDTO
 
-	err := c.BodyParser(&customerDTO)
-	if err != nil {
-		return c.SendStatus(fiber.StatusBadRequest)
-	}
+	c.BodyParser(&createCustomerDTO)
 
-	newCustomerID, err := controller.service.Create(customerDTO)
-	if err != nil {
-		target := &serviceErrors.ServiceError{}
-		if errors.As(err, &target) {
-			c.Status(fiber.StatusBadRequest)
-		} else {
-			c.Status(fiber.StatusInternalServerError)
-		}
-		return c.JSON(fiber.Map{
-			"message": err.Error(),
-		})
-	}
+	customerCreated, err := controller.service.Create(createCustomerDTO)
 
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"location": newCustomerID,
-	})
+	return appUtil.PaginateSingle(customerCreated), err
 }
 
-func (controller *CustomerController) HandleUpdateCustomer(c *fiber.Ctx) error {
-	var customerDTO customerDTO.UpdateCustomerDTO
-
-	err := c.BodyParser(&customerDTO)
-	if err != nil {
-		return c.SendStatus(fiber.StatusBadRequest)
-	}
+func (controller *CustomerController) HandleUpdateCustomer(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
+	var updateCustomerDTO customerDTO.UpdateCustomerDTO
+	c.BodyParser(&updateCustomerDTO)
 
 	id := c.Params("id")
 
-	customerUpdated, err := controller.service.Update(id, customerDTO)
-	if err != nil {
-		target := &serviceErrors.ServiceError{}
-		if errors.As(err, &target) {
-			c.Status(fiber.StatusBadRequest)
-		} else {
-			c.Status(fiber.StatusInternalServerError)
-		}
-		return c.JSON(fiber.Map{
-			"message": err.Error(),
-		})
-	}
+	customerUpdated, err := controller.service.Update(id, updateCustomerDTO)
 
-	return c.Status(fiber.StatusOK).JSON(customerUpdated)
+	return appUtil.PaginateSingle(customerUpdated), err
 }
 
-func (controller *CustomerController) HandleDeleteCustomer(c *fiber.Ctx) error {
+func (controller *CustomerController) HandleDeleteCustomer(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
 	id := c.Params("id")
 
-	err := controller.service.Delete(id)
-	if err != nil {
-		return c.SendStatus(fiber.StatusInternalServerError)
-	}
-	return c.SendStatus(fiber.StatusOK)
+	customerDeleted, err := controller.service.Delete(id)
+	return appUtil.PaginateSingle(customerDeleted), err
 }

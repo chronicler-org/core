@@ -1,13 +1,19 @@
 package customerService
 
 import (
+	"errors"
 	"time"
 
+	"github.com/google/uuid"
+	"gorm.io/gorm"
+
+	appDto "github.com/chronicler-org/core/src/app/dto"
+	appException "github.com/chronicler-org/core/src/app/exceptions"
 	customerDTO "github.com/chronicler-org/core/src/customer/dto"
+	customerExceptionMessage "github.com/chronicler-org/core/src/customer/messages"
 	customerModel "github.com/chronicler-org/core/src/customer/model"
 	customerRepository "github.com/chronicler-org/core/src/customer/repository"
 	serviceErrors "github.com/chronicler-org/core/src/utils/errors"
-	"github.com/google/uuid"
 )
 
 type CustomerService struct {
@@ -21,11 +27,16 @@ func InitCustomerService(r *customerRepository.CustomerRepository) *CustomerServ
 }
 
 func (service *CustomerService) FindByID(id string) (customerModel.Customer, error) {
-	return service.repository.FindByID(id)
+	result, err := service.repository.FindByID(id)
+	customer, _ := result.(*customerModel.Customer)
+
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return *customer, appException.NotFoundException(customerExceptionMessage.CUSTOMER_NOT_FOUND)
+	}
+	return *customer, nil
 }
 
 func (service *CustomerService) Create(dto customerDTO.CreateCustomerDTO) (uuid.UUID, error) {
-	// implementar validacao de dados
 	model := customerModel.Customer{
 		ID:        uuid.New(),
 		CPF:       dto.CPF,
@@ -74,10 +85,24 @@ func (service *CustomerService) Update(id string, dto customerDTO.UpdateCustomer
 	return updatedCustomer, err
 }
 
-func (service *CustomerService) FindAll() ([]customerModel.Customer, error) {
-	return service.repository.FindAll()
+func (service *CustomerService) FindAll(dto appDto.PaginationDTO) (int64, []customerModel.Customer, error) {
+	var customers []customerModel.Customer
+	totalCount, err := service.repository.FindAll(dto.GetLimit(), dto.GetPage(), &customers)
+	if err != nil {
+		return 0, nil, err
+	}
+	return totalCount, customers, nil
 }
 
-func (service *CustomerService) Delete(id string) error {
-	return service.repository.Delete(id)
+func (service *CustomerService) Delete(id string) (customerModel.Customer, error) {
+	customerExists, err := service.FindByID(id)
+	if err != nil {
+		return customerModel.Customer{}, err
+	}
+
+	err = service.repository.Delete(id)
+	if err != nil {
+		return customerModel.Customer{}, err
+	}
+	return customerExists, nil
 }

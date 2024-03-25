@@ -1,9 +1,10 @@
 package attendantRepository
 
 import (
+	"gorm.io/gorm"
+
 	appRepository "github.com/chronicler-org/core/src/app/repository"
 	attendantModel "github.com/chronicler-org/core/src/attendant/model"
-	"gorm.io/gorm"
 )
 
 type AttendantRepository struct {

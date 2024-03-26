@@ -1,11 +1,7 @@
 package tagRepository
 
 import (
-	"log"
-	"os"
-
 	tagModel "github.com/chronicler-org/core/src/tag/model"
-	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
@@ -13,20 +9,9 @@ type TagRepository struct {
 	db *gorm.DB
 }
 
-func initDB() *gorm.DB {
-	dbURL := os.Getenv("DATABASE_URL")
-	db, err := gorm.Open(postgres.Open(dbURL), &gorm.Config{})
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	db.AutoMigrate(&tagModel.Tag{})
-	return db
-}
-
-func InitTagRepository() *TagRepository {
+func InitTagRepository(db *gorm.DB) *TagRepository {
 	return &TagRepository{
-		db: initDB(),
+		db: db,
 	}
 }
 

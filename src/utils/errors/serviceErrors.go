@@ -1,13 +1,11 @@
-package servoceErrors
+package serviceErrors
 
 type ServiceError struct {
-	Status  int
 	Message string
 }
 
-func NewError(status int, message string) *ServiceError {
+func NewError(message string) *ServiceError {
 	return &ServiceError{
-		Status:  status,
 		Message: message,
 	}
 }
@@ -15,9 +13,3 @@ func NewError(status int, message string) *ServiceError {
 func (err *ServiceError) Error() string {
 	return err.Message
 }
-
-const (
-	BadRequestError     = 400
-	NotFoundError       = 404
-	InternalServerError = 500
-)

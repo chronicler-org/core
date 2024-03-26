@@ -1,46 +1,46 @@
 package managerService
 
 import (
+	"errors"
 	"time"
 
-	"github.com/chronicler-org/core/src/manager/dto"
-	"github.com/chronicler-org/core/src/manager/model"
-	"github.com/chronicler-org/core/src/manager/repository"
-	serviceErrors "github.com/chronicler-org/core/src/utils/errors"
-	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
+
+	appDto "github.com/chronicler-org/core/src/app/dto"
+	appException "github.com/chronicler-org/core/src/app/exceptions"
+	appUtil "github.com/chronicler-org/core/src/app/utils"
+	managerDTO "github.com/chronicler-org/core/src/manager/dto"
+	managerExceptionMessage "github.com/chronicler-org/core/src/manager/messages"
+	managerModel "github.com/chronicler-org/core/src/manager/model"
+	managerRepository "github.com/chronicler-org/core/src/manager/repository"
 )
 
 type ManagerService struct {
 	repository *managerRepository.ManagerRepository
-	validate   *validator.Validate
 }
 
-func InitManagerService(r *managerRepository.ManagerRepository, v *validator.Validate) *ManagerService {
+func InitManagerService(r *managerRepository.ManagerRepository) *ManagerService {
 	return &ManagerService{
 		repository: r,
-		validate:   v,
 	}
 }
 
 func (service *ManagerService) FindByID(id string) (managerModel.Manager, error) {
-	return service.repository.FindByID(id)
+	result, err := service.repository.FindByID(id)
+	manager, _ := result.(*managerModel.Manager)
+
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return *manager, appException.NotFoundException(managerExceptionMessage.MANAGER_NOT_FOUND)
+	}
+	return *manager, nil
 }
 
-func (service *ManagerService) Create(dto managerDTO.CreateManagerDTO) (uuid.UUID, error) {
-	err := service.validate.Struct(&dto)
-	if err != nil {
-		return uuid.Nil, err
-	}
-
-	if !dto.Validate() {
-		return uuid.Nil, serviceErrors.NewError(serviceErrors.BadRequestError, "CPF inválido")
-	}
-
+func (service *ManagerService) Create(dto managerDTO.CreateManagerDTO) (managerModel.Manager, error) {
 	newPassword, err := bcrypt.GenerateFromPassword([]byte(dto.Password), 10)
 	if err != nil {
-		return uuid.Nil, err
+		return managerModel.Manager{}, err
 	}
 
 	model := managerModel.Manager{
@@ -56,48 +56,46 @@ func (service *ManagerService) Create(dto managerDTO.CreateManagerDTO) (uuid.UUI
 
 	err = service.repository.Create(model)
 
-	return model.ID, err
+	return model, err
 }
 
 func (service *ManagerService) Update(id string, dto managerDTO.UpdateManagerDTO) (managerModel.Manager, error) {
-	updatedManager, err := service.repository.FindByID(id)
+	managerExists, err := service.FindByID(id)
 	if err != nil {
-		return updatedManager, err
-	}
-	if updatedManager.ID == uuid.Nil {
-		return updatedManager, serviceErrors.NewError(serviceErrors.NotFoundError, "Gerente não encontrado")
+		return managerModel.Manager{}, err
 	}
 
-	if dto.CPF != "" {
-		updatedManager.CPF = dto.CPF
-	}
-	if dto.Name != "" {
-		updatedManager.Name = dto.Name
-	}
-	if dto.Email != "" {
-		updatedManager.Email = dto.Email
-	}
+	appUtil.UpdateModelFromDTO(&managerExists, dto)
 	if dto.Password != "" {
-		newPassword, err := bcrypt.GenerateFromPassword([]byte(dto.CPF), 10)
-		if err != nil {
-			return managerModel.Manager{}, err
+		newPassword, err := bcrypt.GenerateFromPassword([]byte(dto.Password), 10)
+		if err == nil {
+			managerExists.Password = string(newPassword)
 		}
-		updatedManager.Password = string(newPassword)
 	}
-	if !dto.BirthDate.IsZero() {
-		updatedManager.BirthDate = dto.BirthDate
-	}
-	updatedManager.UpdatedAt = time.Now()
 
-	err = service.repository.Update(updatedManager)
-
-	return updatedManager, err
+	managerExists.UpdatedAt = time.Now()
+	err = service.repository.Update(managerExists)
+	return managerExists, err
 }
 
-func (service *ManagerService) FindAll() ([]managerModel.Manager, error) {
-	return service.repository.FindAll()
+func (service *ManagerService) FindAll(dto appDto.PaginationDTO) (int64, []managerModel.Manager, error) {
+	var managers []managerModel.Manager
+	totalCount, err := service.repository.FindAll(dto.GetLimit(), dto.GetPage(), &managers)
+	if err != nil {
+		return 0, nil, err
+	}
+	return totalCount, managers, nil
 }
 
-func (service *ManagerService) Delete(id string) error {
-	return service.repository.Delete(id)
+func (service *ManagerService) Delete(id string) (managerModel.Manager, error) {
+	managerExists, err := service.FindByID(id)
+	if err != nil {
+		return managerModel.Manager{}, err
+	}
+
+	err = service.repository.Delete(id)
+	if err != nil {
+		return managerModel.Manager{}, err
+	}
+	return managerExists, nil
 }

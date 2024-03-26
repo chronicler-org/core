@@ -17,11 +17,13 @@ services:
         limits:
           cpus: '0.5'
           memory: 256M
+    volumes:
+      - ./:/app
 
   database:
     image: postgres:latest
     container_name: go_api_db
-    ports: 
+    ports:
       - 5432:5432
     environment:
       POSTGRES_DB: ${DATABASE_NAME}

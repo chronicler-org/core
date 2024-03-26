@@ -22,5 +22,6 @@ go.work
 
 # Temporary binaries
 tmp/
+main
 
 .env

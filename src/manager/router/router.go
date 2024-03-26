@@ -1,27 +1,27 @@
 package managerRouter
 
 import (
-	"github.com/chronicler-org/core/src/manager/controller"
-	"github.com/chronicler-org/core/src/manager/repository"
-	"github.com/chronicler-org/core/src/manager/service"
-	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
+	"gorm.io/gorm"
+
+	appDto "github.com/chronicler-org/core/src/app/dto"
+	"github.com/chronicler-org/core/src/app/middleware"
+	appUtil "github.com/chronicler-org/core/src/app/utils"
+	managerController "github.com/chronicler-org/core/src/manager/controller"
+	managerDTO "github.com/chronicler-org/core/src/manager/dto"
+	managerRepository "github.com/chronicler-org/core/src/manager/repository"
+	managerService "github.com/chronicler-org/core/src/manager/service"
 )
 
-func NewManagerRouter() *fiber.App {
+func InitManagerRouter(router *fiber.App, db *gorm.DB) {
 
-	router := fiber.New()
-
-	repository := managerRepository.InitManagerRepository()
-	validate := validator.New()
-	service := managerService.InitManagerService(repository, validate)
+	repository := managerRepository.InitManagerRepository(db)
+	service := managerService.InitManagerService(repository)
 	controller := managerController.InitManagerController(service)
 
-	router.Get("/", controller.HandleFindAll)
-	router.Get(":id", controller.HandleFindByID)
-	router.Post("/", controller.HandleCreateManager)
-	router.Patch(":id", controller.HandleUpdateManager)
-	router.Delete(":id", controller.HandleDeleteManager)
-
-	return router
+	router.Get("/manager", middleware.Validate(nil, &appDto.PaginationDTO{}), appUtil.Controller(controller.HandleFindAll))
+	router.Get("/manager/:id", appUtil.Controller(controller.HandleFindByID))
+	router.Post("/manager", middleware.Validate(&managerDTO.CreateManagerDTO{}, nil), appUtil.Controller(controller.HandleCreateManager))
+	router.Patch("/manager/:id", middleware.Validate(&managerDTO.UpdateManagerDTO{}, nil), appUtil.Controller(controller.HandleUpdateManager))
+	router.Delete("/manager/:id", appUtil.Controller(controller.HandleDeleteManager))
 }

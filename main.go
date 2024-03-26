@@ -36,7 +36,7 @@ func main() {
 
 	// rota raiz
 	app.Get("/", func(c *fiber.Ctx) error {
-		return c.SendString("Hello, World!")
+		return c.SendString("Hello, World 2!")
 	})
 
 	// instancia as rotas para cada entidade

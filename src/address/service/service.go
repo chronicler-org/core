@@ -77,3 +77,17 @@ func (service *AddressService) Update(id string, dto addressDTO.UpdateAddressDTO
 
 	return updatedAddress, err
 }
+
+func (service *AddressService) Delete(id string) (addressModel.Address, error) {
+	addressExists, err := service.FindByID(id)
+	if err != nil {
+		return addressModel.Address{}, err
+	}
+
+	err = service.repository.Delete(id)
+	if err != nil {
+		return addressModel.Address{}, err
+	}
+
+	return addressExists, nil
+}

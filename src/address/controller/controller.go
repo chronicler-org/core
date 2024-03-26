@@ -13,7 +13,7 @@ type AddressController struct {
 	service *addressService.AddressService
 }
 
-func initAddressController(s *addressService.AddressService) *AddressController {
+func InitAddressController(s *addressService.AddressService) *AddressController {
 	return &AddressController{
 		service: s,
 	}

@@ -1,12 +1,18 @@
 package addressService
 
 import (
+	"errors"
 	"time"
 
+	"github.com/google/uuid"
+	"gorm.io/gorm"
+
 	addressDTO "github.com/chronicler-org/core/src/address/dto"
+	addressExceptionMessage "github.com/chronicler-org/core/src/address/messages"
 	addressModel "github.com/chronicler-org/core/src/address/model"
 	addressRepository "github.com/chronicler-org/core/src/address/repository"
-	"github.com/google/uuid"
+	appException "github.com/chronicler-org/core/src/app/exceptions"
+	appUtil "github.com/chronicler-org/core/src/app/utils"
 )
 
 type AddressService struct {
@@ -20,21 +26,27 @@ func InitAddressService(r *addressRepository.AddressRepository) *AddressService 
 }
 
 func (service *AddressService) FindByID(id string) (addressModel.Address, error) {
-	return service.repository.FindByID(id)
+	result, err := service.repository.FindByID(id)
+	address, _ := result.(*addressModel.Address)
+
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return *address, appException.NotFoundException(addressExceptionMessage.ADDRESS_NOT_FOUND)
+	}
+	return *address, nil
 }
 
 func (service *AddressService) Create(dto addressDTO.CreateAddressDTO) (uuid.UUID, error) {
 	model := addressModel.Address{
-		ID: uuid.New(),
-		CEP: dto.CEP,
-		City: dto.City,
-		Number: dto.Number,
-		Estate: dto.Estate,
-		StreetName: dto.StreetName,
-		Complement: dto.Complement,
+		ID:           uuid.New(),
+		CEP:          dto.CEP,
+		City:         dto.City,
+		Number:       dto.Number,
+		Estate:       dto.Estate,
+		StreetName:   dto.StreetName,
+		Complement:   dto.Complement,
 		Neighborhood: dto.Neighborhood,
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
+		CreatedAt:    time.Now(),
+		UpdatedAt:    time.Now(),
 	}
 
 	err := service.repository.Create(model)
@@ -43,39 +55,16 @@ func (service *AddressService) Create(dto addressDTO.CreateAddressDTO) (uuid.UUI
 }
 
 func (service *AddressService) Update(id string, dto addressDTO.UpdateAddressDTO) (addressModel.Address, error) {
-	updatedAddress, err := service.repository.FindByID(id)
+	addressExists, err := service.FindByID(id)
 	if err != nil {
-		return updatedAddress, err
+		return addressModel.Address{}, err
 	}
-	if updatedAddress.ID == uuid.Nil {
-		return updatedAddress, err
-	}
-	if dto.CEP != "" {
-		updatedAddress.CEP = dto.CEP
-	}
-	if dto.City != "" {
-		updatedAddress.City = dto.City
-	}
-	if dto.Complement != "" {
-		updatedAddress.Complement = dto.Complement
-	}
-	if dto.Estate != "" {
-		updatedAddress.Estate = dto.Estate
-	}
-	if dto.Neighborhood != "" {
-		updatedAddress.Neighborhood = dto.Neighborhood
-	}
-	if dto.Number != "" {
-		updatedAddress.Number = dto.Number
-	}
-	if dto.StreetName != "" {
-		updatedAddress.StreetName = dto.StreetName
-	}
-	updatedAddress.UpdatedAt = time.Now()
 
-	err = service.repository.Update(updatedAddress)
+	appUtil.UpdateModelFromDTO(&addressExists, dto)
 
-	return updatedAddress, err
+	addressExists.UpdatedAt = time.Now()
+	err = service.repository.Update(addressExists)
+	return addressExists, err
 }
 
 func (service *AddressService) Delete(id string) (addressModel.Address, error) {

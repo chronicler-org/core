@@ -7,7 +7,7 @@ import (
 )
 
 type Attendant struct {
-	ID        uuid.UUID `gorm:"primarykey"`
+	ID        uuid.UUID `gorm:"primarykey"  json:"id"`
 	CPF       string    `gorm:"uniqueIndex" json:"cpf"`
 	Name      string    `json:"name"`
 	Email     string    `gorm:"uniqueIndex" json:"email"`

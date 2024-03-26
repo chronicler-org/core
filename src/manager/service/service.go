@@ -18,17 +18,17 @@ import (
 )
 
 type ManagerService struct {
-	repository *managerRepository.ManagerRepository
+	managerRepository *managerRepository.ManagerRepository
 }
 
 func InitManagerService(r *managerRepository.ManagerRepository) *ManagerService {
 	return &ManagerService{
-		repository: r,
+		managerRepository: r,
 	}
 }
 
 func (service *ManagerService) FindByID(id string) (managerModel.Manager, error) {
-	result, err := service.repository.FindByID(id)
+	result, err := service.managerRepository.FindByID(id)
 	manager, _ := result.(*managerModel.Manager)
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -54,7 +54,7 @@ func (service *ManagerService) Create(dto managerDTO.CreateManagerDTO) (managerM
 		UpdatedAt: time.Now(),
 	}
 
-	err = service.repository.Create(model)
+	err = service.managerRepository.Create(model)
 
 	return model, err
 }
@@ -74,13 +74,13 @@ func (service *ManagerService) Update(id string, dto managerDTO.UpdateManagerDTO
 	}
 
 	managerExists.UpdatedAt = time.Now()
-	err = service.repository.Update(managerExists)
+	err = service.managerRepository.Update(managerExists)
 	return managerExists, err
 }
 
 func (service *ManagerService) FindAll(dto appDto.PaginationDTO) (int64, []managerModel.Manager, error) {
 	var managers []managerModel.Manager
-	totalCount, err := service.repository.FindAll(dto.GetLimit(), dto.GetPage(), &managers)
+	totalCount, err := service.managerRepository.FindAll(dto.GetLimit(), dto.GetPage(), &managers)
 	if err != nil {
 		return 0, nil, err
 	}
@@ -93,7 +93,7 @@ func (service *ManagerService) Delete(id string) (managerModel.Manager, error) {
 		return managerModel.Manager{}, err
 	}
 
-	err = service.repository.Delete(id)
+	err = service.managerRepository.Delete(id)
 	if err != nil {
 		return managerModel.Manager{}, err
 	}

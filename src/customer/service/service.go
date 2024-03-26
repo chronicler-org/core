@@ -17,17 +17,17 @@ import (
 )
 
 type CustomerService struct {
-	repository *customerRepository.CustomerRepository
+	customerRepository *customerRepository.CustomerRepository
 }
 
 func InitCustomerService(r *customerRepository.CustomerRepository) *CustomerService {
 	return &CustomerService{
-		repository: r,
+		customerRepository: r,
 	}
 }
 
 func (service *CustomerService) FindByID(id string) (customerModel.Customer, error) {
-	result, err := service.repository.FindByID(id)
+	result, err := service.customerRepository.FindByID(id)
 	customer, _ := result.(*customerModel.Customer)
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -49,7 +49,7 @@ func (service *CustomerService) Create(dto customerDTO.CreateCustomerDTO) (custo
 		UpdatedAt: time.Now(),
 	}
 
-	err := service.repository.Create(model)
+	err := service.customerRepository.Create(model)
 
 	return model, err
 }
@@ -63,13 +63,13 @@ func (service *CustomerService) Update(id string, dto customerDTO.UpdateCustomer
 	appUtil.UpdateModelFromDTO(&customerExists, dto)
 
 	customerExists.UpdatedAt = time.Now()
-	err = service.repository.Update(customerExists)
+	err = service.customerRepository.Update(customerExists)
 	return customerExists, err
 }
 
 func (service *CustomerService) FindAll(dto appDto.PaginationDTO) (int64, []customerModel.Customer, error) {
 	var customers []customerModel.Customer
-	totalCount, err := service.repository.FindAll(dto.GetLimit(), dto.GetPage(), &customers)
+	totalCount, err := service.customerRepository.FindAll(dto.GetLimit(), dto.GetPage(), &customers)
 	if err != nil {
 		return 0, nil, err
 	}
@@ -82,7 +82,7 @@ func (service *CustomerService) Delete(id string) (customerModel.Customer, error
 		return customerModel.Customer{}, err
 	}
 
-	err = service.repository.Delete(id)
+	err = service.customerRepository.Delete(id)
 	if err != nil {
 		return customerModel.Customer{}, err
 	}

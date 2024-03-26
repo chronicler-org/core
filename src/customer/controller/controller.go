@@ -10,12 +10,12 @@ import (
 )
 
 type CustomerController struct {
-	service *customerService.CustomerService
+	customerService *customerService.CustomerService
 }
 
 func InitCustomerController(s *customerService.CustomerService) *CustomerController {
 	return &CustomerController{
-		service: s,
+		customerService: s,
 	}
 }
 
@@ -23,7 +23,7 @@ func (controller *CustomerController) HandleFindAll(c *fiber.Ctx) (appUtil.Pagin
 	var paginationDto appDto.PaginationDTO
 	c.QueryParser(&paginationDto)
 
-	totalCount, customers, err := controller.service.FindAll(paginationDto)
+	totalCount, customers, err := controller.customerService.FindAll(paginationDto)
 
 	return appUtil.Paginate(customers, totalCount, paginationDto.GetPage(), paginationDto.GetLimit()), err
 }
@@ -31,7 +31,7 @@ func (controller *CustomerController) HandleFindAll(c *fiber.Ctx) (appUtil.Pagin
 func (controller *CustomerController) HandleFindByID(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
 	id := c.Params("id")
 
-	customer, err := controller.service.FindByID(id)
+	customer, err := controller.customerService.FindByID(id)
 	return appUtil.PaginateSingle(customer), err
 }
 
@@ -40,7 +40,7 @@ func (controller *CustomerController) HandleCreateCustomer(c *fiber.Ctx) (appUti
 
 	c.BodyParser(&createCustomerDTO)
 
-	customerCreated, err := controller.service.Create(createCustomerDTO)
+	customerCreated, err := controller.customerService.Create(createCustomerDTO)
 
 	return appUtil.PaginateSingle(customerCreated), err
 }
@@ -51,7 +51,7 @@ func (controller *CustomerController) HandleUpdateCustomer(c *fiber.Ctx) (appUti
 
 	id := c.Params("id")
 
-	customerUpdated, err := controller.service.Update(id, updateCustomerDTO)
+	customerUpdated, err := controller.customerService.Update(id, updateCustomerDTO)
 
 	return appUtil.PaginateSingle(customerUpdated), err
 }
@@ -59,6 +59,6 @@ func (controller *CustomerController) HandleUpdateCustomer(c *fiber.Ctx) (appUti
 func (controller *CustomerController) HandleDeleteCustomer(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
 	id := c.Params("id")
 
-	customerDeleted, err := controller.service.Delete(id)
+	customerDeleted, err := controller.customerService.Delete(id)
 	return appUtil.PaginateSingle(customerDeleted), err
 }

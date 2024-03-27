@@ -12,6 +12,8 @@ import (
 	managerRouter "github.com/chronicler-org/core/src/manager/router"
 	tagModel "github.com/chronicler-org/core/src/tag/model"
 	tagRouter "github.com/chronicler-org/core/src/tag/router"
+	teamModel "github.com/chronicler-org/core/src/team/model"
+	teamRouter "github.com/chronicler-org/core/src/team/router"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"gorm.io/driver/postgres"
@@ -26,7 +28,7 @@ func main() {
 		log.Fatal(err)
 	}
 	// realiza migration das entidades no banco de dados
-	db.AutoMigrate(&managerModel.Manager{}, &customerModel.Customer{}, &tagModel.Tag{}, &attendantModel.Attendant{})
+	db.AutoMigrate(&managerModel.Manager{}, &customerModel.Customer{}, &tagModel.Tag{}, &attendantModel.Attendant{}, &teamModel.Team{})
 
 	// inicializa app principal
 	app := fiber.New()
@@ -41,9 +43,9 @@ func main() {
 
 	// instancia as rotas para cada entidade
 	tagService := tagRouter.InitTagRouter(app, db)
-
-	managerRouter.InitManagerRouter(app, db)
 	customerRouter.InitCustomerRouter(app, db, tagService)
+	teamRouter.InitTeamRouter(app, db)
+	managerRouter.InitManagerRouter(app, db)
 	attendantRouter.InitAttendantRouter(app, db)
 
 	app.Listen(":8080")

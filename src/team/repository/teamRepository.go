@@ -11,7 +11,7 @@ type TeamRepository struct {
 	*appRepository.BaseRepository
 }
 
-func InitTagRepository(db *gorm.DB) *TeamRepository {
+func InitTeamRepository(db *gorm.DB) *TeamRepository {
 	return &TeamRepository{
 		BaseRepository: appRepository.NewRepository(db, teamModel.Team{}),
 	}

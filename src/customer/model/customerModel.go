@@ -18,5 +18,5 @@ type Customer struct {
 	BirthDate time.Time       `json:"birth_date"`
 	CreatedAt time.Time       `json:"created_at"`
 	UpdatedAt time.Time       `json:"updated_at"`
-	Tags      []*tagModel.Tag `gorm:"many2many:manager_tags" json:"tags"`
+	Tags      []*tagModel.Tag `gorm:"many2many:customer_tags;onDelete:CASCADE" json:"tags"`
 }

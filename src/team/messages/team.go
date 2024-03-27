@@ -1,4 +1,4 @@
-package tagExceptionMessage
+package teanExceptionMessage
 
 import appDto "github.com/chronicler-org/core/src/app/dto"
 

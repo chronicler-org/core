@@ -1,4 +1,4 @@
-package tagModel
+package teamModel
 
 import (
 	"time"

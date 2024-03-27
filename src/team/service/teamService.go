@@ -1,4 +1,4 @@
-package tagService
+package teamService
 
 import (
 	"errors"

@@ -1,4 +1,4 @@
-package tagRepository
+package teamRepository
 
 import (
 	"gorm.io/gorm"

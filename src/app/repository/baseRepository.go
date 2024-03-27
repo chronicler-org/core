@@ -4,7 +4,6 @@ import (
 	"reflect"
 
 	"gorm.io/gorm"
-	"gorm.io/gorm/clause"
 )
 
 type BaseRepository struct {
@@ -47,7 +46,11 @@ func (r *BaseRepository) FindAll(limit, page int, results interface{}, preloads 
 	if err != nil {
 		return 0, err
 	}
-	err = r.Db.Preload(clause.Associations).Limit(limit).Offset(offset).Find(results).Error
+	query := r.Db
+	for _, preload := range preloads {
+		query = query.Preload(preload)
+	}
+	err = query.Limit(limit).Offset(offset).Find(results).Error
 	return count, err
 }
 

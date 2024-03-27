@@ -17,17 +17,17 @@ import (
 )
 
 type TagService struct {
-	repository *tagRepository.TagRepository
+	tagRepository *tagRepository.TagRepository
 }
 
 func InitTagService(r *tagRepository.TagRepository) *TagService {
 	return &TagService{
-		repository: r,
+		tagRepository: r,
 	}
 }
 
 func (service *TagService) FindByID(id string) (tagModel.Tag, error) {
-	result, err := service.repository.FindByID(id)
+	result, err := service.tagRepository.FindByID(id)
 	tag, _ := result.(*tagModel.Tag)
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -44,7 +44,7 @@ func (service *TagService) Create(dto tagDTO.CreateTagDTO) (tagModel.Tag, error)
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}
-	err := service.repository.Create(model)
+	err := service.tagRepository.Create(model)
 
 	return model, err
 }
@@ -58,13 +58,13 @@ func (service *TagService) Update(id string, dto tagDTO.UpdateTagDTO) (tagModel.
 	appUtil.UpdateModelFromDTO(&tagExists, dto)
 
 	tagExists.UpdatedAt = time.Now()
-	err = service.repository.Update(tagExists)
+	err = service.tagRepository.Update(tagExists)
 	return tagExists, err
 }
 
 func (service *TagService) FindAll(dto appDto.PaginationDTO) (int64, []tagModel.Tag, error) {
 	var tags []tagModel.Tag
-	totalCount, err := service.repository.FindAll(dto.GetLimit(), dto.GetPage(), &tags)
+	totalCount, err := service.tagRepository.FindAll(dto.GetLimit(), dto.GetPage(), &tags)
 	if err != nil {
 		return 0, nil, err
 	}
@@ -77,7 +77,7 @@ func (service *TagService) Delete(id string) (tagModel.Tag, error) {
 		return tagModel.Tag{}, err
 	}
 
-	err = service.repository.Delete(id)
+	err = service.tagRepository.Delete(id)
 	if err != nil {
 		return tagModel.Tag{}, err
 	}

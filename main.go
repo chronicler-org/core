@@ -40,9 +40,10 @@ func main() {
 	})
 
 	// instancia as rotas para cada entidade
+	tagService := tagRouter.InitTagRouter(app, db)
+
 	managerRouter.InitManagerRouter(app, db)
-	customerRouter.InitCustomerRouter(app, db)
-	tagRouter.InitTagRouter(app, db)
+	customerRouter.InitCustomerRouter(app, db, tagService)
 	attendantRouter.InitAttendantRouter(app, db)
 
 	app.Listen(":8080")

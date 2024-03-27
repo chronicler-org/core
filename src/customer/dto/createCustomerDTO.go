@@ -11,4 +11,5 @@ type CreateCustomerDTO struct {
 	Phone     string    `validate:"required,number,len=11" json:"phone"`
 	Job       string    `validate:"required,min=5,max=30" json:"job"`
 	BirthDate time.Time `validate:"required" json:"birth_date"`
+	TagIDs    []string  `validate:"omitempty,dive,uuid" json:"tag_ids"`
 }

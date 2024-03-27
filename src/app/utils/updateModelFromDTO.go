@@ -5,24 +5,42 @@ import (
 )
 
 func UpdateModelFromDTO(model interface{}, dto interface{}) {
-	dtoType := reflect.TypeOf(dto)
+	modelValue := reflect.ValueOf(model)
 	dtoValue := reflect.ValueOf(dto)
 
-	modelType := reflect.TypeOf(model)
-	modelValue := reflect.ValueOf(model)
-
-	if modelType.Kind() != reflect.Ptr || modelType.Elem().Kind() != reflect.Struct {
-		panic("O modelo fornecido deve ser um ponteiro para uma estrutura")
+	if modelValue.Kind() == reflect.Ptr {
+		modelValue = modelValue.Elem()
+	} else {
+		panic("model must be a pointer to a struct")
 	}
 
-	modelValue = modelValue.Elem()
+	if dtoValue.Kind() == reflect.Ptr {
+		dtoValue = dtoValue.Elem()
+	} else {
+		panic("dto must be a pointer to a struct")
+	}
 
-	for i := 0; i < dtoType.NumField(); i++ {
-		fieldName := dtoType.Field(i).Name
-		dtoFieldValue := dtoValue.FieldByName(fieldName)
-		modelFieldValue := modelValue.FieldByName(fieldName)
-		if dtoFieldValue.IsValid() && dtoFieldValue.Interface() != reflect.Zero(dtoFieldValue.Type()).Interface() && modelFieldValue.CanSet() {
-			modelFieldValue.Set(dtoFieldValue)
+	for i := 0; i < dtoValue.NumField(); i++ {
+		dtoField := dtoValue.Type().Field(i)
+		dtoFieldValue := dtoValue.Field(i)
+
+		modelField := modelValue.FieldByName(dtoField.Name)
+		if !modelField.IsValid() || !modelField.CanSet() {
+			continue
+		}
+
+		if dtoFieldValue.IsZero() {
+			continue
+		}
+
+		switch dtoFieldValue.Kind() {
+		case reflect.Slice:
+			// Check if the field in the model is a slice of strings
+			if modelField.Type().Elem().Kind() == reflect.String {
+				modelField.Set(dtoFieldValue)
+			}
+		default:
+			modelField.Set(dtoFieldValue)
 		}
 	}
 }

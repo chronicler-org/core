@@ -10,19 +10,19 @@ import (
 )
 
 type AttendantController struct {
-	service *attendantService.AttendantService
+	attendantService *attendantService.AttendantService
 }
 
 func InitAttendantController(s *attendantService.AttendantService) *AttendantController {
 	return &AttendantController{
-		service: s,
+		attendantService: s,
 	}
 }
 func (controller *AttendantController) HandleFindAll(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
 	var paginationDto appDto.PaginationDTO
 	c.QueryParser(&paginationDto)
 
-	totalCount, attendants, err := controller.service.FindAll(paginationDto)
+	totalCount, attendants, err := controller.attendantService.FindAll(paginationDto)
 
 	return appUtil.Paginate(attendants, totalCount, paginationDto.GetPage(), paginationDto.GetLimit()), err
 }
@@ -30,7 +30,7 @@ func (controller *AttendantController) HandleFindAll(c *fiber.Ctx) (appUtil.Pagi
 func (controller *AttendantController) HandleFindByID(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
 	id := c.Params("id")
 
-	attendant, err := controller.service.FindByID(id)
+	attendant, err := controller.attendantService.FindByID(id)
 	return appUtil.PaginateSingle(attendant), err
 }
 
@@ -39,7 +39,7 @@ func (controller *AttendantController) HandleCreateAttendant(c *fiber.Ctx) (appU
 
 	c.BodyParser(&createAttendantDTO)
 
-	attendantCreated, err := controller.service.Create(createAttendantDTO)
+	attendantCreated, err := controller.attendantService.Create(createAttendantDTO)
 
 	return appUtil.PaginateSingle(attendantCreated), err
 }
@@ -50,7 +50,7 @@ func (controller *AttendantController) HandleUpdateAttendant(c *fiber.Ctx) (appU
 
 	id := c.Params("id")
 
-	attendantUpdated, err := controller.service.Update(id, updatedAttendantDTO)
+	attendantUpdated, err := controller.attendantService.Update(id, updatedAttendantDTO)
 
 	return appUtil.PaginateSingle(attendantUpdated), err
 }
@@ -58,6 +58,6 @@ func (controller *AttendantController) HandleUpdateAttendant(c *fiber.Ctx) (appU
 func (controller *AttendantController) HandleDeleteAttendant(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
 	id := c.Params("id")
 
-	attendantDeleted, err := controller.service.Delete(id)
+	attendantDeleted, err := controller.attendantService.Delete(id)
 	return appUtil.PaginateSingle(attendantDeleted), err
 }

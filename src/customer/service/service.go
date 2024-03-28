@@ -55,12 +55,17 @@ func (service *CustomerService) Create(dto customerDTO.CreateCustomerDTO) (custo
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}
-	err := service.customerRepository.Create(model)
-	if err != nil {
-		return customerModel.Customer{}, err
+	var tags []*tagModel.Tag
+	for _, tagID := range dto.TagIDs {
+		tag, err := service.tagService.FindByID(tagID)
+		if err != nil {
+			return  customerModel.Customer{}, err
+		}
+		tags = append(tags, &tag)
 	}
+	model.Tags = tags;
 
-	err = service.updateCustomerTags(&model, dto.TagIDs)
+	err := service.customerRepository.Create(model)
 	if err != nil {
 		return customerModel.Customer{}, err
 	}

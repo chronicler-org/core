@@ -31,7 +31,7 @@ func InitManagerService(managerRepository *managerRepository.ManagerRepository, 
 }
 
 func (service *ManagerService) FindByID(id string) (managerModel.Manager, error) {
-	result, err := service.managerRepository.FindByID(id, "Team")
+	result, err := service.managerRepository.FindByID(id)
 	manager, _ := result.(*managerModel.Manager)
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -97,7 +97,7 @@ func (service *ManagerService) Update(id string, dto managerDTO.UpdateManagerDTO
 
 func (service *ManagerService) FindAll(dto appDto.PaginationDTO) (int64, []managerModel.Manager, error) {
 	var managers []managerModel.Manager
-	totalCount, err := service.managerRepository.FindAll(dto.GetLimit(), dto.GetPage(), &managers, "Team")
+	totalCount, err := service.managerRepository.FindAll(dto.GetLimit(), dto.GetPage(), &managers)
 	if err != nil {
 		return 0, nil, err
 	}

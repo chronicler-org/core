@@ -15,20 +15,23 @@ import (
 	managerExceptionMessage "github.com/chronicler-org/core/src/manager/messages"
 	managerModel "github.com/chronicler-org/core/src/manager/model"
 	managerRepository "github.com/chronicler-org/core/src/manager/repository"
+	teamService "github.com/chronicler-org/core/src/team/service"
 )
 
 type ManagerService struct {
 	managerRepository *managerRepository.ManagerRepository
+	teamService       *teamService.TeamService
 }
 
-func InitManagerService(r *managerRepository.ManagerRepository) *ManagerService {
+func InitManagerService(managerRepository *managerRepository.ManagerRepository, teamService *teamService.TeamService) *ManagerService {
 	return &ManagerService{
-		managerRepository: r,
+		managerRepository: managerRepository,
+		teamService:       teamService,
 	}
 }
 
 func (service *ManagerService) FindByID(id string) (managerModel.Manager, error) {
-	result, err := service.managerRepository.FindByID(id)
+	result, err := service.managerRepository.FindByID(id, "Team")
 	manager, _ := result.(*managerModel.Manager)
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -43,12 +46,18 @@ func (service *ManagerService) Create(dto managerDTO.CreateManagerDTO) (managerM
 		return managerModel.Manager{}, err
 	}
 
+	team, err := service.teamService.FindByID(dto.TeamId)
+	if err != nil {
+		return managerModel.Manager{}, err
+	}
+
 	model := managerModel.Manager{
 		ID:        uuid.New(),
 		Name:      dto.Name,
 		CPF:       dto.CPF,
 		Email:     dto.Email,
 		Password:  string(newPassword),
+		Team:      team,
 		BirthDate: dto.BirthDate,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
@@ -73,6 +82,14 @@ func (service *ManagerService) Update(id string, dto managerDTO.UpdateManagerDTO
 		}
 	}
 
+	if dto.TeamId != "" {
+		team, err := service.teamService.FindByID(dto.TeamId)
+		if err != nil {
+			return managerModel.Manager{}, err
+		}
+		managerExists.Team = team
+	}
+
 	managerExists.UpdatedAt = time.Now()
 	err = service.managerRepository.Update(managerExists)
 	return managerExists, err
@@ -80,7 +97,7 @@ func (service *ManagerService) Update(id string, dto managerDTO.UpdateManagerDTO
 
 func (service *ManagerService) FindAll(dto appDto.PaginationDTO) (int64, []managerModel.Manager, error) {
 	var managers []managerModel.Manager
-	totalCount, err := service.managerRepository.FindAll(dto.GetLimit(), dto.GetPage(), &managers)
+	totalCount, err := service.managerRepository.FindAll(dto.GetLimit(), dto.GetPage(), &managers, "Team")
 	if err != nil {
 		return 0, nil, err
 	}

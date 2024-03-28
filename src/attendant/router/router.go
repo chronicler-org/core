@@ -11,17 +11,18 @@ import (
 	attendantDTO "github.com/chronicler-org/core/src/attendant/dto"
 	attendantRepository "github.com/chronicler-org/core/src/attendant/repository"
 	attendantService "github.com/chronicler-org/core/src/attendant/service"
+	teamService "github.com/chronicler-org/core/src/team/service"
 )
 
-func InitAttendantRouter(router *fiber.App, db *gorm.DB) {
+func InitAttendantRouter(router *fiber.App, db *gorm.DB, teamServ *teamService.TeamService) {
 
-	repository := attendantRepository.InitAttendantRepository(db)
-	service := attendantService.InitAttendantService(repository)
-	controller := attendantController.InitAttendantController(service)
+	attendantRepository := attendantRepository.InitAttendantRepository(db)
+	attendantService := attendantService.InitAttendantService(attendantRepository, teamServ)
+	attendantController := attendantController.InitAttendantController(attendantService)
 
-	router.Get("/attendant", middleware.Validate(nil, &appDto.PaginationDTO{}), appUtil.Controller(controller.HandleFindAll))
-	router.Get("/attendant/:id", appUtil.Controller(controller.HandleFindByID))
-	router.Post("/attendant", middleware.Validate(&attendantDTO.CreateAttendantDTO{}, nil), appUtil.Controller(controller.HandleCreateAttendant))
-	router.Patch("/attendant/:id", middleware.Validate(&attendantDTO.UpdateAttendantDTO{}, nil), appUtil.Controller(controller.HandleUpdateAttendant))
-	router.Delete("/attendant/:id", appUtil.Controller(controller.HandleDeleteAttendant))
+	router.Get("/attendant", middleware.Validate(nil, &appDto.PaginationDTO{}), appUtil.Controller(attendantController.HandleFindAll))
+	router.Get("/attendant/:id", appUtil.Controller(attendantController.HandleFindByID))
+	router.Post("/attendant", middleware.Validate(&attendantDTO.CreateAttendantDTO{}, nil), appUtil.Controller(attendantController.HandleCreateAttendant))
+	router.Patch("/attendant/:id", middleware.Validate(&attendantDTO.UpdateAttendantDTO{}, nil), appUtil.Controller(attendantController.HandleUpdateAttendant))
+	router.Delete("/attendant/:id", appUtil.Controller(attendantController.HandleDeleteAttendant))
 }

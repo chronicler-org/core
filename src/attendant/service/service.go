@@ -15,20 +15,26 @@ import (
 	attendantExceptionMessage "github.com/chronicler-org/core/src/attendant/messages"
 	attendantModel "github.com/chronicler-org/core/src/attendant/model"
 	attendantRepository "github.com/chronicler-org/core/src/attendant/repository"
+	teamService "github.com/chronicler-org/core/src/team/service"
 )
 
 type AttendantService struct {
 	attendantRepository *attendantRepository.AttendantRepository
+	teamService         *teamService.TeamService
 }
 
-func InitAttendantService(r *attendantRepository.AttendantRepository) *AttendantService {
+func InitAttendantService(
+	attendantRepository *attendantRepository.AttendantRepository,
+	teamService *teamService.TeamService,
+) *AttendantService {
 	return &AttendantService{
-		attendantRepository: r,
+		attendantRepository: attendantRepository,
+		teamService:         teamService,
 	}
 }
 
 func (service *AttendantService) FindByID(id string) (attendantModel.Attendant, error) {
-	result, err := service.attendantRepository.FindByID(id)
+	result, err := service.attendantRepository.FindByID(id, "Team")
 	manager, _ := result.(*attendantModel.Attendant)
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -44,12 +50,18 @@ func (service *AttendantService) Create(dto attendantDTO.CreateAttendantDTO) (at
 		return attendantModel.Attendant{}, err
 	}
 
+	team, err := service.teamService.FindByID(dto.TeamId)
+	if err != nil {
+		return attendantModel.Attendant{}, err
+	}
+
 	model := attendantModel.Attendant{
 		ID:        uuid.New(),
 		Name:      dto.Name,
 		CPF:       dto.CPF,
 		Email:     dto.Email,
 		Password:  string(newPassword),
+		Team:      team,
 		BirthDate: dto.BirthDate,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
@@ -73,6 +85,13 @@ func (service *AttendantService) Update(id string, dto attendantDTO.UpdateAttend
 			attendantExists.Password = string(newPassword)
 		}
 	}
+	if dto.TeamId != "" {
+		team, err := service.teamService.FindByID(dto.TeamId)
+		if err != nil {
+			return attendantModel.Attendant{}, err
+		}
+		attendantExists.Team = team
+	}
 
 	attendantExists.UpdatedAt = time.Now()
 	err = service.attendantRepository.Update(attendantExists)
@@ -81,7 +100,7 @@ func (service *AttendantService) Update(id string, dto attendantDTO.UpdateAttend
 
 func (service *AttendantService) FindAll(dto appDto.PaginationDTO) (int64, []attendantModel.Attendant, error) {
 	var attendants []attendantModel.Attendant
-	totalCount, err := service.attendantRepository.FindAll(dto.GetLimit(), dto.GetPage(), &attendants)
+	totalCount, err := service.attendantRepository.FindAll(dto.GetLimit(), dto.GetPage(), &attendants, "Team")
 	if err != nil {
 		return 0, nil, err
 	}

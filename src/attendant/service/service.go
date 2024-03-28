@@ -34,7 +34,7 @@ func InitAttendantService(
 }
 
 func (service *AttendantService) FindByID(id string) (attendantModel.Attendant, error) {
-	result, err := service.attendantRepository.FindByID(id)
+	result, err := service.attendantRepository.FindByID(id, "Team")
 	manager, _ := result.(*attendantModel.Attendant)
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -68,7 +68,7 @@ func (service *AttendantService) Create(dto attendantDTO.CreateAttendantDTO) (at
 	}
 
 	err = service.attendantRepository.Create(model)
-
+	model.Team = team
 	return model, err
 }
 
@@ -100,7 +100,7 @@ func (service *AttendantService) Update(id string, dto attendantDTO.UpdateAttend
 
 func (service *AttendantService) FindAll(dto appDto.PaginationDTO) (int64, []attendantModel.Attendant, error) {
 	var attendants []attendantModel.Attendant
-	totalCount, err := service.attendantRepository.FindAll(dto.GetLimit(), dto.GetPage(), &attendants)
+	totalCount, err := service.attendantRepository.FindAll(dto.GetLimit(), dto.GetPage(), &attendants, "Team")
 	if err != nil {
 		return 0, nil, err
 	}

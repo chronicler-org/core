@@ -15,15 +15,21 @@ import (
 	attendantExceptionMessage "github.com/chronicler-org/core/src/attendant/messages"
 	attendantModel "github.com/chronicler-org/core/src/attendant/model"
 	attendantRepository "github.com/chronicler-org/core/src/attendant/repository"
+	teamService "github.com/chronicler-org/core/src/team/service"
 )
 
 type AttendantService struct {
 	attendantRepository *attendantRepository.AttendantRepository
+	teamService         *teamService.TeamService
 }
 
-func InitAttendantService(r *attendantRepository.AttendantRepository) *AttendantService {
+func InitAttendantService(
+	attendantRepository *attendantRepository.AttendantRepository,
+	teamService *teamService.TeamService,
+) *AttendantService {
 	return &AttendantService{
-		attendantRepository: r,
+		attendantRepository: attendantRepository,
+		teamService:         teamService,
 	}
 }
 
@@ -44,12 +50,18 @@ func (service *AttendantService) Create(dto attendantDTO.CreateAttendantDTO) (at
 		return attendantModel.Attendant{}, err
 	}
 
+	team, err := service.teamService.FindByID(dto.TeamId)
+	if err != nil {
+		return attendantModel.Attendant{}, err
+	}
+
 	model := attendantModel.Attendant{
 		ID:        uuid.New(),
 		Name:      dto.Name,
 		CPF:       dto.CPF,
 		Email:     dto.Email,
 		Password:  string(newPassword),
+		TeamID:    team.ID,
 		BirthDate: dto.BirthDate,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
@@ -72,6 +84,13 @@ func (service *AttendantService) Update(id string, dto attendantDTO.UpdateAttend
 		if err == nil {
 			attendantExists.Password = string(newPassword)
 		}
+	}
+	if dto.TeamId != "" {
+		team, err := service.teamService.FindByID(dto.TeamId)
+		if err != nil {
+			return attendantModel.Attendant{}, err
+		}
+		attendantExists.TeamID = team.ID
 	}
 
 	attendantExists.UpdatedAt = time.Now()

@@ -45,7 +45,7 @@ func main() {
 	tagService := tagRouter.InitTagRouter(app, db)
 	customerRouter.InitCustomerRouter(app, db, tagService)
 	teamService := teamRouter.InitTeamRouter(app, db)
-	managerRouter.InitManagerRouter(app, db)
+	managerRouter.InitManagerRouter(app, db, teamService)
 	attendantRouter.InitAttendantRouter(app, db, teamService)
 
 	app.Listen(":8080")

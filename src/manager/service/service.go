@@ -57,7 +57,7 @@ func (service *ManagerService) Create(dto managerDTO.CreateManagerDTO) (managerM
 		CPF:       dto.CPF,
 		Email:     dto.Email,
 		Password:  string(newPassword),
-		Team:      team,
+		TeamID:    team.ID,
 		BirthDate: dto.BirthDate,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
@@ -87,7 +87,7 @@ func (service *ManagerService) Update(id string, dto managerDTO.UpdateManagerDTO
 		if err != nil {
 			return managerModel.Manager{}, err
 		}
-		managerExists.Team = team
+		managerExists.TeamID = team.ID
 	}
 
 	managerExists.UpdatedAt = time.Now()

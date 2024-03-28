@@ -61,7 +61,7 @@ func (service *AttendantService) Create(dto attendantDTO.CreateAttendantDTO) (at
 		CPF:       dto.CPF,
 		Email:     dto.Email,
 		Password:  string(newPassword),
-		Team:      team,
+		TeamID:    team.ID,
 		BirthDate: dto.BirthDate,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
@@ -90,7 +90,7 @@ func (service *AttendantService) Update(id string, dto attendantDTO.UpdateAttend
 		if err != nil {
 			return attendantModel.Attendant{}, err
 		}
-		attendantExists.Team = team
+		attendantExists.TeamID = team.ID
 	}
 
 	attendantExists.UpdatedAt = time.Now()

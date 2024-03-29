@@ -14,6 +14,7 @@ import (
 	customerModel "github.com/chronicler-org/core/src/customer/model"
 	customerRouter "github.com/chronicler-org/core/src/customer/router"
 	customerCareModel "github.com/chronicler-org/core/src/customerCare/model"
+	customerCareRouter "github.com/chronicler-org/core/src/customerCare/router"
 	managerModel "github.com/chronicler-org/core/src/manager/model"
 	managerRouter "github.com/chronicler-org/core/src/manager/router"
 	tagModel "github.com/chronicler-org/core/src/tag/model"
@@ -45,10 +46,11 @@ func main() {
 
 	// instancia as rotas para cada entidade
 	tagService := tagRouter.InitTagRouter(app, db)
-	customerRouter.InitCustomerRouter(app, db, tagService)
+	customerService := customerRouter.InitCustomerRouter(app, db, tagService)
 	teamService := teamRouter.InitTeamRouter(app, db)
 	managerRouter.InitManagerRouter(app, db, teamService)
 	attendantRouter.InitAttendantRouter(app, db, teamService)
+	customerCareRouter.InitCustomerCareRouter(app, db, customerService, teamService)
 
 	app.Listen(":8080")
 }

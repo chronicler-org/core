@@ -1,4 +1,4 @@
-package customerController
+package customerCareController
 
 import (
 	"github.com/gofiber/fiber/v2"

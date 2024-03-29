@@ -14,7 +14,7 @@ import (
 	tagService "github.com/chronicler-org/core/src/tag/service"
 )
 
-func InitCustomerRouter(router *fiber.App, db *gorm.DB, tagServ *tagService.TagService) {
+func InitCustomerRouter(router *fiber.App, db *gorm.DB, tagServ *tagService.TagService) *customerService.CustomerService {
 	customerRepository := customerRepository.InitCustomerRepository(db)
 	customerService := customerService.InitCustomerService(customerRepository, tagServ)
 	customerController := customerController.InitCustomerController(customerService)
@@ -24,4 +24,6 @@ func InitCustomerRouter(router *fiber.App, db *gorm.DB, tagServ *tagService.TagS
 	router.Post("/customer", middleware.Validate(&customerDTO.CreateCustomerDTO{}, nil), appUtil.Controller(customerController.HandleCreateCustomer))
 	router.Patch("/customer/:cpf", middleware.Validate(&customerDTO.UpdateCustomerDTO{}, nil), appUtil.Controller(customerController.HandleUpdateCustomer))
 	router.Delete("/customer/:cpf", appUtil.Controller(customerController.HandleDeleteCustomer))
+
+	return customerService
 }

@@ -1,4 +1,4 @@
-package customerRouter
+package customerCareRouter
 
 import (
 	"github.com/gofiber/fiber/v2"

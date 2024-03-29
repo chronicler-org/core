@@ -100,7 +100,7 @@ func (service *AttendantService) Update(id string, dto attendantDTO.UpdateAttend
 
 func (service *AttendantService) FindAll(dto appDto.PaginationDTO) (int64, []attendantModel.Attendant, error) {
 	var attendants []attendantModel.Attendant
-	totalCount, err := service.attendantRepository.FindAll(dto.GetLimit(), dto.GetPage(), &attendants, "Team")
+	totalCount, err := service.attendantRepository.FindAll(dto, &attendants, "Team")
 	if err != nil {
 		return 0, nil, err
 	}

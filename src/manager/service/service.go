@@ -8,7 +8,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 
-	appDto "github.com/chronicler-org/core/src/app/dto"
 	appException "github.com/chronicler-org/core/src/app/exceptions"
 	appUtil "github.com/chronicler-org/core/src/app/utils"
 	managerDTO "github.com/chronicler-org/core/src/manager/dto"
@@ -95,9 +94,9 @@ func (service *ManagerService) Update(id string, dto managerDTO.UpdateManagerDTO
 	return managerExists, err
 }
 
-func (service *ManagerService) FindAll(dto appDto.PaginationDTO) (int64, []managerModel.Manager, error) {
+func (service *ManagerService) FindAll(queryCustomerDTO managerDTO.QueryManagerDTO) (int64, []managerModel.Manager, error) {
 	var managers []managerModel.Manager
-	totalCount, err := service.managerRepository.FindAll(dto.GetLimit(), dto.GetPage(), &managers, "Team")
+	totalCount, err := service.managerRepository.FindAll(queryCustomerDTO, &managers, "Team")
 	if err != nil {
 		return 0, nil, err
 	}

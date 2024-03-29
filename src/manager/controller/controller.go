@@ -3,7 +3,6 @@ package managerController
 import (
 	"github.com/gofiber/fiber/v2"
 
-	appDto "github.com/chronicler-org/core/src/app/dto"
 	appUtil "github.com/chronicler-org/core/src/app/utils"
 	managerDTO "github.com/chronicler-org/core/src/manager/dto"
 	managerService "github.com/chronicler-org/core/src/manager/service"
@@ -19,12 +18,12 @@ func InitManagerController(s *managerService.ManagerService) *ManagerController 
 	}
 }
 func (controller *ManagerController) HandleFindAll(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
-	var paginationDTO appDto.PaginationDTO
-	c.QueryParser(&paginationDTO)
+	var queryManagerDTO managerDTO.QueryManagerDTO
+	c.QueryParser(&queryManagerDTO)
 
-	totalCount, managers, err := controller.managerService.FindAll(paginationDTO)
+	totalCount, managers, err := controller.managerService.FindAll(queryManagerDTO)
 
-	return appUtil.Paginate(managers, totalCount, paginationDTO.GetPage(), paginationDTO.GetLimit()), err
+	return appUtil.Paginate(managers, totalCount, queryManagerDTO.GetPage(), queryManagerDTO.GetLimit()), err
 }
 
 func (controller *ManagerController) HandleFindByID(c *fiber.Ctx) (appUtil.PaginateResponse, error) {

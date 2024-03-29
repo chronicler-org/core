@@ -109,7 +109,7 @@ func (service *ManagerService) Delete(id string) (managerModel.Manager, error) {
 		return managerModel.Manager{}, err
 	}
 
-	err = service.managerRepository.Delete(id)
+	err = service.managerRepository.Delete("", id)
 	if err != nil {
 		return managerModel.Manager{}, err
 	}

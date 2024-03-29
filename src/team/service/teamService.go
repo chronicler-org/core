@@ -76,7 +76,7 @@ func (service *TeamService) Delete(id string) (teamModel.Team, error) {
 		return teamModel.Team{}, err
 	}
 
-	err = service.teamRepository.Delete(id)
+	err = service.teamRepository.Delete("", id)
 	if err != nil {
 		return teamModel.Team{}, err
 	}

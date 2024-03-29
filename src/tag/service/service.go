@@ -77,7 +77,7 @@ func (service *TagService) Delete(id string) (tagModel.Tag, error) {
 		return tagModel.Tag{}, err
 	}
 
-	err = service.tagRepository.Delete(id)
+	err = service.tagRepository.Delete("", id)
 	if err != nil {
 		return tagModel.Tag{}, err
 	}

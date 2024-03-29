@@ -113,7 +113,7 @@ func (service *AttendantService) Delete(id string) (attendantModel.Attendant, er
 		return attendantModel.Attendant{}, err
 	}
 
-	err = service.attendantRepository.Delete(id)
+	err = service.attendantRepository.Delete("", id)
 	if err != nil {
 		return attendantModel.Attendant{}, err
 	}

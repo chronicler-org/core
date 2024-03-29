@@ -34,7 +34,7 @@ func InitAttendantService(
 }
 
 func (service *AttendantService) FindByID(id string) (attendantModel.Attendant, error) {
-	result, err := service.attendantRepository.FindByID(id, "Team")
+	result, err := service.attendantRepository.FindOneByField("ID", id, "Team")
 	manager, _ := result.(*attendantModel.Attendant)
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -113,7 +113,7 @@ func (service *AttendantService) Delete(id string) (attendantModel.Attendant, er
 		return attendantModel.Attendant{}, err
 	}
 
-	err = service.attendantRepository.Delete(id)
+	err = service.attendantRepository.Delete("ID", id)
 	if err != nil {
 		return attendantModel.Attendant{}, err
 	}

@@ -27,7 +27,7 @@ func InitTagService(r *tagRepository.TagRepository) *TagService {
 }
 
 func (service *TagService) FindByID(id string) (tagModel.Tag, error) {
-	result, err := service.tagRepository.FindByID(id)
+	result, err := service.tagRepository.FindOneByField("ID", id)
 	tag, _ := result.(*tagModel.Tag)
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -77,7 +77,7 @@ func (service *TagService) Delete(id string) (tagModel.Tag, error) {
 		return tagModel.Tag{}, err
 	}
 
-	err = service.tagRepository.Delete(id)
+	err = service.tagRepository.Delete("ID", id)
 	if err != nil {
 		return tagModel.Tag{}, err
 	}

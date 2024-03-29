@@ -4,7 +4,6 @@ import (
 	"errors"
 	"time"
 
-	"github.com/google/uuid"
 	"gorm.io/gorm"
 
 	appDto "github.com/chronicler-org/core/src/app/dto"
@@ -33,8 +32,8 @@ func InitCustomerService(
 	}
 }
 
-func (service *CustomerService) FindByID(id string) (customerModel.Customer, error) {
-	result, err := service.customerRepository.FindByID(id, "Tags")
+func (service *CustomerService) FindByCPF(cpf string) (customerModel.Customer, error) {
+	result, err := service.customerRepository.FindOneByField("CPF", cpf, "Tags")
 	customer, _ := result.(*customerModel.Customer)
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -45,7 +44,6 @@ func (service *CustomerService) FindByID(id string) (customerModel.Customer, err
 
 func (service *CustomerService) Create(dto customerDTO.CreateCustomerDTO) (customerModel.Customer, error) {
 	model := customerModel.Customer{
-		ID:        uuid.New(),
 		CPF:       dto.CPF,
 		Name:      dto.Name,
 		Email:     dto.Email,
@@ -73,8 +71,8 @@ func (service *CustomerService) Create(dto customerDTO.CreateCustomerDTO) (custo
 	return model, err
 }
 
-func (service *CustomerService) Update(id string, dto customerDTO.UpdateCustomerDTO) (customerModel.Customer, error) {
-	customerExists, err := service.FindByID(id)
+func (service *CustomerService) Update(cpf string, dto customerDTO.UpdateCustomerDTO) (customerModel.Customer, error) {
+	customerExists, err := service.FindByCPF(cpf)
 	if err != nil {
 		return customerModel.Customer{}, err
 	}
@@ -91,7 +89,7 @@ func (service *CustomerService) Update(id string, dto customerDTO.UpdateCustomer
 		return customerModel.Customer{}, err
 	}
 
-	customerUpdated, err := service.FindByID(id)
+	customerUpdated, err := service.FindByCPF(cpf)
 
 	return customerUpdated, err
 }
@@ -105,13 +103,13 @@ func (service *CustomerService) FindAll(dto appDto.PaginationDTO) (int64, []cust
 	return totalCount, customers, nil
 }
 
-func (service *CustomerService) Delete(id string) (customerModel.Customer, error) {
-	customerExists, err := service.FindByID(id)
+func (service *CustomerService) Delete(cpf string) (customerModel.Customer, error) {
+	customerExists, err := service.FindByCPF(cpf)
 	if err != nil {
 		return customerModel.Customer{}, err
 	}
 
-	err = service.customerRepository.Delete(id)
+	err = service.customerRepository.Delete("CPF", cpf)
 	if err != nil {
 		return customerModel.Customer{}, err
 	}
@@ -119,7 +117,7 @@ func (service *CustomerService) Delete(id string) (customerModel.Customer, error
 }
 
 func (service *CustomerService) updateCustomerTags(customer *customerModel.Customer, tagIDs []string) error {
-	err := service.customerRepository.ClearAssociations(customer.ID.String(), "Tags")
+	err := service.customerRepository.ClearAssociationsByField("CPF", customer.CPF, "Tags")
 	if err != nil {
 		return err
 	}
@@ -132,7 +130,7 @@ func (service *CustomerService) updateCustomerTags(customer *customerModel.Custo
 		tags = append(tags, &tag)
 	}
 
-	err = service.customerRepository.ReplaceAssociations(customer.ID.String(), tags, "Tags")
+	err = service.customerRepository.ReplaceAssociationsByField("CPF", customer.CPF, tags, "Tags")
 	if err != nil {
 		return err
 	}

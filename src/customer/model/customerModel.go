@@ -7,7 +7,7 @@ import (
 )
 
 type Customer struct {
-	CPF       string          `gorm:"primarykey" json:"cpf"`
+	CPF       string          `gorm:"primaryKey;type:varchar(11)" json:"cpf"`
 	Name      string          `json:"name"`
 	Email     string          `gorm:"uniqueIndex" json:"email"`
 	Phone     string          `json:"phone"`

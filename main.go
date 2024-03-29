@@ -4,20 +4,22 @@ import (
 	"log"
 	"os"
 
+	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/logger"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
+
 	attendantModel "github.com/chronicler-org/core/src/attendant/model"
 	attendantRouter "github.com/chronicler-org/core/src/attendant/router"
 	customerModel "github.com/chronicler-org/core/src/customer/model"
 	customerRouter "github.com/chronicler-org/core/src/customer/router"
+	customerServiceModel "github.com/chronicler-org/core/src/customerService/model"
 	managerModel "github.com/chronicler-org/core/src/manager/model"
 	managerRouter "github.com/chronicler-org/core/src/manager/router"
 	tagModel "github.com/chronicler-org/core/src/tag/model"
 	tagRouter "github.com/chronicler-org/core/src/tag/router"
 	teamModel "github.com/chronicler-org/core/src/team/model"
 	teamRouter "github.com/chronicler-org/core/src/team/router"
-	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/logger"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
 )
 
 func main() {
@@ -28,7 +30,7 @@ func main() {
 		log.Fatal(err)
 	}
 	// realiza migration das entidades no banco de dados
-	db.AutoMigrate(&managerModel.Manager{}, &customerModel.Customer{}, &tagModel.Tag{}, &attendantModel.Attendant{}, &teamModel.Team{})
+	db.AutoMigrate(&managerModel.Manager{}, &customerModel.Customer{}, &tagModel.Tag{}, &attendantModel.Attendant{}, &teamModel.Team{}, &customerServiceModel.CustomerService{})
 
 	// inicializa app principal
 	app := fiber.New()

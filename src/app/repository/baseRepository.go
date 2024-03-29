@@ -24,7 +24,7 @@ func (r *BaseRepository) Create(data interface{}) error {
 	return r.Db.Model(&r.Model).Create(data).Error
 }
 
-func (r *BaseRepository) FindByID(id interface{}, preloads ...string) (interface{}, error) {
+func (r *BaseRepository) FindOneByField(field string, value interface{}, preloads ...string) (interface{}, error) {
 	modelType := reflect.TypeOf(r.Model)
 	modelPtr := reflect.New(modelType).Interface()
 
@@ -33,20 +33,8 @@ func (r *BaseRepository) FindByID(id interface{}, preloads ...string) (interface
 		query = query.Preload(preload)
 	}
 
-	err := query.Where("id = ?", id).First(modelPtr).Error
-	return modelPtr, err
-}
-
-func (r *BaseRepository) FindOneBy(by, value interface{}, preloads ...string) (interface{}, error) {
-	modelType := reflect.TypeOf(r.Model)
-	modelPtr := reflect.New(modelType).Interface()
-
-	query := r.Db
-	for _, preload := range preloads {
-		query = query.Preload(preload)
-	}
-
-	err := query.Where(fmt.Sprintf("%s = ?", by), value).First(modelPtr).Error
+	query = query.Where(fmt.Sprintf("%s = ?", field), value)
+	err := query.First(modelPtr).Error
 	return modelPtr, err
 }
 
@@ -121,17 +109,14 @@ func (r *BaseRepository) Count() (int64, error) {
 }
 
 func (r *BaseRepository) Delete(field, value string) error {
-	if field != "" {
-		return r.Db.Delete(&r.Model, fmt.Sprintf("%s = ?", field), value).Error
-	}
-	return r.Db.Delete(&r.Model, "id = ?", value).Error
+	return r.Db.Delete(&r.Model, fmt.Sprintf("%s = ?", field), value).Error
 }
 
-func (r *BaseRepository) ReplaceAssociations(modelID string, associations interface{}, associationName string) error {
+func (r *BaseRepository) ReplaceAssociationsByField(field, value string, associations interface{}, associationName string) error {
 	modelType := reflect.TypeOf(r.Model)
 	modelPtr := reflect.New(modelType).Interface()
 
-	if err := r.Db.First(modelPtr, "id = ?", modelID).Error; err != nil {
+	if err := r.Db.First(modelPtr, fmt.Sprintf("%s = ?", field), value).Error; err != nil {
 		return err
 	}
 
@@ -142,11 +127,11 @@ func (r *BaseRepository) ReplaceAssociations(modelID string, associations interf
 	return nil
 }
 
-func (r *BaseRepository) ClearAssociations(modelID string, associationName string) error {
+func (r *BaseRepository) ClearAssociationsByField(field, value string, associationName string) error {
 	modelType := reflect.TypeOf(r.Model)
 	modelPtr := reflect.New(modelType).Interface()
 
-	if err := r.Db.First(modelPtr, "id = ?", modelID).Error; err != nil {
+	if err := r.Db.First(modelPtr, fmt.Sprintf("%s = ?", field)).Error; err != nil {
 		return err
 	}
 

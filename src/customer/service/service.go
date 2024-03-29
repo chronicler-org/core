@@ -33,7 +33,7 @@ func InitCustomerService(
 }
 
 func (service *CustomerService) FindByCPF(cpf string) (customerModel.Customer, error) {
-	result, err := service.customerRepository.FindOneBy("CPF", cpf, "Tags")
+	result, err := service.customerRepository.FindOneByField("CPF", cpf, "Tags")
 	customer, _ := result.(*customerModel.Customer)
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -117,7 +117,7 @@ func (service *CustomerService) Delete(cpf string) (customerModel.Customer, erro
 }
 
 func (service *CustomerService) updateCustomerTags(customer *customerModel.Customer, tagIDs []string) error {
-	err := service.customerRepository.ClearAssociations(customer.CPF, "Tags")
+	err := service.customerRepository.ClearAssociationsByField("CPF", customer.CPF, "Tags")
 	if err != nil {
 		return err
 	}
@@ -130,7 +130,7 @@ func (service *CustomerService) updateCustomerTags(customer *customerModel.Custo
 		tags = append(tags, &tag)
 	}
 
-	err = service.customerRepository.ReplaceAssociations(customer.CPF, tags, "Tags")
+	err = service.customerRepository.ReplaceAssociationsByField("CPF", customer.CPF, tags, "Tags")
 	if err != nil {
 		return err
 	}

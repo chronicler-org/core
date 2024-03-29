@@ -30,7 +30,7 @@ func InitManagerService(managerRepository *managerRepository.ManagerRepository, 
 }
 
 func (service *ManagerService) FindByID(id string) (managerModel.Manager, error) {
-	result, err := service.managerRepository.FindByID(id, "Team")
+	result, err := service.managerRepository.FindOneByField("ID", id, "Team")
 	manager, _ := result.(*managerModel.Manager)
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -109,7 +109,7 @@ func (service *ManagerService) Delete(id string) (managerModel.Manager, error) {
 		return managerModel.Manager{}, err
 	}
 
-	err = service.managerRepository.Delete("", id)
+	err = service.managerRepository.Delete("ID", id)
 	if err != nil {
 		return managerModel.Manager{}, err
 	}

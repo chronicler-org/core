@@ -27,7 +27,7 @@ func InitTeamService(r *teamRepository.TeamRepository) *TeamService {
 }
 
 func (service *TeamService) FindByID(id string) (teamModel.Team, error) {
-	result, err := service.teamRepository.FindByID(id)
+	result, err := service.teamRepository.FindOneByField("ID", id)
 	team, _ := result.(*teamModel.Team)
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -76,7 +76,7 @@ func (service *TeamService) Delete(id string) (teamModel.Team, error) {
 		return teamModel.Team{}, err
 	}
 
-	err = service.teamRepository.Delete("", id)
+	err = service.teamRepository.Delete("ID", id)
 	if err != nil {
 		return teamModel.Team{}, err
 	}

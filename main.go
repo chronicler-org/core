@@ -13,7 +13,7 @@ import (
 	attendantRouter "github.com/chronicler-org/core/src/attendant/router"
 	customerModel "github.com/chronicler-org/core/src/customer/model"
 	customerRouter "github.com/chronicler-org/core/src/customer/router"
-	customerServiceModel "github.com/chronicler-org/core/src/customerService/model"
+	customerCareModel "github.com/chronicler-org/core/src/customerCare/model"
 	managerModel "github.com/chronicler-org/core/src/manager/model"
 	managerRouter "github.com/chronicler-org/core/src/manager/router"
 	tagModel "github.com/chronicler-org/core/src/tag/model"
@@ -30,7 +30,7 @@ func main() {
 		log.Fatal(err)
 	}
 	// realiza migration das entidades no banco de dados
-	db.AutoMigrate(&managerModel.Manager{}, &customerModel.Customer{}, &tagModel.Tag{}, &attendantModel.Attendant{}, &teamModel.Team{}, &customerServiceModel.CustomerService{})
+	db.AutoMigrate(&managerModel.Manager{}, &customerModel.Customer{}, &tagModel.Tag{}, &attendantModel.Attendant{}, &teamModel.Team{}, &customerCareModel.CustomerCare{})
 
 	// inicializa app principal
 	app := fiber.New()

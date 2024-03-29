@@ -1,4 +1,4 @@
-package customerServiceModel
+package customerCareModel
 
 import (
 	"time"
@@ -9,7 +9,7 @@ import (
 	teamModel "github.com/chronicler-org/core/src/team/model"
 )
 
-type CustomerService struct {
+type CustomerCare struct {
 	ID          uuid.UUID              `gorm:"primarykey"  json:"id"`
 	Date        time.Time              `json:"date"`
 	CustomerCPF string                 `gorm:"column:customer_cpf;primaryKey;type:varchar(11);not null" json:"_"`

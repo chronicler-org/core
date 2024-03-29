@@ -1,10 +1,10 @@
-package customerServiceDTO
+package customerCareDTO
 
 import (
 	"time"
 )
 
-type CreateCustomerServiceDTO struct {
+type CreateCustomerCareDTO struct {
 	Date        time.Time `validate:"required" json:"date"`
 	CustomerCPF string    `validate:"required,number,len=11" json:"customer_cpf"`
 }

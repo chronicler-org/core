@@ -1,8 +1,10 @@
 package appRepository
 
 import (
+	"fmt"
 	"reflect"
 
+	appDto "github.com/chronicler-org/core/src/app/dto"
 	"gorm.io/gorm"
 )
 
@@ -39,17 +41,62 @@ func (r *BaseRepository) Update(data interface{}) error {
 	return r.Db.Save(data).Error
 }
 
-func (r *BaseRepository) FindAll(limit, page int, results interface{}, preloads ...string) (int64, error) {
+func (r *BaseRepository) FindAll(dto interface{}, results interface{}, preloads ...string) (int64, error) {
 	var count int64
-	offset := (page - 1) * limit
-	err := r.Db.Model(r.model).Count(&count).Error
+	var paginationDTO appDto.PaginationDTO
+
+	dtoValue := reflect.ValueOf(dto)
+	if dtoValue.Kind() == reflect.Ptr {
+		dtoValue = dtoValue.Elem()
+	}
+	dtoType := dtoValue.Type()
+
+	filters := make(map[string]interface{})
+
+	for i := 0; i < dtoType.NumField(); i++ {
+		fieldName := dtoType.Field(i).Name
+		fieldValue := dtoValue.Field(i)
+
+		switch fieldName {
+		case "PaginationDTO":
+			paginationDTOValue := fieldValue.Interface().(appDto.PaginationDTO)
+			paginationDTO.Limit = paginationDTOValue.Limit
+			paginationDTO.Page = paginationDTOValue.Page
+		case "Limit":
+			if fieldValue.IsValid() && fieldValue.Type().Kind() == reflect.Int {
+				paginationDTO.Limit = int(fieldValue.Int())
+			}
+		case "Page":
+			if fieldValue.IsValid() && fieldValue.Type().Kind() == reflect.Int {
+				paginationDTO.Page = int(fieldValue.Int())
+			}
+		default:
+			if fieldValue.Interface() != "" {
+				tag := dtoType.Field(i).Tag.Get("query")
+				if tag != "" {
+					filters[tag] = fieldValue.Interface()
+				}
+			}
+		}
+
+	}
+	query := r.Db.Model(r.model)
+	for key, value := range filters {
+		query = query.Where(fmt.Sprintf("%s = ?", key), value)
+	}
+
+	err := query.Where(filters).Count(&count).Error
 	if err != nil {
 		return 0, err
 	}
-	query := r.Db
+
 	for _, preload := range preloads {
 		query = query.Preload(preload)
 	}
+
+	page := paginationDTO.GetPage()
+	limit := paginationDTO.GetLimit()
+	offset := (page - 1) * limit
 	err = query.Limit(limit).Offset(offset).Find(results).Error
 	return count, err
 }

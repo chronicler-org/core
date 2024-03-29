@@ -64,7 +64,7 @@ func (service *TagService) Update(id string, dto tagDTO.UpdateTagDTO) (tagModel.
 
 func (service *TagService) FindAll(dto appDto.PaginationDTO) (int64, []tagModel.Tag, error) {
 	var tags []tagModel.Tag
-	totalCount, err := service.tagRepository.FindAll(dto.GetLimit(), dto.GetPage(), &tags)
+	totalCount, err := service.tagRepository.FindAll(dto, &tags)
 	if err != nil {
 		return 0, nil, err
 	}

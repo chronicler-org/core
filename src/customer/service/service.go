@@ -59,11 +59,11 @@ func (service *CustomerService) Create(dto customerDTO.CreateCustomerDTO) (custo
 	for _, tagID := range dto.TagIDs {
 		tag, err := service.tagService.FindByID(tagID)
 		if err != nil {
-			return  customerModel.Customer{}, err
+			return customerModel.Customer{}, err
 		}
 		tags = append(tags, &tag)
 	}
-	model.Tags = tags;
+	model.Tags = tags
 
 	err := service.customerRepository.Create(model)
 	if err != nil {
@@ -98,7 +98,7 @@ func (service *CustomerService) Update(id string, dto customerDTO.UpdateCustomer
 
 func (service *CustomerService) FindAll(dto appDto.PaginationDTO) (int64, []customerModel.Customer, error) {
 	var customers []customerModel.Customer
-	totalCount, err := service.customerRepository.FindAll(dto.GetLimit(), dto.GetPage(), &customers, "Tags")
+	totalCount, err := service.customerRepository.FindAll(dto, &customers, "Tags")
 	if err != nil {
 		return 0, nil, err
 	}

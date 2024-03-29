@@ -63,7 +63,7 @@ func (service *TeamService) Update(id string, dto teamDTO.UpdateTeamDTO) (teamMo
 
 func (service *TeamService) FindAll(dto appDto.PaginationDTO) (int64, []teamModel.Team, error) {
 	var teams []teamModel.Team
-	totalCount, err := service.teamRepository.FindAll(dto.GetLimit(), dto.GetPage(), &teams)
+	totalCount, err := service.teamRepository.FindAll(dto, &teams)
 	if err != nil {
 		return 0, nil, err
 	}

@@ -11,7 +11,7 @@ import (
 type Manager struct {
 	ID        uuid.UUID      `gorm:"primarykey"  json:"id"`
 	CPF       string         `gorm:"unique" json:"cpf"`
-	Name      string         `json:"name"`
+	Name      string         `gorm:"column:name" json:"name"`
 	Email     string         `gorm:"unique" json:"email"`
 	Password  string         `json:"-"`
 	TeamID    uuid.UUID      `gorm:"column:team_id;not null, uniqueIndex" json:"-"`

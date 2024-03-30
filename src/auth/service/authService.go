@@ -93,7 +93,6 @@ func (service *AuthService) generateAT(id string, userType string) (string, time
 		"sub":  id,
 		"role": userType,
 	}
-
 	authSecret := os.Getenv("AT_SECRET")
 	authTokenExpiresIn := os.Getenv("AT_EXPIRES_IN")
 

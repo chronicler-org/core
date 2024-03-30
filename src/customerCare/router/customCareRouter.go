@@ -24,8 +24,16 @@ func InitCustomerCareRouter(
 	customerCareService := customerCareService.InitCustomerCareService(customerCareRepository, customerCareEvaluationRepository, customerServ, teamServ)
 	customerCareController := customerCareController.InitCustomerCareController(customerCareService)
 
-	router.Get("/customer-care", middleware.Validate(nil, &customerCareDTO.QueryCustomerCareDTO{}), appUtil.Controller(customerCareController.HandleFindAllCustomerCares))
-	router.Get("/customer-care/:id", appUtil.Controller(customerCareController.HandleFindCustomerCareByID))
-	router.Post("/customer-care", middleware.Validate(&customerCareDTO.CreateCustomerCareDTO{}, nil), appUtil.Controller(customerCareController.HandleCreateCustomerCare))
-	router.Delete("/customer-care/:id", appUtil.Controller(customerCareController.HandleDeleteCustomerCare))
+	router.Group("/customer-care")
+	router.Get("/", middleware.Validate(nil, &customerCareDTO.QueryCustomerCareDTO{}), appUtil.Controller(customerCareController.HandleFindAllCustomerCares))
+	router.Get("/:id", appUtil.Controller(customerCareController.HandleFindCustomerCareByID))
+	router.Post("/", middleware.Validate(&customerCareDTO.CreateCustomerCareDTO{}, nil), appUtil.Controller(customerCareController.HandleCreateCustomerCare))
+	router.Delete("/:id", appUtil.Controller(customerCareController.HandleDeleteCustomerCare))
+
+	router.Get("/evaluation", middleware.Validate(nil, &customerCareDTO.QueryCustomerCareEvaluationDTO{}), appUtil.Controller(customerCareController.HandleFindAllCustomerCareEvaluations))
+
+	router.Get("/:id/evaluation", appUtil.Controller(customerCareController.HandleFindCustomerCareEvaluationByID))
+	router.Post("/:id/evaluation", middleware.Validate(&customerCareDTO.CreateCustomerCareEvaluationDTO{}, nil), appUtil.Controller(customerCareController.HandleCreateCustomerCareEvaluation))
+	router.Patch("/:id/evaluation", middleware.Validate(&customerCareDTO.UpdateCustomerCareeEvaluationDTO{}, nil), appUtil.Controller(customerCareController.HandleUpdateCustomerCareEvaluation))
+	router.Delete("/:id/evaluation", appUtil.Controller(customerCareController.HandleDeleteCustomerCareEvaluation))
 }

@@ -13,3 +13,9 @@ var CUSTOMER_CARE_EVALUATION_NOT_FOUND = appDto.CustomErrorDTO{
 	Title:  "Avaliação de atendimento não encontrada",
 	Detail: "O atendimento não possui avaliação.",
 }
+
+var CUSTOMER_CARE_ALREADY_EVALUATED = appDto.CustomErrorDTO{
+	Code:   "CUSTOMER_CARE_ALREADY_EVALUATED",
+	Title:  "Avaliação de atendimento já cadastrada",
+	Detail: "O atendimento de cliente já possui uma avaliação cadastrada.",
+}

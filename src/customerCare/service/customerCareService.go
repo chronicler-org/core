@@ -122,6 +122,11 @@ func (service *CustomerCareService) CreateCustomerCareEvaluation(
 		return customerCareModel.CustomerCareEvaluation{}, err
 	}
 
+	_, err = service.customerCareEvaluationRepository.FindOneByField("CustomerCareID", customerCareId)
+	if !errors.Is(err, gorm.ErrRecordNotFound) {
+		return customerCareModel.CustomerCareEvaluation{}, appException.ConflictException(customerCareExceptionMessage.CUSTOMER_CARE_ALREADY_EVALUATED)
+	}
+
 	customerExists, err := service.customerService.FindByCPF(customerCareExists.CustomerCPF)
 	if err != nil {
 		return customerCareModel.CustomerCareEvaluation{}, err

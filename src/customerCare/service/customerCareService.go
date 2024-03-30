@@ -101,3 +101,13 @@ func (service *CustomerCareService) DeleteCustomerCare(id string) (customerCareM
 	}
 	return customerCareExists, nil
 }
+
+func (service *CustomerCareService) FindServiceEvaluationByID(id string) (customerCareModel.ServiceEvaluation, error) {
+	result, err := service.customerCareRepository.FindOneByField("ID", id, "CustomerCare", "Customer")
+	serviceEvaluation, _ := result.(*customerCareModel.ServiceEvaluation)
+
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return *serviceEvaluation, appException.NotFoundException(customerCareExceptionMessage.SERVICE_EVALUATION_CARE_NOT_FOUND)
+	}
+	return *serviceEvaluation, nil
+}

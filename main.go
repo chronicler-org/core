@@ -11,6 +11,7 @@ import (
 
 	attendantModel "github.com/chronicler-org/core/src/attendant/model"
 	attendantRouter "github.com/chronicler-org/core/src/attendant/router"
+	authRouter "github.com/chronicler-org/core/src/auth/router"
 	customerModel "github.com/chronicler-org/core/src/customer/model"
 	customerRouter "github.com/chronicler-org/core/src/customer/router"
 	customerCareModel "github.com/chronicler-org/core/src/customerCare/model"
@@ -48,9 +49,11 @@ func main() {
 	tagService := tagRouter.InitTagRouter(app, db)
 	customerService := customerRouter.InitCustomerRouter(app, db, tagService)
 	teamService := teamRouter.InitTeamRouter(app, db)
-	managerRouter.InitManagerRouter(app, db, teamService)
-	attendantRouter.InitAttendantRouter(app, db, teamService)
+	managerService := managerRouter.InitManagerRouter(app, db, teamService)
+	attendantService := attendantRouter.InitAttendantRouter(app, db, teamService)
 	customerCareRouter.InitCustomerCareRouter(app, db, customerService, teamService)
+
+	authRouter.InitAuthRouter(app, managerService, attendantService)
 
 	app.Listen(":8080")
 }

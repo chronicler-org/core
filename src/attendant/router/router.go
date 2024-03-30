@@ -14,7 +14,7 @@ import (
 	teamService "github.com/chronicler-org/core/src/team/service"
 )
 
-func InitAttendantRouter(router *fiber.App, db *gorm.DB, teamServ *teamService.TeamService) {
+func InitAttendantRouter(router *fiber.App, db *gorm.DB, teamServ *teamService.TeamService) *attendantService.AttendantService {
 
 	attendantRepository := attendantRepository.InitAttendantRepository(db)
 	attendantService := attendantService.InitAttendantService(attendantRepository, teamServ)
@@ -25,4 +25,6 @@ func InitAttendantRouter(router *fiber.App, db *gorm.DB, teamServ *teamService.T
 	router.Post("/attendant", middleware.Validate(&attendantDTO.CreateAttendantDTO{}, nil), appUtil.Controller(attendantController.HandleCreateAttendant))
 	router.Patch("/attendant/:id", middleware.Validate(&attendantDTO.UpdateAttendantDTO{}, nil), appUtil.Controller(attendantController.HandleUpdateAttendant))
 	router.Delete("/attendant/:id", appUtil.Controller(attendantController.HandleDeleteAttendant))
+
+	return attendantService
 }

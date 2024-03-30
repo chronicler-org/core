@@ -11,6 +11,7 @@ import (
 
 	attendantModel "github.com/chronicler-org/core/src/attendant/model"
 	attendantRouter "github.com/chronicler-org/core/src/attendant/router"
+	authMiddleware "github.com/chronicler-org/core/src/auth/middleware"
 	authRouter "github.com/chronicler-org/core/src/auth/router"
 	customerModel "github.com/chronicler-org/core/src/customer/model"
 	customerRouter "github.com/chronicler-org/core/src/customer/router"
@@ -39,6 +40,7 @@ func main() {
 
 	// instancia logger que permite visualizacao das rotas acessadas e status codes retornados
 	app.Use(logger.New())
+	app.Use(authMiddleware.WithAuth())
 
 	// rota raiz
 	app.Get("/", func(c *fiber.Ctx) error {

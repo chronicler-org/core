@@ -14,17 +14,21 @@ import (
 	teamService "github.com/chronicler-org/core/src/team/service"
 )
 
-func InitAttendantRouter(router *fiber.App, db *gorm.DB, teamServ *teamService.TeamService) *attendantService.AttendantService {
+func InitAttendantModule(
+	db *gorm.DB,
+	teamServ *teamService.TeamService,
+) (*attendantController.AttendantController, *attendantService.AttendantService) {
+	attendantRepo := attendantRepository.InitAttendantRepository(db)
+	attendantServ := attendantService.InitAttendantService(attendantRepo, teamServ)
+	attendantCtrl := attendantController.InitAttendantController(attendantServ)
 
-	attendantRepository := attendantRepository.InitAttendantRepository(db)
-	attendantService := attendantService.InitAttendantService(attendantRepository, teamServ)
-	attendantController := attendantController.InitAttendantController(attendantService)
+	return attendantCtrl, attendantServ
+}
 
+func InitAttendantRouter(router *fiber.App, attendantController *attendantController.AttendantController) {
 	router.Get("/attendant", middleware.Validate(nil, &appDto.PaginationDTO{}), appUtil.Controller(attendantController.HandleFindAll))
 	router.Get("/attendant/:id", appUtil.Controller(attendantController.HandleFindByID))
 	router.Post("/attendant", middleware.Validate(&attendantDTO.CreateAttendantDTO{}, nil), appUtil.Controller(attendantController.HandleCreateAttendant))
 	router.Patch("/attendant/:id", middleware.Validate(&attendantDTO.UpdateAttendantDTO{}, nil), appUtil.Controller(attendantController.HandleUpdateAttendant))
 	router.Delete("/attendant/:id", appUtil.Controller(attendantController.HandleDeleteAttendant))
-
-	return attendantService
 }

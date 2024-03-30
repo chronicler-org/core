@@ -14,16 +14,23 @@ import (
 	teamService "github.com/chronicler-org/core/src/team/service"
 )
 
-func InitCustomerCareRouter(
-	router *fiber.App, db *gorm.DB,
+func InitCustomerCareModule(
+	db *gorm.DB,
 	customerServ *customerService.CustomerService,
 	teamServ *teamService.TeamService,
-) {
-	customerCareEvaluationRepository := customerCareRepository.InitCustomerCareEvaluationRepository(db)
-	customerCareRepository := customerCareRepository.InitCustomerCareRepository(db)
-	customerCareService := customerCareService.InitCustomerCareService(customerCareRepository, customerCareEvaluationRepository, customerServ, teamServ)
-	customerCareController := customerCareController.InitCustomerCareController(customerCareService)
+) (*customerCareController.CustomerCareController, *customerCareService.CustomerCareService) {
+	customerCareEvaluationRepo := customerCareRepository.InitCustomerCareEvaluationRepository(db)
+	customerCareRepo := customerCareRepository.InitCustomerCareRepository(db)
+	customerCareServ := customerCareService.InitCustomerCareService(customerCareRepo, customerCareEvaluationRepo, customerServ, teamServ)
+	customerCareCtrl := customerCareController.InitCustomerCareController(customerCareServ)
 
+	return customerCareCtrl, customerCareServ
+}
+
+func InitCustomerCareRouter(
+	router *fiber.App,
+	customerCareController *customerCareController.CustomerCareController,
+) {
 	router.Group("/customer-care")
 	router.Get("/", middleware.Validate(nil, &customerCareDTO.QueryCustomerCareDTO{}), appUtil.Controller(customerCareController.HandleFindAllCustomerCares))
 	router.Get("/:id", appUtil.Controller(customerCareController.HandleFindCustomerCareByID))

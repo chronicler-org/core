@@ -13,16 +13,20 @@ import (
 	tagService "github.com/chronicler-org/core/src/tag/service"
 )
 
-func InitTagRouter(router *fiber.App, db *gorm.DB) *tagService.TagService {
-	tagRepository := tagRepository.InitTagRepository(db)
-	tagService := tagService.InitTagService(tagRepository)
-	tagController := tagController.InitTagController(tagService)
+func InitTagModule(
+	db *gorm.DB,
+) (*tagController.TagController, *tagService.TagService) {
+	tagRepo := tagRepository.InitTagRepository(db)
+	tagServ := tagService.InitTagService(tagRepo)
+	tagCtrl := tagController.InitTagController(tagServ)
 
+	return tagCtrl, tagServ
+}
+
+func InitTagRouter(router *fiber.App, tagController *tagController.TagController) {
 	router.Get("/tag", middleware.Validate(nil, &appDto.PaginationDTO{}), appUtil.Controller(tagController.HandleFindAll))
 	router.Get("/tag/:id", appUtil.Controller(tagController.HandleFindByID))
 	router.Post("/tag", middleware.Validate(&tagDTO.CreateTagDTO{}, nil), appUtil.Controller(tagController.HandleCreateTag))
 	router.Patch("/tag/:id", middleware.Validate(&tagDTO.UpdateTagDTO{}, nil), appUtil.Controller(tagController.HandleUpdateTag))
 	router.Delete("/tag/:id", appUtil.Controller(tagController.HandleDeleteTag))
-
-	return tagService
 }

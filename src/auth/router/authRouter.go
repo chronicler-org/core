@@ -2,6 +2,7 @@ package authRouter
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"gorm.io/gorm"
 
 	"github.com/chronicler-org/core/src/app/middleware"
 	appUtil "github.com/chronicler-org/core/src/app/utils"
@@ -12,13 +13,20 @@ import (
 	managerService "github.com/chronicler-org/core/src/manager/service"
 )
 
-func InitAuthRouter(
-	router *fiber.App,
+func InitAuthModule(
+	db *gorm.DB,
 	managerServ *managerService.ManagerService,
 	attendantServ *attendantService.AttendantService,
-) {
-	authService := authService.InitAuthService(managerServ, attendantServ)
-	authController := authController.InitAuthrController(authService)
+) (*authController.AuthController, *authService.AuthService) {
+	authServ := authService.InitAuthService(managerServ, attendantServ)
+	authCtrl := authController.InitAuthrController(authServ)
 
+	return authCtrl, authServ
+}
+
+func InitAuthRouter(
+	router *fiber.App,
+	authController *authController.AuthController,
+) {
 	router.Post("/auth/login", middleware.Validate(&authDTO.AuthLoginDTO{}, nil), appUtil.Controller(authController.HandleLogin))
 }

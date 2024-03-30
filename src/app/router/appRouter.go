@@ -26,7 +26,7 @@ func InitAppRouter(app *fiber.App, db *gorm.DB) {
 
 	authRouter.InitAuthRouter(app, authRouterController)
 
-	app.Use(authMiddleware.WithAuth())
+	app.Use(authMiddleware.WithAuth(managerService, attendantService))
 	tagRouter.InitTagRouter(app, tagController)
 	teamRouter.InitTeamRouter(app, teamController)
 

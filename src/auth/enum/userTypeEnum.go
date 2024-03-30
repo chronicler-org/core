@@ -1,4 +1,4 @@
-package appEnum
+package authEnum
 
 const (
 	AttendantRole = "Attendant"

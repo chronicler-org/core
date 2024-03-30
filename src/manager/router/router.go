@@ -13,7 +13,7 @@ import (
 	teamService "github.com/chronicler-org/core/src/team/service"
 )
 
-func InitManagerRouter(router *fiber.App, db *gorm.DB, teamServ *teamService.TeamService) {
+func InitManagerRouter(router *fiber.App, db *gorm.DB, teamServ *teamService.TeamService) *managerService.ManagerService {
 
 	managerRepository := managerRepository.InitManagerRepository(db)
 	managerService := managerService.InitManagerService(managerRepository, teamServ)
@@ -24,4 +24,6 @@ func InitManagerRouter(router *fiber.App, db *gorm.DB, teamServ *teamService.Tea
 	router.Post("/manager", middleware.Validate(&managerDTO.CreateManagerDTO{}, nil), appUtil.Controller(managerController.HandleCreateManager))
 	router.Patch("/manager/:id", middleware.Validate(&managerDTO.UpdateManagerDTO{}, nil), appUtil.Controller(managerController.HandleUpdateManager))
 	router.Delete("/manager/:id", appUtil.Controller(managerController.HandleDeleteManager))
+
+	return managerService
 }

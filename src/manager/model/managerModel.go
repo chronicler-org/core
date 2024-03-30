@@ -20,3 +20,7 @@ type Manager struct {
 	CreatedAt time.Time      `json:"created_at"`
 	UpdatedAt time.Time      `json:"updated_at"`
 }
+
+func (m Manager) GetID() uuid.UUID {
+	return m.ID
+}

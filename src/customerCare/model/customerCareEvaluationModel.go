@@ -8,7 +8,7 @@ import (
 	customerModel "github.com/chronicler-org/core/src/customer/model"
 )
 
-type ServiceEvaluation struct {
+type CustomerCareEvaluation struct {
 	ID             uuid.UUID              `gorm:"primarykey"  json:"id"`
 	Score          uint8                  `gorm:"not null" json:"score"`
 	Description    string                 `gorm:"not null" json:"description"`

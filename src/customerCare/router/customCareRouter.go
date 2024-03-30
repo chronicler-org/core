@@ -19,9 +19,9 @@ func InitCustomerCareRouter(
 	customerServ *customerService.CustomerService,
 	teamServ *teamService.TeamService,
 ) {
-	serviceEvaluationRepository := customerCareRepository.InitServiceEvaluationRepository(db)
+	customerCareEvaluationRepository := customerCareRepository.InitCustomerCareEvaluationRepository(db)
 	customerCareRepository := customerCareRepository.InitCustomerCareRepository(db)
-	customerCareService := customerCareService.InitCustomerCareService(customerCareRepository, serviceEvaluationRepository, customerServ, teamServ)
+	customerCareService := customerCareService.InitCustomerCareService(customerCareRepository, customerCareEvaluationRepository, customerServ, teamServ)
 	customerCareController := customerCareController.InitCustomerCareController(customerCareService)
 
 	router.Get("/customer-care", middleware.Validate(nil, &customerCareDTO.QueryCustomerCareDTO{}), appUtil.Controller(customerCareController.HandleFindAllCustomerCares))

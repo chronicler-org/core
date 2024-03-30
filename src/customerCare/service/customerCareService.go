@@ -17,23 +17,23 @@ import (
 )
 
 type CustomerCareService struct {
-	customerCareRepository      *customerCareRepository.CustomerCareRepository
-	serviceEvaluationRepository *customerCareRepository.ServiceEvaluationRepository
-	customerService             *customerService.CustomerService
-	teamService                 *teamService.TeamService
+	customerCareRepository           *customerCareRepository.CustomerCareRepository
+	customerCareEvaluationRepository *customerCareRepository.CustomerCareEvaluationRepository
+	customerService                  *customerService.CustomerService
+	teamService                      *teamService.TeamService
 }
 
 func InitCustomerCareService(
 	customerCareRepository *customerCareRepository.CustomerCareRepository,
-	serviceEvaluationRepository *customerCareRepository.ServiceEvaluationRepository,
+	customerCareEvaluationRepository *customerCareRepository.CustomerCareEvaluationRepository,
 	customerService *customerService.CustomerService,
 	teamService *teamService.TeamService,
 ) *CustomerCareService {
 	return &CustomerCareService{
-		serviceEvaluationRepository: serviceEvaluationRepository,
-		customerCareRepository:      customerCareRepository,
-		customerService:             customerService,
-		teamService:                 teamService,
+		customerCareEvaluationRepository: customerCareEvaluationRepository,
+		customerCareRepository:           customerCareRepository,
+		customerService:                  customerService,
+		teamService:                      teamService,
 	}
 }
 
@@ -102,12 +102,12 @@ func (service *CustomerCareService) DeleteCustomerCare(id string) (customerCareM
 	return customerCareExists, nil
 }
 
-func (service *CustomerCareService) FindServiceEvaluationByID(id string) (customerCareModel.ServiceEvaluation, error) {
-	result, err := service.customerCareRepository.FindOneByField("ID", id, "CustomerCare", "Customer")
-	serviceEvaluation, _ := result.(*customerCareModel.ServiceEvaluation)
+func (service *CustomerCareService) FindCustomerCareEvaluationByID(customerCareId string) (customerCareModel.CustomerCareEvaluation, error) {
+	result, err := service.customerCareRepository.FindOneByField("CustomerCareID", customerCareId, "CustomerCare", "Customer")
+	customerCareEvaluation, _ := result.(*customerCareModel.CustomerCareEvaluation)
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return *serviceEvaluation, appException.NotFoundException(customerCareExceptionMessage.SERVICE_EVALUATION_CARE_NOT_FOUND)
+		return *customerCareEvaluation, appException.NotFoundException(customerCareExceptionMessage.CUSTOMER_CARE_EVALUATION_NOT_FOUND)
 	}
-	return *serviceEvaluation, nil
+	return *customerCareEvaluation, nil
 }

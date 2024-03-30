@@ -111,3 +111,37 @@ func (service *CustomerCareService) FindCustomerCareEvaluationByID(customerCareI
 	}
 	return *customerCareEvaluation, nil
 }
+
+func (service *CustomerCareService) CreateCustomerCareEvaluation(
+	customerCareId string,
+	dto customerCareDTO.CreateCustomerCareEvaluationDTO,
+) (customerCareModel.CustomerCareEvaluation, error) {
+
+	customerCareExists, err := service.FindCustomerCareByID(customerCareId)
+	if err != nil {
+		return customerCareModel.CustomerCareEvaluation{}, err
+	}
+
+	customerExists, err := service.customerService.FindByCPF(customerCareExists.CustomerCPF)
+	if err != nil {
+		return customerCareModel.CustomerCareEvaluation{}, err
+	}
+
+	model := customerCareModel.CustomerCareEvaluation{
+		Score:          dto.Score,
+		Description:    dto.Description,
+		CustomerCareID: customerCareExists.ID,
+		CustomerCPF:    customerCareExists.CustomerCPF,
+		CreatedAt:      time.Now(),
+		UpdatedAt:      time.Now(),
+	}
+
+	err = service.customerCareRepository.Create(model)
+	if err != nil {
+		return customerCareModel.CustomerCareEvaluation{}, err
+	}
+
+	model.CustomerCare = customerCareExists
+	model.Customer = customerExists
+	return model, err
+}

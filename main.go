@@ -9,20 +9,13 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 
+	appRouter "github.com/chronicler-org/core/src/app/router"
 	attendantModel "github.com/chronicler-org/core/src/attendant/model"
-	attendantRouter "github.com/chronicler-org/core/src/attendant/router"
-	authMiddleware "github.com/chronicler-org/core/src/auth/middleware"
-	authRouter "github.com/chronicler-org/core/src/auth/router"
 	customerModel "github.com/chronicler-org/core/src/customer/model"
-	customerRouter "github.com/chronicler-org/core/src/customer/router"
 	customerCareModel "github.com/chronicler-org/core/src/customerCare/model"
-	customerCareRouter "github.com/chronicler-org/core/src/customerCare/router"
 	managerModel "github.com/chronicler-org/core/src/manager/model"
-	managerRouter "github.com/chronicler-org/core/src/manager/router"
 	tagModel "github.com/chronicler-org/core/src/tag/model"
-	tagRouter "github.com/chronicler-org/core/src/tag/router"
 	teamModel "github.com/chronicler-org/core/src/team/model"
-	teamRouter "github.com/chronicler-org/core/src/team/router"
 )
 
 func main() {
@@ -40,22 +33,13 @@ func main() {
 
 	// instancia logger que permite visualizacao das rotas acessadas e status codes retornados
 	app.Use(logger.New())
-	app.Use(authMiddleware.WithAuth())
 
 	// rota raiz
 	app.Get("/", func(c *fiber.Ctx) error {
 		return c.SendString("Hello, World!")
 	})
 
-	// instancia as rotas para cada entidade
-	tagService := tagRouter.InitTagRouter(app, db)
-	customerService := customerRouter.InitCustomerRouter(app, db, tagService)
-	teamService := teamRouter.InitTeamRouter(app, db)
-	managerService := managerRouter.InitManagerRouter(app, db, teamService)
-	attendantService := attendantRouter.InitAttendantRouter(app, db, teamService)
-	customerCareRouter.InitCustomerCareRouter(app, db, customerService, teamService)
-
-	authRouter.InitAuthRouter(app, managerService, attendantService)
+	appRouter.InitAppRouter(app, db)
 
 	app.Listen(":8080")
 }

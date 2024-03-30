@@ -17,24 +17,27 @@ import (
 )
 
 type CustomerCareService struct {
-	customerCareRepository *customerCareRepository.CustomerCareRepository
-	customerService        *customerService.CustomerService
-	teamService            *teamService.TeamService
+	customerCareRepository      *customerCareRepository.CustomerCareRepository
+	serviceEvaluationRepository *customerCareRepository.ServiceEvaluationRepository
+	customerService             *customerService.CustomerService
+	teamService                 *teamService.TeamService
 }
 
 func InitCustomerCareService(
 	customerCareRepository *customerCareRepository.CustomerCareRepository,
+	serviceEvaluationRepository *customerCareRepository.ServiceEvaluationRepository,
 	customerService *customerService.CustomerService,
 	teamService *teamService.TeamService,
 ) *CustomerCareService {
 	return &CustomerCareService{
-		customerCareRepository: customerCareRepository,
-		customerService:        customerService,
-		teamService:            teamService,
+		serviceEvaluationRepository: serviceEvaluationRepository,
+		customerCareRepository:      customerCareRepository,
+		customerService:             customerService,
+		teamService:                 teamService,
 	}
 }
 
-func (service *CustomerCareService) FindByID(id string) (customerCareModel.CustomerCare, error) {
+func (service *CustomerCareService) FindCustomerCareByID(id string) (customerCareModel.CustomerCare, error) {
 	result, err := service.customerCareRepository.FindOneByField("ID", id, "Team", "Customer")
 	customerCare, _ := result.(*customerCareModel.CustomerCare)
 
@@ -44,7 +47,7 @@ func (service *CustomerCareService) FindByID(id string) (customerCareModel.Custo
 	return *customerCare, nil
 }
 
-func (service *CustomerCareService) Create(
+func (service *CustomerCareService) CreateCustomerCare(
 	dto customerCareDTO.CreateCustomerCareDTO,
 	attendant attendantModel.Attendant,
 ) (customerCareModel.CustomerCare, error) {
@@ -77,7 +80,7 @@ func (service *CustomerCareService) Create(
 	return model, err
 }
 
-func (service *CustomerCareService) FindAll(dto customerCareDTO.QueryCustomerCareDTO) (int64, []customerCareModel.CustomerCare, error) {
+func (service *CustomerCareService) FindAllCustomerCares(dto customerCareDTO.QueryCustomerCareDTO) (int64, []customerCareModel.CustomerCare, error) {
 	var customerCares []customerCareModel.CustomerCare
 	totalCount, err := service.customerCareRepository.FindAll(dto, &customerCares, "Team", "Customer")
 	if err != nil {
@@ -86,8 +89,8 @@ func (service *CustomerCareService) FindAll(dto customerCareDTO.QueryCustomerCar
 	return totalCount, customerCares, nil
 }
 
-func (service *CustomerCareService) Delete(id string) (customerCareModel.CustomerCare, error) {
-	customerCareExists, err := service.FindByID(id)
+func (service *CustomerCareService) DeleteCustomerCare(id string) (customerCareModel.CustomerCare, error) {
+	customerCareExists, err := service.FindCustomerCareByID(id)
 	if err != nil {
 		return customerCareModel.CustomerCare{}, err
 	}

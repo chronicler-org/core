@@ -19,18 +19,18 @@ func InitCustomerCareController(customerCareService *customerCareService.Custome
 	}
 }
 
-func (controller *CustomerCareController) HandleFindAll(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
+func (controller *CustomerCareController) HandleFindAllCustomerCares(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
 	var queryCustomerCareDTO customerCareDTO.QueryCustomerCareDTO
 	c.QueryParser(&queryCustomerCareDTO)
 
-	totalCount, customers, err := controller.customerCareService.FindAll(queryCustomerCareDTO)
+	totalCount, customers, err := controller.customerCareService.FindAllCustomerCares(queryCustomerCareDTO)
 	return appUtil.Paginate(customers, totalCount, queryCustomerCareDTO.GetPage(), queryCustomerCareDTO.GetLimit()), err
 }
 
-func (controller *CustomerCareController) HandleFindById(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
+func (controller *CustomerCareController) HandleFindCustomerCareByID(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
 	id := c.Params("id")
 
-	customerCare, err := controller.customerCareService.FindByID(id)
+	customerCare, err := controller.customerCareService.FindCustomerCareByID(id)
 	return appUtil.PaginateSingle(customerCare), err
 }
 
@@ -40,13 +40,13 @@ func (controller *CustomerCareController) HandleCreateCustomerCare(c *fiber.Ctx)
 
 	c.BodyParser(&createCustomerCareDTO)
 
-	customerCareCreated, err := controller.customerCareService.Create(createCustomerCareDTO, loggedAttendant)
+	customerCareCreated, err := controller.customerCareService.CreateCustomerCare(createCustomerCareDTO, loggedAttendant)
 	return appUtil.PaginateSingle(customerCareCreated), err
 }
 
-func (controller *CustomerCareController) HandleDeleteCustomer(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
+func (controller *CustomerCareController) HandleDeleteCustomerCare(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
 	id := c.Params("id")
 
-	customerCareDeleted, err := controller.customerCareService.Delete(id)
+	customerCareDeleted, err := controller.customerCareService.DeleteCustomerCare(id)
 	return appUtil.PaginateSingle(customerCareDeleted), err
 }

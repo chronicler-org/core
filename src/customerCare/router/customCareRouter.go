@@ -19,12 +19,13 @@ func InitCustomerCareRouter(
 	customerServ *customerService.CustomerService,
 	teamServ *teamService.TeamService,
 ) {
+	serviceEvaluationRepository := customerCareRepository.InitServiceEvaluationRepository(db)
 	customerCareRepository := customerCareRepository.InitCustomerCareRepository(db)
-	customerCareService := customerCareService.InitCustomerCareService(customerCareRepository, customerServ, teamServ)
+	customerCareService := customerCareService.InitCustomerCareService(customerCareRepository, serviceEvaluationRepository, customerServ, teamServ)
 	customerCareController := customerCareController.InitCustomerCareController(customerCareService)
 
-	router.Get("/customer-care", middleware.Validate(nil, &customerCareDTO.QueryCustomerCareDTO{}), appUtil.Controller(customerCareController.HandleFindAll))
-	router.Get("/customer-care/:id", appUtil.Controller(customerCareController.HandleFindById))
+	router.Get("/customer-care", middleware.Validate(nil, &customerCareDTO.QueryCustomerCareDTO{}), appUtil.Controller(customerCareController.HandleFindAllCustomerCares))
+	router.Get("/customer-care/:id", appUtil.Controller(customerCareController.HandleFindCustomerCareByID))
 	router.Post("/customer-care", middleware.Validate(&customerCareDTO.CreateCustomerCareDTO{}, nil), appUtil.Controller(customerCareController.HandleCreateCustomerCare))
-	router.Delete("/customer-care/:id", appUtil.Controller(customerCareController.HandleDeleteCustomer))
+	router.Delete("/customer-care/:id", appUtil.Controller(customerCareController.HandleDeleteCustomerCare))
 }

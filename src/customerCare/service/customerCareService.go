@@ -7,6 +7,7 @@ import (
 	"gorm.io/gorm"
 
 	appException "github.com/chronicler-org/core/src/app/exceptions"
+	appUtil "github.com/chronicler-org/core/src/app/utils"
 	attendantModel "github.com/chronicler-org/core/src/attendant/model"
 	customerService "github.com/chronicler-org/core/src/customer/service"
 	customerCareDTO "github.com/chronicler-org/core/src/customerCare/dto"
@@ -149,4 +150,48 @@ func (service *CustomerCareService) CreateCustomerCareEvaluation(
 	model.CustomerCare = customerCareExists
 	model.Customer = customerExists
 	return model, err
+}
+
+func (service *CustomerCareService) UpdateCustomerCareEvaluation(
+	customerCareId string, dto customerCareDTO.UpdateCustomerCareeEvaluationDTO,
+) (customerCareModel.CustomerCareEvaluation, error) {
+	customerCareEvaluationExists, err := service.FindCustomerCareEvaluationByID(customerCareId)
+	if err != nil {
+		return customerCareModel.CustomerCareEvaluation{}, err
+	}
+
+	appUtil.UpdateModelFromDTO(&customerCareEvaluationExists, &dto)
+
+	customerCareEvaluationExists.UpdatedAt = time.Now()
+	err = service.customerCareEvaluationRepository.Update(customerCareEvaluationExists)
+	if err != nil {
+		return customerCareModel.CustomerCareEvaluation{}, err
+	}
+
+	return customerCareEvaluationExists, err
+}
+
+func (service *CustomerCareService) FindAllCustomerCareEvaluations(
+	dto customerCareDTO.QueryCustomerCareEvaluationDTO,
+) (int64, []customerCareModel.CustomerCareEvaluation, error) {
+
+	var customerCareEvaluations []customerCareModel.CustomerCareEvaluation
+	totalCount, err := service.customerCareEvaluationRepository.FindAll(dto, &customerCareEvaluations, "CustomerCare", "Customer")
+	if err != nil {
+		return 0, nil, err
+	}
+	return totalCount, customerCareEvaluations, nil
+}
+
+func (service *CustomerCareService) DeleteCustomerCareEvaluation(customerCareId string) (customerCareModel.CustomerCareEvaluation, error) {
+	customerCareEvaluationExists, err := service.FindCustomerCareEvaluationByID(customerCareId)
+	if err != nil {
+		return customerCareModel.CustomerCareEvaluation{}, err
+	}
+
+	err = service.customerCareRepository.Delete("CustomerCareID", customerCareId)
+	if err != nil {
+		return customerCareModel.CustomerCareEvaluation{}, err
+	}
+	return customerCareEvaluationExists, nil
 }

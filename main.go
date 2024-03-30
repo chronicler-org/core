@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 
+	addressRouter "github.com/chronicler-org/core/src/address/router"
 	attendantModel "github.com/chronicler-org/core/src/attendant/model"
 	attendantRouter "github.com/chronicler-org/core/src/attendant/router"
 	customerModel "github.com/chronicler-org/core/src/customer/model"
@@ -44,6 +45,7 @@ func main() {
 	customerRouter.InitCustomerRouter(app, db)
 	tagRouter.InitTagRouter(app, db)
 	attendantRouter.InitAttendantRouter(app, db)
+	addressRouter.InitAddressRouter(app, db)
 
 	app.Listen(":8080")
 }

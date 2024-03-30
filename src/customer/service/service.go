@@ -14,20 +14,27 @@ import (
 	customerExceptionMessage "github.com/chronicler-org/core/src/customer/messages"
 	customerModel "github.com/chronicler-org/core/src/customer/model"
 	customerRepository "github.com/chronicler-org/core/src/customer/repository"
+	tagModel "github.com/chronicler-org/core/src/tag/model"
+	tagService "github.com/chronicler-org/core/src/tag/service"
 )
 
 type CustomerService struct {
-	repository *customerRepository.CustomerRepository
+	customerRepository *customerRepository.CustomerRepository
+	tagService         *tagService.TagService
 }
 
-func InitCustomerService(r *customerRepository.CustomerRepository) *CustomerService {
+func InitCustomerService(
+	customerRepository *customerRepository.CustomerRepository,
+	tagService *tagService.TagService,
+) *CustomerService {
 	return &CustomerService{
-		repository: r,
+		customerRepository: customerRepository,
+		tagService:         tagService,
 	}
 }
 
 func (service *CustomerService) FindByID(id string) (customerModel.Customer, error) {
-	result, err := service.repository.FindByID(id)
+	result, err := service.customerRepository.FindByID(id, "Tags")
 	customer, _ := result.(*customerModel.Customer)
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -48,8 +55,15 @@ func (service *CustomerService) Create(dto customerDTO.CreateCustomerDTO) (custo
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}
+	err := service.customerRepository.Create(model)
+	if err != nil {
+		return customerModel.Customer{}, err
+	}
 
-	err := service.repository.Create(model)
+	err = service.updateCustomerTags(&model, dto.TagIDs)
+	if err != nil {
+		return customerModel.Customer{}, err
+	}
 
 	return model, err
 }
@@ -59,17 +73,27 @@ func (service *CustomerService) Update(id string, dto customerDTO.UpdateCustomer
 	if err != nil {
 		return customerModel.Customer{}, err
 	}
+	appUtil.UpdateModelFromDTO(&customerExists, &dto)
 
-	appUtil.UpdateModelFromDTO(&customerExists, dto)
+	err = service.updateCustomerTags(&customerExists, dto.TagIDs)
+	if err != nil {
+		return customerModel.Customer{}, err
+	}
 
 	customerExists.UpdatedAt = time.Now()
-	err = service.repository.Update(customerExists)
-	return customerExists, err
+	err = service.customerRepository.Update(customerExists)
+	if err != nil {
+		return customerModel.Customer{}, err
+	}
+
+	customerUpdated, err := service.FindByID(id)
+
+	return customerUpdated, err
 }
 
 func (service *CustomerService) FindAll(dto appDto.PaginationDTO) (int64, []customerModel.Customer, error) {
 	var customers []customerModel.Customer
-	totalCount, err := service.repository.FindAll(dto.GetLimit(), dto.GetPage(), &customers)
+	totalCount, err := service.customerRepository.FindAll(dto.GetLimit(), dto.GetPage(), &customers, "Tags")
 	if err != nil {
 		return 0, nil, err
 	}
@@ -82,9 +106,32 @@ func (service *CustomerService) Delete(id string) (customerModel.Customer, error
 		return customerModel.Customer{}, err
 	}
 
-	err = service.repository.Delete(id)
+	err = service.customerRepository.Delete(id)
 	if err != nil {
 		return customerModel.Customer{}, err
 	}
 	return customerExists, nil
+}
+
+func (service *CustomerService) updateCustomerTags(customer *customerModel.Customer, tagIDs []string) error {
+	err := service.customerRepository.ClearAssociations(customer.ID.String(), "Tags")
+	if err != nil {
+		return err
+	}
+	var tags []*tagModel.Tag
+	for _, tagID := range tagIDs {
+		tag, err := service.tagService.FindByID(tagID)
+		if err != nil {
+			return err
+		}
+		tags = append(tags, &tag)
+	}
+
+	err = service.customerRepository.ReplaceAssociations(customer.ID.String(), tags, "Tags")
+	if err != nil {
+		return err
+	}
+	customer.Tags = tags
+
+	return nil
 }

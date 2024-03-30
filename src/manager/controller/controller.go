@@ -10,19 +10,19 @@ import (
 )
 
 type ManagerController struct {
-	service *managerService.ManagerService
+	managerService *managerService.ManagerService
 }
 
 func InitManagerController(s *managerService.ManagerService) *ManagerController {
 	return &ManagerController{
-		service: s,
+		managerService: s,
 	}
 }
 func (controller *ManagerController) HandleFindAll(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
 	var paginationDTO appDto.PaginationDTO
 	c.QueryParser(&paginationDTO)
 
-	totalCount, managers, err := controller.service.FindAll(paginationDTO)
+	totalCount, managers, err := controller.managerService.FindAll(paginationDTO)
 
 	return appUtil.Paginate(managers, totalCount, paginationDTO.GetPage(), paginationDTO.GetLimit()), err
 }
@@ -30,7 +30,7 @@ func (controller *ManagerController) HandleFindAll(c *fiber.Ctx) (appUtil.Pagina
 func (controller *ManagerController) HandleFindByID(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
 	id := c.Params("id")
 
-	manager, err := controller.service.FindByID(id)
+	manager, err := controller.managerService.FindByID(id)
 	return appUtil.PaginateSingle(manager), err
 }
 
@@ -39,7 +39,7 @@ func (controller *ManagerController) HandleCreateManager(c *fiber.Ctx) (appUtil.
 
 	c.BodyParser(&createManagerDTO)
 
-	managerCreated, err := controller.service.Create(createManagerDTO)
+	managerCreated, err := controller.managerService.Create(createManagerDTO)
 
 	return appUtil.PaginateSingle(managerCreated), err
 }
@@ -50,7 +50,7 @@ func (controller *ManagerController) HandleUpdateManager(c *fiber.Ctx) (appUtil.
 
 	id := c.Params("id")
 
-	managerUpdated, err := controller.service.Update(id, updateManagerDTO)
+	managerUpdated, err := controller.managerService.Update(id, updateManagerDTO)
 
 	return appUtil.PaginateSingle(managerUpdated), err
 }
@@ -58,6 +58,6 @@ func (controller *ManagerController) HandleUpdateManager(c *fiber.Ctx) (appUtil.
 func (controller *ManagerController) HandleDeleteManager(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
 	id := c.Params("id")
 
-	managerDeleted, err := controller.service.Delete(id)
+	managerDeleted, err := controller.managerService.Delete(id)
 	return appUtil.PaginateSingle(managerDeleted), err
 }

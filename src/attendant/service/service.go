@@ -18,17 +18,17 @@ import (
 )
 
 type AttendantService struct {
-	repository *attendantRepository.AttendantRepository
+	attendantRepository *attendantRepository.AttendantRepository
 }
 
 func InitAttendantService(r *attendantRepository.AttendantRepository) *AttendantService {
 	return &AttendantService{
-		repository: r,
+		attendantRepository: r,
 	}
 }
 
 func (service *AttendantService) FindByID(id string) (attendantModel.Attendant, error) {
-	result, err := service.repository.FindByID(id)
+	result, err := service.attendantRepository.FindByID(id)
 	manager, _ := result.(*attendantModel.Attendant)
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -55,7 +55,7 @@ func (service *AttendantService) Create(dto attendantDTO.CreateAttendantDTO) (at
 		UpdatedAt: time.Now(),
 	}
 
-	err = service.repository.Create(model)
+	err = service.attendantRepository.Create(model)
 
 	return model, err
 }
@@ -75,13 +75,13 @@ func (service *AttendantService) Update(id string, dto attendantDTO.UpdateAttend
 	}
 
 	attendantExists.UpdatedAt = time.Now()
-	err = service.repository.Update(attendantExists)
+	err = service.attendantRepository.Update(attendantExists)
 	return attendantExists, err
 }
 
 func (service *AttendantService) FindAll(dto appDto.PaginationDTO) (int64, []attendantModel.Attendant, error) {
 	var attendants []attendantModel.Attendant
-	totalCount, err := service.repository.FindAll(dto.GetLimit(), dto.GetPage(), &attendants)
+	totalCount, err := service.attendantRepository.FindAll(dto.GetLimit(), dto.GetPage(), &attendants)
 	if err != nil {
 		return 0, nil, err
 	}
@@ -94,7 +94,7 @@ func (service *AttendantService) Delete(id string) (attendantModel.Attendant, er
 		return attendantModel.Attendant{}, err
 	}
 
-	err = service.repository.Delete(id)
+	err = service.attendantRepository.Delete(id)
 	if err != nil {
 		return attendantModel.Attendant{}, err
 	}

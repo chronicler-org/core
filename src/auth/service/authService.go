@@ -61,13 +61,13 @@ func (service *AuthService) validateUserByEmail(dto authDTO.AuthLoginDTO) (authI
 		hashedPassword = manager.Password
 		userType = appEnum.ManagerRole
 		user = manager
-	}
-
-	attendant, err := service.attendantService.FindAttendantByEmail(email)
-	if err == nil {
-		hashedPassword = attendant.Password
-		userType = appEnum.AttendantRole
-		user = attendant
+	} else {
+		attendant, err := service.attendantService.FindAttendantByEmail(email)
+		if err == nil {
+			hashedPassword = attendant.Password
+			userType = appEnum.AttendantRole
+			user = attendant
+		}
 	}
 
 	matchPass, err := service.validatePassword(dto.Password, hashedPassword)

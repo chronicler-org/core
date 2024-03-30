@@ -35,13 +35,23 @@ func InitAttendantService(
 
 func (service *AttendantService) FindByID(id string) (attendantModel.Attendant, error) {
 	result, err := service.attendantRepository.FindOneByField("ID", id, "Team")
-	manager, _ := result.(*attendantModel.Attendant)
+	attendant, _ := result.(*attendantModel.Attendant)
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return *manager, appException.NotFoundException(attendantExceptionMessage.ATTENDANT_NOT_FOUND)
+		return *attendant, appException.NotFoundException(attendantExceptionMessage.ATTENDANT_NOT_FOUND)
 	}
 
-	return *manager, err
+	return *attendant, err
+}
+
+func (service *AttendantService) FindAttendantByEmail(email string) (attendantModel.Attendant, error) {
+	result, err := service.attendantRepository.FindOneByField("Email", email, "Team")
+	attendant, _ := result.(*attendantModel.Attendant)
+
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return *attendant, appException.NotFoundException(attendantExceptionMessage.ATTENDANT_NOT_FOUND)
+	}
+	return *attendant, nil
 }
 
 func (service *AttendantService) Create(dto attendantDTO.CreateAttendantDTO) (attendantModel.Attendant, error) {

@@ -39,6 +39,16 @@ func (service *ManagerService) FindByID(id string) (managerModel.Manager, error)
 	return *manager, nil
 }
 
+func (service *ManagerService) FindManagerByEmail(email string) (managerModel.Manager, error) {
+	result, err := service.managerRepository.FindOneByField("Email", email, "Team")
+	manager, _ := result.(*managerModel.Manager)
+
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return *manager, appException.NotFoundException(managerExceptionMessage.MANAGER_NOT_FOUND)
+	}
+	return *manager, nil
+}
+
 func (service *ManagerService) Create(dto managerDTO.CreateManagerDTO) (managerModel.Manager, error) {
 	newPassword, err := bcrypt.GenerateFromPassword([]byte(dto.Password), 10)
 	if err != nil {

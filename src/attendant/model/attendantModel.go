@@ -20,3 +20,7 @@ type Attendant struct {
 	CreatedAt time.Time      `json:"created_at"`
 	UpdatedAt time.Time      `json:"updated_at"`
 }
+
+func (a Attendant) GetID() uuid.UUID {
+	return a.ID
+}

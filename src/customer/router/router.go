@@ -14,14 +14,16 @@ import (
 	tagService "github.com/chronicler-org/core/src/tag/service"
 )
 
-func InitCustomerRouter(router *fiber.App, db *gorm.DB, tagServ *tagService.TagService) {
+func InitCustomerRouter(router *fiber.App, db *gorm.DB, tagServ *tagService.TagService) *customerService.CustomerService {
 	customerRepository := customerRepository.InitCustomerRepository(db)
 	customerService := customerService.InitCustomerService(customerRepository, tagServ)
 	customerController := customerController.InitCustomerController(customerService)
 
 	router.Get("/customer", middleware.Validate(nil, &appDto.PaginationDTO{}), appUtil.Controller(customerController.HandleFindAll))
-	router.Get("/customer/:id", appUtil.Controller(customerController.HandleFindByID))
+	router.Get("/customer/:cpf", appUtil.Controller(customerController.HandleFindByCPF))
 	router.Post("/customer", middleware.Validate(&customerDTO.CreateCustomerDTO{}, nil), appUtil.Controller(customerController.HandleCreateCustomer))
-	router.Patch("/customer/:id", middleware.Validate(&customerDTO.UpdateCustomerDTO{}, nil), appUtil.Controller(customerController.HandleUpdateCustomer))
-	router.Delete("/customer/:id", appUtil.Controller(customerController.HandleDeleteCustomer))
+	router.Patch("/customer/:cpf", middleware.Validate(&customerDTO.UpdateCustomerDTO{}, nil), appUtil.Controller(customerController.HandleUpdateCustomer))
+	router.Delete("/customer/:cpf", appUtil.Controller(customerController.HandleDeleteCustomer))
+
+	return customerService
 }

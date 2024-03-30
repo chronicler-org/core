@@ -15,31 +15,52 @@ import (
 	attendantExceptionMessage "github.com/chronicler-org/core/src/attendant/messages"
 	attendantModel "github.com/chronicler-org/core/src/attendant/model"
 	attendantRepository "github.com/chronicler-org/core/src/attendant/repository"
+	teamService "github.com/chronicler-org/core/src/team/service"
 )
 
 type AttendantService struct {
 	attendantRepository *attendantRepository.AttendantRepository
+	teamService         *teamService.TeamService
 }
 
-func InitAttendantService(r *attendantRepository.AttendantRepository) *AttendantService {
+func InitAttendantService(
+	attendantRepository *attendantRepository.AttendantRepository,
+	teamService *teamService.TeamService,
+) *AttendantService {
 	return &AttendantService{
-		attendantRepository: r,
+		attendantRepository: attendantRepository,
+		teamService:         teamService,
 	}
 }
 
 func (service *AttendantService) FindByID(id string) (attendantModel.Attendant, error) {
-	result, err := service.attendantRepository.FindByID(id)
-	manager, _ := result.(*attendantModel.Attendant)
+	result, err := service.attendantRepository.FindOneByField("ID", id, "Team")
+	attendant, _ := result.(*attendantModel.Attendant)
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return *manager, appException.NotFoundException(attendantExceptionMessage.ATTENDANT_NOT_FOUND)
+		return *attendant, appException.NotFoundException(attendantExceptionMessage.ATTENDANT_NOT_FOUND)
 	}
 
-	return *manager, err
+	return *attendant, err
+}
+
+func (service *AttendantService) FindAttendantByEmail(email string) (attendantModel.Attendant, error) {
+	result, err := service.attendantRepository.FindOneByField("Email", email, "Team")
+	attendant, _ := result.(*attendantModel.Attendant)
+
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return *attendant, appException.NotFoundException(attendantExceptionMessage.ATTENDANT_NOT_FOUND)
+	}
+	return *attendant, nil
 }
 
 func (service *AttendantService) Create(dto attendantDTO.CreateAttendantDTO) (attendantModel.Attendant, error) {
 	newPassword, err := bcrypt.GenerateFromPassword([]byte(dto.Password), 10)
+	if err != nil {
+		return attendantModel.Attendant{}, err
+	}
+
+	team, err := service.teamService.FindByID(dto.TeamId)
 	if err != nil {
 		return attendantModel.Attendant{}, err
 	}
@@ -50,13 +71,14 @@ func (service *AttendantService) Create(dto attendantDTO.CreateAttendantDTO) (at
 		CPF:       dto.CPF,
 		Email:     dto.Email,
 		Password:  string(newPassword),
+		TeamID:    team.ID,
 		BirthDate: dto.BirthDate,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}
 
 	err = service.attendantRepository.Create(model)
-
+	model.Team = team
 	return model, err
 }
 
@@ -73,6 +95,13 @@ func (service *AttendantService) Update(id string, dto attendantDTO.UpdateAttend
 			attendantExists.Password = string(newPassword)
 		}
 	}
+	if dto.TeamId != "" {
+		team, err := service.teamService.FindByID(dto.TeamId)
+		if err != nil {
+			return attendantModel.Attendant{}, err
+		}
+		attendantExists.TeamID = team.ID
+	}
 
 	attendantExists.UpdatedAt = time.Now()
 	err = service.attendantRepository.Update(attendantExists)
@@ -81,7 +110,7 @@ func (service *AttendantService) Update(id string, dto attendantDTO.UpdateAttend
 
 func (service *AttendantService) FindAll(dto appDto.PaginationDTO) (int64, []attendantModel.Attendant, error) {
 	var attendants []attendantModel.Attendant
-	totalCount, err := service.attendantRepository.FindAll(dto.GetLimit(), dto.GetPage(), &attendants)
+	totalCount, err := service.attendantRepository.FindAll(dto, &attendants, "Team")
 	if err != nil {
 		return 0, nil, err
 	}
@@ -94,7 +123,7 @@ func (service *AttendantService) Delete(id string) (attendantModel.Attendant, er
 		return attendantModel.Attendant{}, err
 	}
 
-	err = service.attendantRepository.Delete(id)
+	err = service.attendantRepository.Delete("ID", id)
 	if err != nil {
 		return attendantModel.Attendant{}, err
 	}

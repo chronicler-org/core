@@ -4,19 +4,25 @@ import (
 	"log"
 	"os"
 
-	addressRouter "github.com/chronicler-org/core/src/address/router"
-	attendantModel "github.com/chronicler-org/core/src/attendant/model"
-	attendantRouter "github.com/chronicler-org/core/src/attendant/router"
-	customerModel "github.com/chronicler-org/core/src/customer/model"
-	customerRouter "github.com/chronicler-org/core/src/customer/router"
-	managerModel "github.com/chronicler-org/core/src/manager/model"
-	managerRouter "github.com/chronicler-org/core/src/manager/router"
-	tagModel "github.com/chronicler-org/core/src/tag/model"
-	tagRouter "github.com/chronicler-org/core/src/tag/router"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+
+	addressRouter "github.com/chronicler-org/core/src/address/router"
+	attendantModel "github.com/chronicler-org/core/src/attendant/model"
+	attendantRouter "github.com/chronicler-org/core/src/attendant/router"
+	authRouter "github.com/chronicler-org/core/src/auth/router"
+	customerModel "github.com/chronicler-org/core/src/customer/model"
+	customerRouter "github.com/chronicler-org/core/src/customer/router"
+	customerCareModel "github.com/chronicler-org/core/src/customerCare/model"
+	customerCareRouter "github.com/chronicler-org/core/src/customerCare/router"
+	managerModel "github.com/chronicler-org/core/src/manager/model"
+	managerRouter "github.com/chronicler-org/core/src/manager/router"
+	tagModel "github.com/chronicler-org/core/src/tag/model"
+	tagRouter "github.com/chronicler-org/core/src/tag/router"
+	teamModel "github.com/chronicler-org/core/src/team/model"
+	teamRouter "github.com/chronicler-org/core/src/team/router"
 )
 
 func main() {
@@ -27,7 +33,7 @@ func main() {
 		log.Fatal(err)
 	}
 	// realiza migration das entidades no banco de dados
-	db.AutoMigrate(&managerModel.Manager{}, &customerModel.Customer{}, &tagModel.Tag{}, &attendantModel.Attendant{})
+	db.AutoMigrate(&managerModel.Manager{}, &customerModel.Customer{}, &tagModel.Tag{}, &attendantModel.Attendant{}, &teamModel.Team{}, &customerCareModel.CustomerCare{}, &customerCareModel.CustomerCareEvaluation{})
 
 	// inicializa app principal
 	app := fiber.New()
@@ -42,11 +48,16 @@ func main() {
 
 	// instancia as rotas para cada entidade
 	tagService := tagRouter.InitTagRouter(app, db)
+	customerService := customerRouter.InitCustomerRouter(app, db, tagService)
+	teamService := teamRouter.InitTeamRouter(app, db)
+	managerService := managerRouter.InitManagerRouter(app, db, teamService)
+	attendantService := attendantRouter.InitAttendantRouter(app, db, teamService)
+	customerCareRouter.InitCustomerCareRouter(app, db, customerService, teamService)
 
 	managerRouter.InitManagerRouter(app, db)
 	customerRouter.InitCustomerRouter(app, db, tagService)
-	attendantRouter.InitAttendantRouter(app, db)
-	addressRouter.InitAddressRouter(app, db)
+	attendantRouter.InitAttendantRouter(app, db
+	addressRouter.Ini
 
 	app.Listen(":8080")
 }

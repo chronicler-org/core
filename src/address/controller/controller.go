@@ -5,8 +5,8 @@ import (
 
 	appUtil "github.com/chronicler-org/core/src/app/utils"
 
-	addressDTO "github.com/chronicler-org/core/src/address/dto"
-	addressService "github.com/chronicler-org/core/src/address/service"
+	addressService "github.com/chronicler-org/core/src/address/"
+	addressDTO "github.com/chronicler-org/core/src/address/dto/service"
 )
 
 type AddressController struct {

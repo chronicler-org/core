@@ -8,27 +8,39 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 
-	appDto "github.com/chronicler-org/core/src/app/dto"
 	appException "github.com/chronicler-org/core/src/app/exceptions"
 	appUtil "github.com/chronicler-org/core/src/app/utils"
 	managerDTO "github.com/chronicler-org/core/src/manager/dto"
 	managerExceptionMessage "github.com/chronicler-org/core/src/manager/messages"
 	managerModel "github.com/chronicler-org/core/src/manager/model"
 	managerRepository "github.com/chronicler-org/core/src/manager/repository"
+	teamService "github.com/chronicler-org/core/src/team/service"
 )
 
 type ManagerService struct {
 	managerRepository *managerRepository.ManagerRepository
+	teamService       *teamService.TeamService
 }
 
-func InitManagerService(r *managerRepository.ManagerRepository) *ManagerService {
+func InitManagerService(managerRepository *managerRepository.ManagerRepository, teamService *teamService.TeamService) *ManagerService {
 	return &ManagerService{
-		managerRepository: r,
+		managerRepository: managerRepository,
+		teamService:       teamService,
 	}
 }
 
 func (service *ManagerService) FindByID(id string) (managerModel.Manager, error) {
-	result, err := service.managerRepository.FindByID(id)
+	result, err := service.managerRepository.FindOneByField("ID", id, "Team")
+	manager, _ := result.(*managerModel.Manager)
+
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return *manager, appException.NotFoundException(managerExceptionMessage.MANAGER_NOT_FOUND)
+	}
+	return *manager, nil
+}
+
+func (service *ManagerService) FindManagerByEmail(email string) (managerModel.Manager, error) {
+	result, err := service.managerRepository.FindOneByField("Email", email, "Team")
 	manager, _ := result.(*managerModel.Manager)
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -43,19 +55,25 @@ func (service *ManagerService) Create(dto managerDTO.CreateManagerDTO) (managerM
 		return managerModel.Manager{}, err
 	}
 
+	team, err := service.teamService.FindByID(dto.TeamId)
+	if err != nil {
+		return managerModel.Manager{}, err
+	}
+
 	model := managerModel.Manager{
 		ID:        uuid.New(),
 		Name:      dto.Name,
 		CPF:       dto.CPF,
 		Email:     dto.Email,
 		Password:  string(newPassword),
+		TeamID:    team.ID,
 		BirthDate: dto.BirthDate,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}
 
 	err = service.managerRepository.Create(model)
-
+	model.Team = team
 	return model, err
 }
 
@@ -73,14 +91,22 @@ func (service *ManagerService) Update(id string, dto managerDTO.UpdateManagerDTO
 		}
 	}
 
+	if dto.TeamId != "" {
+		team, err := service.teamService.FindByID(dto.TeamId)
+		if err != nil {
+			return managerModel.Manager{}, err
+		}
+		managerExists.TeamID = team.ID
+	}
+
 	managerExists.UpdatedAt = time.Now()
 	err = service.managerRepository.Update(managerExists)
 	return managerExists, err
 }
 
-func (service *ManagerService) FindAll(dto appDto.PaginationDTO) (int64, []managerModel.Manager, error) {
+func (service *ManagerService) FindAll(queryCustomerDTO managerDTO.QueryManagerDTO) (int64, []managerModel.Manager, error) {
 	var managers []managerModel.Manager
-	totalCount, err := service.managerRepository.FindAll(dto.GetLimit(), dto.GetPage(), &managers)
+	totalCount, err := service.managerRepository.FindAll(queryCustomerDTO, &managers, "Team")
 	if err != nil {
 		return 0, nil, err
 	}
@@ -93,7 +119,7 @@ func (service *ManagerService) Delete(id string) (managerModel.Manager, error) {
 		return managerModel.Manager{}, err
 	}
 
-	err = service.managerRepository.Delete(id)
+	err = service.managerRepository.Delete("ID", id)
 	if err != nil {
 		return managerModel.Manager{}, err
 	}

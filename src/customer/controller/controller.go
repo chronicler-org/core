@@ -29,10 +29,10 @@ func (controller *CustomerController) HandleFindAll(c *fiber.Ctx) (appUtil.Pagin
 	return appUtil.Paginate(customers, totalCount, paginationDto.GetPage(), paginationDto.GetLimit()), err
 }
 
-func (controller *CustomerController) HandleFindByID(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
-	id := c.Params("id")
+func (controller *CustomerController) HandleFindByCPF(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
+	cpf := c.Params("cpf")
 
-	customer, err := controller.customerService.FindByID(id)
+	customer, err := controller.customerService.FindByCPF(cpf)
 	return appUtil.PaginateSingle(customer), err
 }
 
@@ -50,16 +50,16 @@ func (controller *CustomerController) HandleUpdateCustomer(c *fiber.Ctx) (appUti
 	var updateCustomerDTO customerDTO.UpdateCustomerDTO
 	c.BodyParser(&updateCustomerDTO)
 
-	id := c.Params("id")
+	cpf := c.Params("cpf")
 
-	customerUpdated, err := controller.customerService.Update(id, updateCustomerDTO)
+	customerUpdated, err := controller.customerService.Update(cpf, updateCustomerDTO)
 
 	return appUtil.PaginateSingle(customerUpdated), err
 }
 
 func (controller *CustomerController) HandleDeleteCustomer(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
-	id := c.Params("id")
+	cpf := c.Params("cpf")
 
-	customerDeleted, err := controller.customerService.Delete(id)
+	customerDeleted, err := controller.customerService.Delete(cpf)
 	return appUtil.PaginateSingle(customerDeleted), err
 }

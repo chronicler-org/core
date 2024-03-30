@@ -56,8 +56,8 @@ func main() {
 
 	managerRouter.InitManagerRouter(app, db)
 	customerRouter.InitCustomerRouter(app, db, tagService)
-	attendantRouter.InitAttendantRouter(app, db
-	addressRouter.Ini
+	attendantRouter.InitAttendantRouter(app, db)
+	addressRouter.InitAddressRouter(app, db)
 
 	app.Listen(":8080")
 }

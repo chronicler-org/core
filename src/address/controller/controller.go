@@ -5,7 +5,7 @@ import (
 
 	appUtil "github.com/chronicler-org/core/src/app/utils"
 
-	addressService "github.com/chronicler-org/core/src/address/"
+	addressService "github.com/chronicler-org/core/src/address"
 	addressDTO "github.com/chronicler-org/core/src/address/dto/service"
 )
 

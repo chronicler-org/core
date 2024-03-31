@@ -177,6 +177,27 @@ func (service *AttendantService) CreateAttendantEvaluation(
 	return model, err
 }
 
+func (service *AttendantService) UpdateAttendantEvaluation(
+	id string,
+	dto attendantDTO.UpdateAttendantEvaluationDTO,
+) (attendantModel.AttendantEvaluation, error) {
+	attendantEvaluationExists, err := service.FindAttendantEvaluationByID(id)
+	if err != nil {
+		return attendantModel.AttendantEvaluation{}, err
+	}
+
+	appUtil.UpdateModelFromDTO(&attendantEvaluationExists, &dto)
+
+	attendantEvaluationExists.UpdatedAt = time.Now()
+	err = service.attendantEvaluationRepository.Update(attendantEvaluationExists)
+	if err != nil {
+		return attendantModel.AttendantEvaluation{}, err
+	}
+
+	return attendantEvaluationExists, err
+}
+
+
 func (service *AttendantService) FindAllAttedantEvaluations(
 	dto attendantDTO.QueryAttendantEvaluationDTO,
 ) (int64, []attendantModel.AttendantEvaluation, error) {

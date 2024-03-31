@@ -185,6 +185,15 @@ func (service *CustomerService) UpdateCustomerAddress(id string, dto customerDTO
 	return customerAddressExists, err
 }
 
+func (service *CustomerService) FindAllCustomerAddresses(dto appDto.PaginationDTO) (int64, []customerModel.CustomerAddress, error) {
+	var customerAddresses []customerModel.CustomerAddress
+	totalCount, err := service.customerAddressRepository.FindAll(dto, &customerAddresses)
+	if err != nil {
+		return 0, nil, err
+	}
+	return totalCount, customerAddresses, nil
+}
+
 func (service *CustomerService) DeleteCustomerAddress(id string) (customerModel.CustomerAddress, error) {
 	customerAddressExists, err := service.FindCustomerAddressByID(id)
 	if err != nil {

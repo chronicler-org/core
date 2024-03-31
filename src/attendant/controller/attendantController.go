@@ -6,6 +6,7 @@ import (
 	appDto "github.com/chronicler-org/core/src/app/dto"
 	appUtil "github.com/chronicler-org/core/src/app/utils"
 	attendantDTO "github.com/chronicler-org/core/src/attendant/dto"
+	attendantModel "github.com/chronicler-org/core/src/attendant/model"
 	attendantService "github.com/chronicler-org/core/src/attendant/service"
 )
 
@@ -60,4 +61,46 @@ func (controller *AttendantController) HandleDeleteAttendant(c *fiber.Ctx) (appU
 
 	attendantDeleted, err := controller.attendantService.DeleteAttendant(id)
 	return appUtil.PaginateSingle(attendantDeleted), err
+}
+
+func (controller *AttendantController) HandleFindAllAttendantEvaluations(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
+	var queryAttendantEvaluationDTO attendantDTO.QueryAttendantEvaluationDTO
+	c.QueryParser(&queryAttendantEvaluationDTO)
+
+	totalCount, attendanEvaluations, err := controller.attendantService.FindAllAttedantEvaluations(queryAttendantEvaluationDTO)
+	return appUtil.Paginate(attendanEvaluations, totalCount, queryAttendantEvaluationDTO.GetPage(), queryAttendantEvaluationDTO.GetLimit()), err
+}
+
+func (controller *AttendantController) HandleFindAttendantEvaluationByID(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
+	id := c.Params("id")
+
+	attendantEvaluation, err := controller.attendantService.FindAttendantEvaluationByID(id)
+	return appUtil.PaginateSingle(attendantEvaluation), err
+}
+
+func (controller *AttendantController) HandleCreateAttendantEvaluation(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
+	loggedAttendant := c.Locals("attendant").(attendantModel.Attendant)
+	var createAttendantEvaluationDTO attendantDTO.CreateAttendantEvaluationDTO
+
+	c.BodyParser(&createAttendantEvaluationDTO)
+
+	attendantEvaluationCreated, err := controller.attendantService.CreateAttendantEvaluation(createAttendantEvaluationDTO,loggedAttendant)
+	return appUtil.PaginateSingle(attendantEvaluationCreated), err
+}
+
+func (controller *AttendantController) HandleUpdateAttendantEvaluation(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
+	id := c.Params("id")
+	var updateAttendantEvaluationDTO attendantDTO.UpdateAttendantEvaluationDTO
+	c.BodyParser(&updateAttendantEvaluationDTO)
+
+	attendantEvaluationUpdated, err := controller.attendantService.UpdateAttendantEvaluation(id, updateAttendantEvaluationDTO)
+
+	return appUtil.PaginateSingle(attendantEvaluationUpdated), err
+}
+
+func (controller *AttendantController) HandleDeleteAttendantEvaluation(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
+	id := c.Params("id")
+
+	attendantEvaluationDeleted, err := controller.attendantService.DeleteAttedantEvaluation(id)
+	return appUtil.PaginateSingle(attendantEvaluationDeleted), err
 }

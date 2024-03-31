@@ -144,12 +144,11 @@ func (service *AttendantService) FindAttendantEvaluationByID(id string) (attenda
 }
 
 func (service *AttendantService) CreateAttendantEvaluation(
-	avaluatedId string,
 	dto attendantDTO.CreateAttendantEvaluationDTO,
 	avaluator attendantModel.Attendant,
 ) (attendantModel.AttendantEvaluation, error) {
 
-	AvaluatedExists, err := service.FindAttendantByID(avaluatedId)
+	AvaluatedExists, err := service.FindAttendantByID(dto.AvaluatedID)
 	if err != nil {
 		return attendantModel.AttendantEvaluation{}, err
 	}

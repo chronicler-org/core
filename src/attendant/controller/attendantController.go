@@ -18,7 +18,7 @@ func InitAttendantController(s *attendantService.AttendantService) *AttendantCon
 		attendantService: s,
 	}
 }
-func (controller *AttendantController) HandleFindAll(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
+func (controller *AttendantController) HandleFindAllAttendants(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
 	var paginationDto appDto.PaginationDTO
 	c.QueryParser(&paginationDto)
 
@@ -27,7 +27,7 @@ func (controller *AttendantController) HandleFindAll(c *fiber.Ctx) (appUtil.Pagi
 	return appUtil.Paginate(attendants, totalCount, paginationDto.GetPage(), paginationDto.GetLimit()), err
 }
 
-func (controller *AttendantController) HandleFindByID(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
+func (controller *AttendantController) HandleFindAttendantByID(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
 	id := c.Params("id")
 
 	attendant, err := controller.attendantService.FindAttendantByID(id)

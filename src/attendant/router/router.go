@@ -27,8 +27,8 @@ func InitAttendantModule(
 }
 
 func InitAttendantRouter(router *fiber.App, attendantController *attendantController.AttendantController) {
-	router.Get("/attendant", middleware.Validate(nil, &appDto.PaginationDTO{}), appUtil.Controller(attendantController.HandleFindAll))
-	router.Get("/attendant/:id", appUtil.Controller(attendantController.HandleFindByID))
+	router.Get("/attendant", middleware.Validate(nil, &appDto.PaginationDTO{}), appUtil.Controller(attendantController.HandleFindAllAttendants))
+	router.Get("/attendant/:id", appUtil.Controller(attendantController.HandleFindAttendantByID))
 	router.Post("/attendant", middleware.Validate(&attendantDTO.CreateAttendantDTO{}, nil), appUtil.Controller(attendantController.HandleCreateAttendant))
 	router.Patch("/attendant/:id", middleware.Validate(&attendantDTO.UpdateAttendantDTO{}, nil), appUtil.Controller(attendantController.HandleUpdateAttendant))
 	router.Delete("/attendant/:id", appUtil.Controller(attendantController.HandleDeleteAttendant))

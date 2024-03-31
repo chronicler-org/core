@@ -48,7 +48,7 @@ func WithAuth(
 				}
 				c.Locals("manager", manager)
 			} else {
-				attendant, err := attendantService.FindByID(id)
+				attendant, err := attendantService.FindAttendantByID(id)
 				if err != nil {
 					return c.Status(exceptionExpiredAt.GetStatusCode()).JSON(appUtil.PaginateError(exceptionExpiredAt.GetErrors()))
 				}

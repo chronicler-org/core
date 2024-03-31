@@ -26,7 +26,7 @@ func main() {
 		log.Fatal(err)
 	}
 	// realiza migration das entidades no banco de dados
-	db.AutoMigrate(&managerModel.Manager{}, &customerModel.Customer{}, &tagModel.Tag{}, &attendantModel.Attendant{}, &teamModel.Team{}, &customerCareModel.CustomerCare{}, &customerCareModel.CustomerCareEvaluation{})
+	db.AutoMigrate(&managerModel.Manager{}, &customerModel.Customer{}, &tagModel.Tag{}, &attendantModel.Attendant{}, &attendantModel.AttendantEvaluation{}, &teamModel.Team{}, &customerCareModel.CustomerCare{}, &customerCareModel.CustomerCareEvaluation{})
 
 	// inicializa app principal
 	app := fiber.New()

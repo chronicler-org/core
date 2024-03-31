@@ -1,9 +1,11 @@
 package appRouter
 
 import (
+	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
 
+	appMiddleware "github.com/chronicler-org/core/src/app/middleware"
 	attendantRouter "github.com/chronicler-org/core/src/attendant/router"
 	authMiddleware "github.com/chronicler-org/core/src/auth/middleware"
 	authRouter "github.com/chronicler-org/core/src/auth/router"
@@ -15,7 +17,7 @@ import (
 	teamRouter "github.com/chronicler-org/core/src/team/router"
 )
 
-func InitAppRouter(app *fiber.App, db *gorm.DB) {
+func InitAppRouter(app *fiber.App, db *gorm.DB, Validator *validator.Validate) {
 
 	tagController, tagService := tagRouter.InitTagModule(db)
 	productController, _ := productRouter.InitProductModule(db)
@@ -27,14 +29,16 @@ func InitAppRouter(app *fiber.App, db *gorm.DB) {
 
 	customerCareController, _ := customerCareRouter.InitCustomerCareModule(db, customerService, teamService)
 
-	authRouter.InitAuthRouter(app, authRouterController)
+	validatorMiddleware := appMiddleware.Validate(Validator)
+	authRouter.InitAuthRouter(app, authRouterController, validatorMiddleware)
 
 	app.Use(authMiddleware.WithAuth(managerService, attendantService))
-	tagRouter.InitTagRouter(app, tagController)
-	teamRouter.InitTeamRouter(app, teamController)
-	productRouter.InitProductRouter(app, productController)
-	managerRouter.InitManagerRouter(app, managerController)
-	customerRouter.InitCustomerRouter(app, customerController)
-	attendantRouter.InitAttendantRouter(app, attendantController)
-	customerCareRouter.InitCustomerCareRouter(app, customerCareController)
+
+	tagRouter.InitTagRouter(app, tagController, validatorMiddleware)
+	teamRouter.InitTeamRouter(app, teamController, validatorMiddleware)
+	productRouter.InitProductRouter(app, productController, validatorMiddleware)
+	managerRouter.InitManagerRouter(app, managerController, validatorMiddleware)
+	customerRouter.InitCustomerRouter(app, customerController, validatorMiddleware)
+	attendantRouter.InitAttendantRouter(app, attendantController, validatorMiddleware)
+	customerCareRouter.InitCustomerCareRouter(app, customerCareController, validatorMiddleware)
 }

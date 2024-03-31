@@ -4,7 +4,6 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
 
-	appMiddleware "github.com/chronicler-org/core/src/app/middleware"
 	appUtil "github.com/chronicler-org/core/src/app/utils"
 	productController "github.com/chronicler-org/core/src/product/controller"
 	productDTO "github.com/chronicler-org/core/src/product/dto"
@@ -25,22 +24,23 @@ func InitProductModule(
 func InitProductRouter(
 	router *fiber.App,
 	productController *productController.ProductController,
+	validatorMiddleware func(interface{}, interface{}) func(*fiber.Ctx) error,
 ) {
 	productRouter := router.Group("/product")
 
 	productRouter.Get("/",
-		appMiddleware.Validate(nil, &productDTO.QueryProductDTO{}),
+		validatorMiddleware(nil, &productDTO.QueryProductDTO{}),
 		appUtil.Controller(productController.HandleFindAllProducts),
 	)
 	productRouter.Get("/:id",
 		appUtil.Controller(productController.HandleFindProductByID),
 	)
 	productRouter.Post("/",
-		appMiddleware.Validate(&productDTO.CreateProductDTO{}, nil),
+		validatorMiddleware(&productDTO.CreateProductDTO{}, nil),
 		appUtil.Controller(productController.HandleCreateProduct),
 	)
 	productRouter.Patch("/:id",
-		appMiddleware.Validate(&productDTO.UpdateProductDTO{}, nil),
+		validatorMiddleware(&productDTO.UpdateProductDTO{}, nil),
 		appUtil.Controller(productController.HandleUpdateProduct),
 	)
 	productRouter.Delete("/:id",

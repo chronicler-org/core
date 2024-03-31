@@ -4,7 +4,6 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
 
-	"github.com/chronicler-org/core/src/app/middleware"
 	appUtil "github.com/chronicler-org/core/src/app/utils"
 	managerController "github.com/chronicler-org/core/src/manager/controller"
 	managerDTO "github.com/chronicler-org/core/src/manager/dto"
@@ -27,10 +26,26 @@ func InitManagerModule(
 func InitManagerRouter(
 	router *fiber.App,
 	managerController *managerController.ManagerController,
+	validatorMiddleware func(interface{}, interface{}) func(*fiber.Ctx) error,
 ) {
-	router.Get("/manager", appMiddleware.Validate(nil, &managerDTO.QueryManagerDTO{}), appUtil.Controller(managerController.HandleFindAll))
-	router.Get("/manager/:id", appUtil.Controller(managerController.HandleFindByID))
-	router.Post("/manager", appMiddleware.Validate(&managerDTO.CreateManagerDTO{}, nil), appUtil.Controller(managerController.HandleCreateManager))
-	router.Patch("/manager/:id", appMiddleware.Validate(&managerDTO.UpdateManagerDTO{}, nil), appUtil.Controller(managerController.HandleUpdateManager))
-	router.Delete("/manager/:id", appUtil.Controller(managerController.HandleDeleteManager))
+	managerRouter := router.Group("/manager")
+
+	managerRouter.Get("/",
+		validatorMiddleware(nil, &managerDTO.QueryManagerDTO{}),
+		appUtil.Controller(managerController.HandleFindAll),
+	)
+	managerRouter.Get("/:id",
+		appUtil.Controller(managerController.HandleFindByID),
+	)
+	managerRouter.Post("/",
+		validatorMiddleware(&managerDTO.CreateManagerDTO{}, nil),
+		appUtil.Controller(managerController.HandleCreateManager),
+	)
+	managerRouter.Patch("/:id",
+		validatorMiddleware(&managerDTO.UpdateManagerDTO{}, nil),
+		appUtil.Controller(managerController.HandleUpdateManager),
+	)
+	managerRouter.Delete("/:id",
+		appUtil.Controller(managerController.HandleDeleteManager),
+	)
 }

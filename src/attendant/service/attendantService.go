@@ -33,7 +33,7 @@ func InitAttendantService(
 	}
 }
 
-func (service *AttendantService) FindByID(id string) (attendantModel.Attendant, error) {
+func (service *AttendantService) FindAttendantByID(id string) (attendantModel.Attendant, error) {
 	result, err := service.attendantRepository.FindOneByField("ID", id, "Team")
 	attendant, _ := result.(*attendantModel.Attendant)
 
@@ -54,7 +54,7 @@ func (service *AttendantService) FindAttendantByEmail(email string) (attendantMo
 	return *attendant, nil
 }
 
-func (service *AttendantService) Create(dto attendantDTO.CreateAttendantDTO) (attendantModel.Attendant, error) {
+func (service *AttendantService) CreateAttendant(dto attendantDTO.CreateAttendantDTO) (attendantModel.Attendant, error) {
 	newPassword, err := bcrypt.GenerateFromPassword([]byte(dto.Password), 10)
 	if err != nil {
 		return attendantModel.Attendant{}, err
@@ -82,8 +82,8 @@ func (service *AttendantService) Create(dto attendantDTO.CreateAttendantDTO) (at
 	return model, err
 }
 
-func (service *AttendantService) Update(id string, dto attendantDTO.UpdateAttendantDTO) (attendantModel.Attendant, error) {
-	attendantExists, err := service.FindByID(id)
+func (service *AttendantService) UpdateAttendant(id string, dto attendantDTO.UpdateAttendantDTO) (attendantModel.Attendant, error) {
+	attendantExists, err := service.FindAttendantByID(id)
 	if err != nil {
 		return attendantModel.Attendant{}, err
 	}
@@ -108,7 +108,7 @@ func (service *AttendantService) Update(id string, dto attendantDTO.UpdateAttend
 	return attendantExists, err
 }
 
-func (service *AttendantService) FindAll(dto appDto.PaginationDTO) (int64, []attendantModel.Attendant, error) {
+func (service *AttendantService) FindAllAttendants(dto appDto.PaginationDTO) (int64, []attendantModel.Attendant, error) {
 	var attendants []attendantModel.Attendant
 	totalCount, err := service.attendantRepository.FindAll(dto, &attendants, "Team")
 	if err != nil {
@@ -117,8 +117,8 @@ func (service *AttendantService) FindAll(dto appDto.PaginationDTO) (int64, []att
 	return totalCount, attendants, nil
 }
 
-func (service *AttendantService) Delete(id string) (attendantModel.Attendant, error) {
-	attendantExists, err := service.FindByID(id)
+func (service *AttendantService) DeleteAttendant(id string) (attendantModel.Attendant, error) {
+	attendantExists, err := service.FindAttendantByID(id)
 	if err != nil {
 		return attendantModel.Attendant{}, err
 	}

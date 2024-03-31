@@ -22,7 +22,7 @@ func (controller *AttendantController) HandleFindAll(c *fiber.Ctx) (appUtil.Pagi
 	var paginationDto appDto.PaginationDTO
 	c.QueryParser(&paginationDto)
 
-	totalCount, attendants, err := controller.attendantService.FindAll(paginationDto)
+	totalCount, attendants, err := controller.attendantService.FindAllAttendants(paginationDto)
 
 	return appUtil.Paginate(attendants, totalCount, paginationDto.GetPage(), paginationDto.GetLimit()), err
 }
@@ -30,7 +30,7 @@ func (controller *AttendantController) HandleFindAll(c *fiber.Ctx) (appUtil.Pagi
 func (controller *AttendantController) HandleFindByID(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
 	id := c.Params("id")
 
-	attendant, err := controller.attendantService.FindByID(id)
+	attendant, err := controller.attendantService.FindAttendantByID(id)
 	return appUtil.PaginateSingle(attendant), err
 }
 
@@ -39,7 +39,7 @@ func (controller *AttendantController) HandleCreateAttendant(c *fiber.Ctx) (appU
 
 	c.BodyParser(&createAttendantDTO)
 
-	attendantCreated, err := controller.attendantService.Create(createAttendantDTO)
+	attendantCreated, err := controller.attendantService.CreateAttendant(createAttendantDTO)
 
 	return appUtil.PaginateSingle(attendantCreated), err
 }
@@ -50,7 +50,7 @@ func (controller *AttendantController) HandleUpdateAttendant(c *fiber.Ctx) (appU
 
 	id := c.Params("id")
 
-	attendantUpdated, err := controller.attendantService.Update(id, updatedAttendantDTO)
+	attendantUpdated, err := controller.attendantService.UpdateAttendant(id, updatedAttendantDTO)
 
 	return appUtil.PaginateSingle(attendantUpdated), err
 }
@@ -58,6 +58,6 @@ func (controller *AttendantController) HandleUpdateAttendant(c *fiber.Ctx) (appU
 func (controller *AttendantController) HandleDeleteAttendant(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
 	id := c.Params("id")
 
-	attendantDeleted, err := controller.attendantService.Delete(id)
+	attendantDeleted, err := controller.attendantService.DeleteAttendant(id)
 	return appUtil.PaginateSingle(attendantDeleted), err
 }

@@ -10,6 +10,7 @@ import (
 	appException "github.com/chronicler-org/core/src/app/exceptions"
 	appUtil "github.com/chronicler-org/core/src/app/utils"
 	productDTO "github.com/chronicler-org/core/src/product/dto"
+	productEnum "github.com/chronicler-org/core/src/product/enum"
 	productExceptionMessage "github.com/chronicler-org/core/src/product/messages"
 	productModel "github.com/chronicler-org/core/src/product/model"
 	productRepository "github.com/chronicler-org/core/src/product/repository"
@@ -38,8 +39,8 @@ func (service *ProductService) FindProductByID(id string) (productModel.Product,
 func (service *ProductService) CreateProduct(dto productDTO.CreateProductDTO) (productModel.Product, error) {
 	model := productModel.Product{
 		ID:        uuid.New(),
-		Model:     productModel.ClothingModel(dto.Model),
-		Size:      productModel.Size(dto.Size),
+		Model:     productEnum.ClothingModel(dto.Model),
+		Size:      productEnum.Size(dto.Size),
 		Value:     dto.Value,
 		Fabric:    dto.Fabric,
 		Stock:     dto.Stock,

@@ -1,4 +1,4 @@
-package addressModel
+package customerModel
 
 import (
 	"time"
@@ -6,7 +6,7 @@ import (
 	"github.com/google/uuid"
 )
 
-type Address struct {
+type CustomerAddress struct {
 	ID 						uuid.UUID	`gorm:"primarykey"`
 	CEP 					string		`json:"cep"`
 	City 					string 		`json:"city"`

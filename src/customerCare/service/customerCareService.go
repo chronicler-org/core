@@ -53,7 +53,7 @@ func (service *CustomerCareService) CreateCustomerCare(
 	attendant attendantModel.Attendant,
 ) (customerCareModel.CustomerCare, error) {
 
-	customerExists, err := service.customerService.FindByCPF(dto.CustomerCPF)
+	customerExists, err := service.customerService.FindCustomerByCPF(dto.CustomerCPF)
 	if err != nil {
 		return customerCareModel.CustomerCare{}, err
 	}
@@ -128,7 +128,7 @@ func (service *CustomerCareService) CreateCustomerCareEvaluation(
 		return customerCareModel.CustomerCareEvaluation{}, appException.ConflictException(customerCareExceptionMessage.CUSTOMER_CARE_ALREADY_EVALUATED)
 	}
 
-	customerExists, err := service.customerService.FindByCPF(customerCareExists.CustomerCPF)
+	customerExists, err := service.customerService.FindCustomerByCPF(customerCareExists.CustomerCPF)
 	if err != nil {
 		return customerCareModel.CustomerCareEvaluation{}, err
 	}

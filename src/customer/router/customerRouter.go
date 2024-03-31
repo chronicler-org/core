@@ -18,7 +18,8 @@ func InitCustomerModule(
 	tagServ *tagService.TagService,
 ) (*customerController.CustomerController, *customerService.CustomerService) {
 	customerRepo := customerRepository.InitCustomerRepository(db)
-	customerServ := customerService.InitCustomerService(customerRepo, tagServ)
+	customerAddressRepo := customerRepository.InitCustomerAddressRepository(db)
+	customerServ := customerService.InitCustomerService(customerRepo, customerAddressRepo, tagServ)
 	customerCtrl := customerController.InitCustomerController(customerServ)
 
 	return customerCtrl, customerServ
@@ -31,12 +32,31 @@ func InitCustomerRouter(
 ) {
 	customerRouter := router.Group("/customer")
 
+	customerRouter.Get("/address",
+		validatorMiddleware(nil, &appDto.PaginationDTO{}),
+		appUtil.Controller(customerController.HandleFindAllCustomerAddresses),
+	)
+	customerRouter.Get("/address/:id",
+		appUtil.Controller(customerController.HandleFindCustomerAddressByID),
+	)
+	customerRouter.Post("/address",
+		validatorMiddleware(&customerDTO.CreateCustomerAddressDTO{}, nil),
+		appUtil.Controller(customerController.HandleCreateCustomerAddress),
+	)
+	customerRouter.Patch("/address/:id",
+		validatorMiddleware(&customerDTO.UpdateCustomerAddressDTO{}, nil),
+		appUtil.Controller(customerController.HandleUpdateCustomerAddress),
+	)
+	customerRouter.Delete("/address/:id",
+		appUtil.Controller(customerController.HandleDeleteCustomerAddress),
+	)
+
 	customerRouter.Get("/",
 		validatorMiddleware(nil, &appDto.PaginationDTO{}),
-		appUtil.Controller(customerController.HandleFindAll),
+		appUtil.Controller(customerController.HandleFindAllCustomers),
 	)
 	customerRouter.Get("/:cpf",
-		appUtil.Controller(customerController.HandleFindByCPF),
+		appUtil.Controller(customerController.HandleFindCustomerByCPF),
 	)
 	customerRouter.Post("/",
 		validatorMiddleware(&customerDTO.CreateCustomerDTO{}, nil),

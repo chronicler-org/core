@@ -14,6 +14,7 @@ import (
 	customerModel "github.com/chronicler-org/core/src/customer/model"
 	customerCareModel "github.com/chronicler-org/core/src/customerCare/model"
 	managerModel "github.com/chronicler-org/core/src/manager/model"
+	productModel "github.com/chronicler-org/core/src/product/model"
 	tagModel "github.com/chronicler-org/core/src/tag/model"
 	teamModel "github.com/chronicler-org/core/src/team/model"
 )
@@ -26,7 +27,7 @@ func main() {
 		log.Fatal(err)
 	}
 	// realiza migration das entidades no banco de dados
-	db.AutoMigrate(&managerModel.Manager{}, &customerModel.Customer{}, &tagModel.Tag{}, &attendantModel.Attendant{}, &attendantModel.AttendantEvaluation{}, &teamModel.Team{}, &customerCareModel.CustomerCare{}, &customerCareModel.CustomerCareEvaluation{})
+	db.AutoMigrate(&managerModel.Manager{}, &customerModel.Customer{}, &tagModel.Tag{}, &attendantModel.Attendant{}, &attendantModel.AttendantEvaluation{}, &teamModel.Team{}, &customerCareModel.CustomerCare{}, &customerCareModel.CustomerCareEvaluation{}, &productModel.Product{})
 
 	// inicializa app principal
 	app := fiber.New()

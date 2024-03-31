@@ -14,6 +14,7 @@ import (
 func Validate(Validator *validator.Validate) func(interface{}, interface{}) func(*fiber.Ctx) error {
 	return func(bodyDto, queryDto interface{}) func(*fiber.Ctx) error {
 		return func(c *fiber.Ctx) error {
+
 			if bodyDto != nil {
 				c.BodyParser(&bodyDto)
 				if err := Validator.StructCtx(c.Context(), bodyDto); err != nil {
@@ -56,5 +57,6 @@ func Validate(Validator *validator.Validate) func(interface{}, interface{}) func
 
 			return c.Next()
 		}
+
 	}
 }

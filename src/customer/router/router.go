@@ -29,9 +29,9 @@ func InitCustomerRouter(
 	router *fiber.App,
 	customerController *customerController.CustomerController,
 ) {
-	router.Get("/customer", middleware.Validate(nil, &appDto.PaginationDTO{}), appUtil.Controller(customerController.HandleFindAll))
+	router.Get("/customer", appMiddleware.Validate(nil, &appDto.PaginationDTO{}), appUtil.Controller(customerController.HandleFindAll))
 	router.Get("/customer/:cpf", appUtil.Controller(customerController.HandleFindByCPF))
-	router.Post("/customer", middleware.Validate(&customerDTO.CreateCustomerDTO{}, nil), appUtil.Controller(customerController.HandleCreateCustomer))
-	router.Patch("/customer/:cpf", middleware.Validate(&customerDTO.UpdateCustomerDTO{}, nil), appUtil.Controller(customerController.HandleUpdateCustomer))
+	router.Post("/customer", appMiddleware.Validate(&customerDTO.CreateCustomerDTO{}, nil), appUtil.Controller(customerController.HandleCreateCustomer))
+	router.Patch("/customer/:cpf", appMiddleware.Validate(&customerDTO.UpdateCustomerDTO{}, nil), appUtil.Controller(customerController.HandleUpdateCustomer))
 	router.Delete("/customer/:cpf", appUtil.Controller(customerController.HandleDeleteCustomer))
 }

@@ -19,3 +19,9 @@ var INVALID_AT = appDto.CustomErrorDTO{
 	Title:  "Access Token inválido",
 	Detail: "Token informado é inválido. Realize nova autenticação para adquirir novo token.",
 }
+
+var USER_SERVICE_ACCESS_INFO_DENIED = appDto.CustomErrorDTO{
+	Code:   "USER_SERVICE_ACCESS_INFO_DENIED",
+	Title:  "Operação não permitida",
+	Detail: "Usuário ou seviço não tem permissão para acessar este recurso.",
+}

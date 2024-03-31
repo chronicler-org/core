@@ -19,7 +19,8 @@ func InitAttendantModule(
 	teamServ *teamService.TeamService,
 ) (*attendantController.AttendantController, *attendantService.AttendantService) {
 	attendantRepo := attendantRepository.InitAttendantRepository(db)
-	attendantServ := attendantService.InitAttendantService(attendantRepo, teamServ)
+	attendantEvaluationRepo := attendantRepository.InitAttendantEvaluationRepository(db)
+	attendantServ := attendantService.InitAttendantService(attendantRepo, attendantEvaluationRepo, teamServ)
 	attendantCtrl := attendantController.InitAttendantController(attendantServ)
 
 	return attendantCtrl, attendantServ

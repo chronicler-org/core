@@ -19,17 +19,20 @@ import (
 )
 
 type AttendantService struct {
-	attendantRepository *attendantRepository.AttendantRepository
-	teamService         *teamService.TeamService
+	attendantRepository           *attendantRepository.AttendantRepository
+	attendantEvaluationRepository *attendantRepository.AttendantEvaluationRepository
+	teamService                   *teamService.TeamService
 }
 
 func InitAttendantService(
 	attendantRepository *attendantRepository.AttendantRepository,
+	attendantEvaluationRepository *attendantRepository.AttendantEvaluationRepository,
 	teamService *teamService.TeamService,
 ) *AttendantService {
 	return &AttendantService{
-		attendantRepository: attendantRepository,
-		teamService:         teamService,
+		attendantRepository:           attendantRepository,
+		attendantEvaluationRepository: attendantEvaluationRepository,
+		teamService:                   teamService,
 	}
 }
 
@@ -128,4 +131,73 @@ func (service *AttendantService) DeleteAttendant(id string) (attendantModel.Atte
 		return attendantModel.Attendant{}, err
 	}
 	return attendantExists, nil
+}
+
+func (service *AttendantService) FindAttendantEvaluationByID(id string) (attendantModel.AttendantEvaluation, error) {
+	result, err := service.attendantEvaluationRepository.FindOneByField("ID", id, "Avaluated", "Avaluator")
+	attendantEvaluation, _ := result.(*attendantModel.AttendantEvaluation)
+
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return *attendantEvaluation, appException.NotFoundException(attendantExceptionMessage.ATTENDANT_EVALUATION_NOT_FOUND)
+	}
+	return *attendantEvaluation, nil
+}
+
+func (service *AttendantService) CreateAttendantEvaluation(
+	avaluatedId string,
+	dto attendantDTO.CreateAttendantEvaluationDTO,
+	avaluator attendantModel.Attendant,
+) (attendantModel.AttendantEvaluation, error) {
+
+	AvaluatedExists, err := service.FindAttendantByID(avaluatedId)
+	if err != nil {
+		return attendantModel.AttendantEvaluation{}, err
+	}
+
+	if AvaluatedExists.ID.String() == avaluator.ID.String() {
+		return attendantModel.AttendantEvaluation{}, appException.ConflictException(attendantExceptionMessage.ATTENDANT_EVALUATION_SELF_EVALUATION)
+	}
+
+	model := attendantModel.AttendantEvaluation{
+		Score:       dto.Score,
+		Description: dto.Description,
+		AvaluatedID: AvaluatedExists.ID,
+		AvaluatorID: avaluator.ID,
+		CreatedAt:   time.Now(),
+		UpdatedAt:   time.Now(),
+	}
+
+	err = service.attendantEvaluationRepository.Create(model)
+	if err != nil {
+		return attendantModel.AttendantEvaluation{}, err
+	}
+
+	model.Avaluated = AvaluatedExists
+	model.Avaluator = avaluator
+	return model, err
+}
+
+func (service *AttendantService) FindAllAttedantEvaluations(
+	dto attendantDTO.QueryAttendantEvaluationDTO,
+) (int64, []attendantModel.AttendantEvaluation, error) {
+
+	var attendantEvaluations []attendantModel.AttendantEvaluation
+	totalCount, err := service.attendantEvaluationRepository.FindAll(dto, &attendantEvaluations, "Avaluated", "Avaluator")
+	if err != nil {
+		return 0, nil, err
+	}
+	return totalCount, attendantEvaluations, nil
+}
+
+func (service *AttendantService) DeleteAttedantEvaluation(evaluationId string) (attendantModel.AttendantEvaluation, error) {
+	attendantEvaluationExists, err := service.FindAttendantEvaluationByID(evaluationId)
+	if err != nil {
+		return attendantModel.AttendantEvaluation{}, err
+	}
+
+	err = service.attendantEvaluationRepository.Delete("ID", evaluationId)
+	if err != nil {
+		return attendantModel.AttendantEvaluation{}, err
+	}
+	return attendantEvaluationExists, nil
 }

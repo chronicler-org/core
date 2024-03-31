@@ -15,24 +15,28 @@ import (
 	customerRepository "github.com/chronicler-org/core/src/customer/repository"
 	tagModel "github.com/chronicler-org/core/src/tag/model"
 	tagService "github.com/chronicler-org/core/src/tag/service"
+	"github.com/google/uuid"
 )
 
 type CustomerService struct {
-	customerRepository *customerRepository.CustomerRepository
-	tagService         *tagService.TagService
+	customerRepository        *customerRepository.CustomerRepository
+	customerAddressRepository *customerRepository.CustomerAddressRepository
+	tagService                *tagService.TagService
 }
 
 func InitCustomerService(
 	customerRepository *customerRepository.CustomerRepository,
+	customerAddressRepository *customerRepository.CustomerAddressRepository,
 	tagService *tagService.TagService,
 ) *CustomerService {
 	return &CustomerService{
-		customerRepository: customerRepository,
-		tagService:         tagService,
+		customerRepository:        customerRepository,
+		customerAddressRepository: customerAddressRepository,
+		tagService:                tagService,
 	}
 }
 
-func (service *CustomerService) FindByCPF(cpf string) (customerModel.Customer, error) {
+func (service *CustomerService) FindCustomerByCPF(cpf string) (customerModel.Customer, error) {
 	result, err := service.customerRepository.FindOneByField("CPF", cpf, "Tags")
 	customer, _ := result.(*customerModel.Customer)
 
@@ -42,7 +46,7 @@ func (service *CustomerService) FindByCPF(cpf string) (customerModel.Customer, e
 	return *customer, nil
 }
 
-func (service *CustomerService) Create(dto customerDTO.CreateCustomerDTO) (customerModel.Customer, error) {
+func (service *CustomerService) CreateCustomer(dto customerDTO.CreateCustomerDTO) (customerModel.Customer, error) {
 	model := customerModel.Customer{
 		CPF:       dto.CPF,
 		Name:      dto.Name,
@@ -71,8 +75,8 @@ func (service *CustomerService) Create(dto customerDTO.CreateCustomerDTO) (custo
 	return model, err
 }
 
-func (service *CustomerService) Update(cpf string, dto customerDTO.UpdateCustomerDTO) (customerModel.Customer, error) {
-	customerExists, err := service.FindByCPF(cpf)
+func (service *CustomerService) UpdateCustomer(cpf string, dto customerDTO.UpdateCustomerDTO) (customerModel.Customer, error) {
+	customerExists, err := service.FindCustomerByCPF(cpf)
 	if err != nil {
 		return customerModel.Customer{}, err
 	}
@@ -89,12 +93,12 @@ func (service *CustomerService) Update(cpf string, dto customerDTO.UpdateCustome
 		return customerModel.Customer{}, err
 	}
 
-	customerUpdated, err := service.FindByCPF(cpf)
+	customerUpdated, err := service.FindCustomerByCPF(cpf)
 
 	return customerUpdated, err
 }
 
-func (service *CustomerService) FindAll(dto appDto.PaginationDTO) (int64, []customerModel.Customer, error) {
+func (service *CustomerService) FindAllCustomers(dto appDto.PaginationDTO) (int64, []customerModel.Customer, error) {
 	var customers []customerModel.Customer
 	totalCount, err := service.customerRepository.FindAll(dto, &customers, "Tags")
 	if err != nil {
@@ -103,8 +107,8 @@ func (service *CustomerService) FindAll(dto appDto.PaginationDTO) (int64, []cust
 	return totalCount, customers, nil
 }
 
-func (service *CustomerService) Delete(cpf string) (customerModel.Customer, error) {
-	customerExists, err := service.FindByCPF(cpf)
+func (service *CustomerService) DeleteCustomer(cpf string) (customerModel.Customer, error) {
+	customerExists, err := service.FindCustomerByCPF(cpf)
 	if err != nil {
 		return customerModel.Customer{}, err
 	}
@@ -137,4 +141,60 @@ func (service *CustomerService) updateCustomerTags(customer *customerModel.Custo
 	customer.Tags = tags
 
 	return nil
+}
+
+func (service *CustomerService) FindCustomerAddressByID(id string) (customerModel.CustomerAddress, error) {
+	result, err := service.customerAddressRepository.FindOneByField("ID", id)
+	customerAddress, _ := result.(*customerModel.CustomerAddress)
+
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return *customerAddress, appException.NotFoundException(customerExceptionMessage.ADDRESS_NOT_FOUND)
+	}
+	return *customerAddress, nil
+}
+
+func (service *CustomerService) CreateCustomerAddress(dto customerDTO.CreateCustomerAddressDTO) (customerModel.CustomerAddress, error) {
+	model := customerModel.CustomerAddress{
+		ID:           uuid.New(),
+		CEP:          dto.CEP,
+		City:         dto.City,
+		Number:       dto.Number,
+		Estate:       dto.Estate,
+		StreetName:   dto.StreetName,
+		Complement:   dto.Complement,
+		Neighborhood: dto.Neighborhood,
+		CreatedAt:    time.Now(),
+		UpdatedAt:    time.Now(),
+	}
+
+	err := service.customerAddressRepository.Create(model)
+
+	return model, err
+}
+
+func (service *CustomerService) UpdateCustomerAddress(id string, dto customerDTO.UpdateCustomerAddressDTO) (customerModel.CustomerAddress, error) {
+	customerAddressExists, err := service.FindCustomerAddressByID(id)
+	if err != nil {
+		return customerModel.CustomerAddress{}, err
+	}
+
+	appUtil.UpdateModelFromDTO(&customerAddressExists, dto)
+
+	customerAddressExists.UpdatedAt = time.Now()
+	err = service.customerAddressRepository.Update(customerAddressExists)
+	return customerAddressExists, err
+}
+
+func (service *CustomerService) DeleteCustomerAddress(id string) (customerModel.CustomerAddress, error) {
+	customerAddressExists, err := service.FindCustomerAddressByID(id)
+	if err != nil {
+		return customerModel.CustomerAddress{}, err
+	}
+
+	err = service.customerAddressRepository.Delete("ID", id)
+	if err != nil {
+		return customerModel.CustomerAddress{}, err
+	}
+
+	return customerAddressExists, nil
 }

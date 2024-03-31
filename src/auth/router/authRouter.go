@@ -4,7 +4,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
 
-	"github.com/chronicler-org/core/src/app/middleware"
+	appMiddleware "github.com/chronicler-org/core/src/app/middleware"
 	appUtil "github.com/chronicler-org/core/src/app/utils"
 	attendantService "github.com/chronicler-org/core/src/attendant/service"
 	authController "github.com/chronicler-org/core/src/auth/controller"
@@ -28,5 +28,5 @@ func InitAuthRouter(
 	router *fiber.App,
 	authController *authController.AuthController,
 ) {
-	router.Post("/auth/login", middleware.Validate(&authDTO.AuthLoginDTO{}, nil), appUtil.Controller(authController.HandleLogin))
+	router.Post("/auth/login", appMiddleware.Validate(&authDTO.AuthLoginDTO{}, nil), appUtil.Controller(authController.HandleLogin))
 }

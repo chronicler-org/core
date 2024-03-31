@@ -28,9 +28,9 @@ func InitManagerRouter(
 	router *fiber.App,
 	managerController *managerController.ManagerController,
 ) {
-	router.Get("/manager", middleware.Validate(nil, &managerDTO.QueryManagerDTO{}), appUtil.Controller(managerController.HandleFindAll))
+	router.Get("/manager", appMiddleware.Validate(nil, &managerDTO.QueryManagerDTO{}), appUtil.Controller(managerController.HandleFindAll))
 	router.Get("/manager/:id", appUtil.Controller(managerController.HandleFindByID))
-	router.Post("/manager", middleware.Validate(&managerDTO.CreateManagerDTO{}, nil), appUtil.Controller(managerController.HandleCreateManager))
-	router.Patch("/manager/:id", middleware.Validate(&managerDTO.UpdateManagerDTO{}, nil), appUtil.Controller(managerController.HandleUpdateManager))
+	router.Post("/manager", appMiddleware.Validate(&managerDTO.CreateManagerDTO{}, nil), appUtil.Controller(managerController.HandleCreateManager))
+	router.Patch("/manager/:id", appMiddleware.Validate(&managerDTO.UpdateManagerDTO{}, nil), appUtil.Controller(managerController.HandleUpdateManager))
 	router.Delete("/manager/:id", appUtil.Controller(managerController.HandleDeleteManager))
 }

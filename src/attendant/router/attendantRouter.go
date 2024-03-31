@@ -29,15 +29,15 @@ func InitAttendantModule(
 func InitAttendantRouter(router *fiber.App, attendantController *attendantController.AttendantController) {
 	router.Group("/attendant")
 
-	router.Get("/evaluation", middleware.Validate(nil, &appDto.PaginationDTO{}), appUtil.Controller(attendantController.HandleFindAllAttendantEvaluations))
+	router.Get("/evaluation", appMiddleware.Validate(nil, &appDto.PaginationDTO{}), appUtil.Controller(attendantController.HandleFindAllAttendantEvaluations))
 	router.Get("/evaluation/:id", appUtil.Controller(attendantController.HandleFindAttendantEvaluationByID))
-	router.Post("/evaluation", middleware.Validate(&attendantDTO.CreateAttendantDTO{}, nil), appUtil.Controller(attendantController.HandleCreateAttendantEvaluation))
-	router.Patch("/evaluation/:id", middleware.Validate(&attendantDTO.UpdateAttendantDTO{}, nil), appUtil.Controller(attendantController.HandleUpdateAttendantEvaluation))
+	router.Post("/evaluation", appMiddleware.Validate(&attendantDTO.CreateAttendantDTO{}, nil), appUtil.Controller(attendantController.HandleCreateAttendantEvaluation))
+	router.Patch("/evaluation/:id", appMiddleware.Validate(&attendantDTO.UpdateAttendantDTO{}, nil), appUtil.Controller(attendantController.HandleUpdateAttendantEvaluation))
 	router.Delete("/evaluation/:id", appUtil.Controller(attendantController.HandleDeleteAttendantEvaluation))
 
-	router.Get("", middleware.Validate(nil, &appDto.PaginationDTO{}), appUtil.Controller(attendantController.HandleFindAllAttendants))
+	router.Get("", appMiddleware.Validate(nil, &appDto.PaginationDTO{}), appUtil.Controller(attendantController.HandleFindAllAttendants))
 	router.Get("/:id", appUtil.Controller(attendantController.HandleFindAttendantByID))
-	router.Post("", middleware.Validate(&attendantDTO.CreateAttendantDTO{}, nil), appUtil.Controller(attendantController.HandleCreateAttendant))
-	router.Patch("/:id", middleware.Validate(&attendantDTO.UpdateAttendantDTO{}, nil), appUtil.Controller(attendantController.HandleUpdateAttendant))
+	router.Post("", appMiddleware.Validate(&attendantDTO.CreateAttendantDTO{}, nil), appUtil.Controller(attendantController.HandleCreateAttendant))
+	router.Patch("/:id", appMiddleware.Validate(&attendantDTO.UpdateAttendantDTO{}, nil), appUtil.Controller(attendantController.HandleUpdateAttendant))
 	router.Delete("/:id", appUtil.Controller(attendantController.HandleDeleteAttendant))
 }

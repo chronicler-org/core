@@ -13,7 +13,7 @@ import (
 	appException "github.com/chronicler-org/core/src/app/exceptions"
 	attendantService "github.com/chronicler-org/core/src/attendant/service"
 	authDTO "github.com/chronicler-org/core/src/auth/dto"
-	appEnum "github.com/chronicler-org/core/src/auth/enum"
+	authEnum "github.com/chronicler-org/core/src/auth/enum"
 	authInterface "github.com/chronicler-org/core/src/auth/interface"
 	authExceptionMessage "github.com/chronicler-org/core/src/auth/messages"
 	managerService "github.com/chronicler-org/core/src/manager/service"
@@ -49,23 +49,23 @@ func (service *AuthService) Login(dto authDTO.AuthLoginDTO) (authDTO.ResponseAut
 	}, err
 }
 
-func (service *AuthService) validateUserByEmail(dto authDTO.AuthLoginDTO) (authInterface.IUser, string, error) {
+func (service *AuthService) validateUserByEmail(dto authDTO.AuthLoginDTO) (authInterface.IUser, authEnum.Role, error) {
 	email := dto.Email
 
 	hashedPassword := ""
-	userType := ""
+	var userType authEnum.Role
 	var user authInterface.IUser
 
 	manager, err := service.managerService.FindManagerByEmail(email)
 	if err == nil {
 		hashedPassword = manager.Password
-		userType = appEnum.ManagerRole
+		userType = authEnum.ManagerRole
 		user = manager
 	} else {
 		attendant, err := service.attendantService.FindAttendantByEmail(email)
 		if err == nil {
 			hashedPassword = attendant.Password
-			userType = appEnum.AttendantRole
+			userType = authEnum.AttendantRole
 			user = attendant
 		}
 	}
@@ -81,7 +81,7 @@ func (service *AuthService) validateUserByEmail(dto authDTO.AuthLoginDTO) (authI
 	return user, userType, nil
 }
 
-func (service *AuthService) generateAT(id string, userType string) (string, time.Time, error) {
+func (service *AuthService) generateAT(id string, role authEnum.Role) (string, time.Time, error) {
 	jtiBytes := make([]byte, 12)
 	if _, err := rand.Read(jtiBytes); err != nil {
 		return "", time.Time{}, err
@@ -91,7 +91,7 @@ func (service *AuthService) generateAT(id string, userType string) (string, time
 	payload := jwt.MapClaims{
 		"jti":  jti,
 		"sub":  id,
-		"role": userType,
+		"role": role,
 	}
 	authSecret := []byte(os.Getenv("AT_SECRET"))
 	authTokenExpiresIn := os.Getenv("AT_EXPIRES_IN")

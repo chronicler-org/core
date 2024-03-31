@@ -41,18 +41,18 @@ func WithAuth(
 			id := claims["sub"].(string)
 			role := claims["role"].(string)
 
-			if role == authEnum.ManagerRole {
+			if role == string(authEnum.ManagerRole) {
 				manager, err := managerService.FindByID(id)
 				if err != nil {
 					return c.Status(exceptionExpiredAt.GetStatusCode()).JSON(appUtil.PaginateError(exceptionExpiredAt.GetErrors()))
 				}
-				c.Locals("manager", manager)
+				c.Locals(authEnum.ManagerRole, manager)
 			} else {
 				attendant, err := attendantService.FindAttendantByID(id)
 				if err != nil {
 					return c.Status(exceptionExpiredAt.GetStatusCode()).JSON(appUtil.PaginateError(exceptionExpiredAt.GetErrors()))
 				}
-				c.Locals("attendant", attendant)
+				c.Locals(authEnum.AttendantRole, attendant)
 			}
 			return c.Next()
 		},

@@ -5,7 +5,6 @@ import (
 	"gorm.io/gorm"
 
 	appDto "github.com/chronicler-org/core/src/app/dto"
-	appMiddleware "github.com/chronicler-org/core/src/app/middleware"
 	appUtil "github.com/chronicler-org/core/src/app/utils"
 	teamController "github.com/chronicler-org/core/src/team/controller"
 	teamDTO "github.com/chronicler-org/core/src/team/dto"
@@ -23,12 +22,29 @@ func InitTeamModule(
 	return teamCtrl, teamServ
 }
 
-func InitTeamRouter(router *fiber.App,
+func InitTeamRouter(
+	router *fiber.App,
 	teamController *teamController.TeamController,
+	validatorMiddleware func(interface{}, interface{}) func(*fiber.Ctx) error,
 ) {
-	router.Get("/team", appMiddleware.Validate(nil, &appDto.PaginationDTO{}), appUtil.Controller(teamController.HandleFindAll))
-	router.Get("/team/:id", appUtil.Controller(teamController.HandleFindByID))
-	router.Post("/team", appMiddleware.Validate(&teamDTO.CreateTeamDTO{}, nil), appUtil.Controller(teamController.HandleCreateTeam))
-	router.Patch("/team/:id", appMiddleware.Validate(&teamDTO.UpdateTeamDTO{}, nil), appUtil.Controller(teamController.HandleUpdateTeam))
-	router.Delete("/team/:id", appUtil.Controller(teamController.HandleDeleteTeam))
+	teamRouter := router.Group("/team")
+
+	teamRouter.Get("/",
+		validatorMiddleware(nil, &appDto.PaginationDTO{}),
+		appUtil.Controller(teamController.HandleFindAll),
+	)
+	teamRouter.Get("/:id",
+		appUtil.Controller(teamController.HandleFindByID),
+	)
+	teamRouter.Post("/",
+		validatorMiddleware(&teamDTO.CreateTeamDTO{}, nil),
+		appUtil.Controller(teamController.HandleCreateTeam),
+	)
+	teamRouter.Patch("/:id",
+		validatorMiddleware(&teamDTO.UpdateTeamDTO{}, nil),
+		appUtil.Controller(teamController.HandleUpdateTeam),
+	)
+	teamRouter.Delete("/:id",
+		appUtil.Controller(teamController.HandleDeleteTeam),
+	)
 }

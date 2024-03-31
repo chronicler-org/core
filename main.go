@@ -4,16 +4,22 @@ import (
 	"log"
 	"os"
 
+	"github.com/go-playground/locales/pt_BR"
+	ut "github.com/go-playground/universal-translator"
+	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 
 	appRouter "github.com/chronicler-org/core/src/app/router"
+	appUtil "github.com/chronicler-org/core/src/app/utils"
 	attendantModel "github.com/chronicler-org/core/src/attendant/model"
 	customerModel "github.com/chronicler-org/core/src/customer/model"
 	customerCareModel "github.com/chronicler-org/core/src/customerCare/model"
 	managerModel "github.com/chronicler-org/core/src/manager/model"
+	productEnum "github.com/chronicler-org/core/src/product/enum"
+	productModel "github.com/chronicler-org/core/src/product/model"
 	tagModel "github.com/chronicler-org/core/src/tag/model"
 	teamModel "github.com/chronicler-org/core/src/team/model"
 )
@@ -26,7 +32,7 @@ func main() {
 		log.Fatal(err)
 	}
 	// realiza migration das entidades no banco de dados
-	db.AutoMigrate(&managerModel.Manager{}, &customerModel.Customer{}, &tagModel.Tag{}, &attendantModel.Attendant{}, &attendantModel.AttendantEvaluation{}, &teamModel.Team{}, &customerCareModel.CustomerCare{}, &customerCareModel.CustomerCareEvaluation{})
+	db.AutoMigrate(&managerModel.Manager{}, &customerModel.Customer{}, &tagModel.Tag{}, &attendantModel.Attendant{}, &attendantModel.AttendantEvaluation{}, &teamModel.Team{}, &customerCareModel.CustomerCare{}, &customerCareModel.CustomerCareEvaluation{}, &productModel.Product{})
 
 	// inicializa app principal
 	app := fiber.New()
@@ -39,7 +45,18 @@ func main() {
 		return c.SendString("Hello, World!")
 	})
 
-	appRouter.InitAppRouter(app, db)
+	// validator
+	Validator := validator.New()
+
+	pt := pt_BR.New()
+	uni := ut.New(pt, pt)
+	trans, _ := uni.GetTranslator("pt_BR")
+
+	appUtil.RegisterCPFValidationAndTranslation(Validator, trans)
+	productEnum.RegisterModelValidationAndTranslation(Validator, trans)
+	productEnum.RegisterSizeValidationAndTranslation(Validator, trans)
+
+	appRouter.InitAppRouter(app, db, Validator)
 
 	app.Listen(":8080")
 }

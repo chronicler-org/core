@@ -5,7 +5,6 @@ import (
 	"gorm.io/gorm"
 
 	appDto "github.com/chronicler-org/core/src/app/dto"
-	"github.com/chronicler-org/core/src/app/middleware"
 	appUtil "github.com/chronicler-org/core/src/app/utils"
 	attendantController "github.com/chronicler-org/core/src/attendant/controller"
 	attendantDTO "github.com/chronicler-org/core/src/attendant/dto"
@@ -26,18 +25,48 @@ func InitAttendantModule(
 	return attendantCtrl, attendantServ
 }
 
-func InitAttendantRouter(router *fiber.App, attendantController *attendantController.AttendantController) {
+func InitAttendantRouter(
+	router *fiber.App,
+	attendantController *attendantController.AttendantController,
+	validatorMiddleware func(interface{}, interface{}) func(*fiber.Ctx) error,
+) {
 	router.Group("/attendant")
 
-	router.Get("/evaluation", appMiddleware.Validate(nil, &appDto.PaginationDTO{}), appUtil.Controller(attendantController.HandleFindAllAttendantEvaluations))
-	router.Get("/evaluation/:id", appUtil.Controller(attendantController.HandleFindAttendantEvaluationByID))
-	router.Post("/evaluation", appMiddleware.Validate(&attendantDTO.CreateAttendantDTO{}, nil), appUtil.Controller(attendantController.HandleCreateAttendantEvaluation))
-	router.Patch("/evaluation/:id", appMiddleware.Validate(&attendantDTO.UpdateAttendantDTO{}, nil), appUtil.Controller(attendantController.HandleUpdateAttendantEvaluation))
-	router.Delete("/evaluation/:id", appUtil.Controller(attendantController.HandleDeleteAttendantEvaluation))
+	router.Get("/evaluation",
+		validatorMiddleware(nil, &appDto.PaginationDTO{}),
+		appUtil.Controller(attendantController.HandleFindAllAttendantEvaluations),
+	)
+	router.Get("/evaluation/:id",
+		appUtil.Controller(attendantController.HandleFindAttendantEvaluationByID),
+	)
+	router.Post("/evaluation",
+		validatorMiddleware(&attendantDTO.CreateAttendantDTO{}, nil),
+		appUtil.Controller(attendantController.HandleCreateAttendantEvaluation),
+	)
+	router.Patch("/evaluation/:id",
+		validatorMiddleware(&attendantDTO.UpdateAttendantDTO{}, nil),
+		appUtil.Controller(attendantController.HandleUpdateAttendantEvaluation),
+	)
+	router.Delete("/evaluation/:id",
+		appUtil.Controller(attendantController.HandleDeleteAttendantEvaluation),
+	)
 
-	router.Get("", appMiddleware.Validate(nil, &appDto.PaginationDTO{}), appUtil.Controller(attendantController.HandleFindAllAttendants))
-	router.Get("/:id", appUtil.Controller(attendantController.HandleFindAttendantByID))
-	router.Post("", appMiddleware.Validate(&attendantDTO.CreateAttendantDTO{}, nil), appUtil.Controller(attendantController.HandleCreateAttendant))
-	router.Patch("/:id", appMiddleware.Validate(&attendantDTO.UpdateAttendantDTO{}, nil), appUtil.Controller(attendantController.HandleUpdateAttendant))
-	router.Delete("/:id", appUtil.Controller(attendantController.HandleDeleteAttendant))
+	router.Get("",
+		validatorMiddleware(nil, &appDto.PaginationDTO{}),
+		appUtil.Controller(attendantController.HandleFindAllAttendants),
+	)
+	router.Get("/:id",
+		appUtil.Controller(attendantController.HandleFindAttendantByID),
+	)
+	router.Post("",
+		validatorMiddleware(&attendantDTO.CreateAttendantDTO{}, nil),
+		appUtil.Controller(attendantController.HandleCreateAttendant),
+	)
+	router.Patch("/:id",
+		validatorMiddleware(&attendantDTO.UpdateAttendantDTO{}, nil),
+		appUtil.Controller(attendantController.HandleUpdateAttendant),
+	)
+	router.Delete("/:id",
+		appUtil.Controller(attendantController.HandleDeleteAttendant),
+	)
 }

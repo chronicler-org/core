@@ -11,7 +11,7 @@ type ProductRepository struct {
 	*appRepository.BaseRepository
 }
 
-func InitManagerRepository(db *gorm.DB) *ProductRepository {
+func InitProductRepository(db *gorm.DB) *ProductRepository {
 	return &ProductRepository{
 		BaseRepository: appRepository.NewRepository(db, productModel.Product{}),
 	}

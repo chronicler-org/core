@@ -10,6 +10,7 @@ import (
 	customerRouter "github.com/chronicler-org/core/src/customer/router"
 	customerCareRouter "github.com/chronicler-org/core/src/customerCare/router"
 	managerRouter "github.com/chronicler-org/core/src/manager/router"
+	productRouter "github.com/chronicler-org/core/src/product/router"
 	tagRouter "github.com/chronicler-org/core/src/tag/router"
 	teamRouter "github.com/chronicler-org/core/src/team/router"
 )
@@ -17,11 +18,13 @@ import (
 func InitAppRouter(app *fiber.App, db *gorm.DB) {
 
 	tagController, tagService := tagRouter.InitTagModule(db)
+	productController, _ := productRouter.InitProductModule(db)
 	teamController, teamService := teamRouter.InitTeamModule(db)
 	managerController, managerService := managerRouter.InitManagerModule(db, teamService)
 	customerController, customerService := customerRouter.InitCustomerModule(db, tagService)
 	attendantController, attendantService := attendantRouter.InitAttendantModule(db, teamService)
 	authRouterController, _ := authRouter.InitAuthModule(db, managerService, attendantService)
+
 	customerCareController, _ := customerCareRouter.InitCustomerCareModule(db, customerService, teamService)
 
 	authRouter.InitAuthRouter(app, authRouterController)
@@ -29,7 +32,7 @@ func InitAppRouter(app *fiber.App, db *gorm.DB) {
 	app.Use(authMiddleware.WithAuth(managerService, attendantService))
 	tagRouter.InitTagRouter(app, tagController)
 	teamRouter.InitTeamRouter(app, teamController)
-
+	productRouter.InitProductRouter(app, productController)
 	managerRouter.InitManagerRouter(app, managerController)
 	customerRouter.InitCustomerRouter(app, customerController)
 	attendantRouter.InitAttendantRouter(app, attendantController)

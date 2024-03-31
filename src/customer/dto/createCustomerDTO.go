@@ -5,7 +5,7 @@ import (
 )
 
 type CreateCustomerDTO struct {
-	CPF       string    `validate:"required,number,len=11" json:"cpf"`
+	CPF       string    `validate:"required,cpf" json:"cpf"`
 	Name      string    `validate:"required,min=10,max=50" json:"name"`
 	Email     string    `validate:"required,email,max=50"  json:"email"`
 	Phone     string    `validate:"required,number,len=11" json:"phone"`

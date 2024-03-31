@@ -5,7 +5,6 @@ import (
 	"gorm.io/gorm"
 
 	appDto "github.com/chronicler-org/core/src/app/dto"
-	"github.com/chronicler-org/core/src/app/middleware"
 	appUtil "github.com/chronicler-org/core/src/app/utils"
 	teamController "github.com/chronicler-org/core/src/team/controller"
 	teamDTO "github.com/chronicler-org/core/src/team/dto"
@@ -13,16 +12,39 @@ import (
 	teamService "github.com/chronicler-org/core/src/team/service"
 )
 
-func InitTeamRouter(router *fiber.App, db *gorm.DB) *teamService.TeamService {
-	teamRepository := teamRepository.InitTeamRepository(db)
-	teamService := teamService.InitTeamService(teamRepository)
-	teamController := teamController.InitTeamController(teamService)
+func InitTeamModule(
+	db *gorm.DB,
+) (*teamController.TeamController, *teamService.TeamService) {
+	teamRepo := teamRepository.InitTeamRepository(db)
+	teamServ := teamService.InitTeamService(teamRepo)
+	teamCtrl := teamController.InitTeamController(teamServ)
 
-	router.Get("/team", middleware.Validate(nil, &appDto.PaginationDTO{}), appUtil.Controller(teamController.HandleFindAll))
-	router.Get("/team/:id", appUtil.Controller(teamController.HandleFindByID))
-	router.Post("/team", middleware.Validate(&teamDTO.CreateTeamDTO{}, nil), appUtil.Controller(teamController.HandleCreateTeam))
-	router.Patch("/team/:id", middleware.Validate(&teamDTO.UpdateTeamDTO{}, nil), appUtil.Controller(teamController.HandleUpdateTeam))
-	router.Delete("/team/:id", appUtil.Controller(teamController.HandleDeleteTeam))
+	return teamCtrl, teamServ
+}
 
-	return teamService
+func InitTeamRouter(
+	router *fiber.App,
+	teamController *teamController.TeamController,
+	validatorMiddleware func(interface{}, interface{}) func(*fiber.Ctx) error,
+) {
+	teamRouter := router.Group("/team")
+
+	teamRouter.Get("/",
+		validatorMiddleware(nil, &appDto.PaginationDTO{}),
+		appUtil.Controller(teamController.HandleFindAll),
+	)
+	teamRouter.Get("/:id",
+		appUtil.Controller(teamController.HandleFindByID),
+	)
+	teamRouter.Post("/",
+		validatorMiddleware(&teamDTO.CreateTeamDTO{}, nil),
+		appUtil.Controller(teamController.HandleCreateTeam),
+	)
+	teamRouter.Patch("/:id",
+		validatorMiddleware(&teamDTO.UpdateTeamDTO{}, nil),
+		appUtil.Controller(teamController.HandleUpdateTeam),
+	)
+	teamRouter.Delete("/:id",
+		appUtil.Controller(teamController.HandleDeleteTeam),
+	)
 }

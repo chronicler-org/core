@@ -5,7 +5,6 @@ import (
 	"gorm.io/gorm"
 
 	appDto "github.com/chronicler-org/core/src/app/dto"
-	"github.com/chronicler-org/core/src/app/middleware"
 	appUtil "github.com/chronicler-org/core/src/app/utils"
 	customerController "github.com/chronicler-org/core/src/customer/controller"
 	customerDTO "github.com/chronicler-org/core/src/customer/dto"
@@ -14,16 +13,39 @@ import (
 	tagService "github.com/chronicler-org/core/src/tag/service"
 )
 
-func InitCustomerRouter(router *fiber.App, db *gorm.DB, tagServ *tagService.TagService) *customerService.CustomerService {
-	customerRepository := customerRepository.InitCustomerRepository(db)
-	customerService := customerService.InitCustomerService(customerRepository, tagServ)
-	customerController := customerController.InitCustomerController(customerService)
+func InitCustomerModule(
+	db *gorm.DB,
+	tagServ *tagService.TagService,
+) (*customerController.CustomerController, *customerService.CustomerService) {
+	customerRepo := customerRepository.InitCustomerRepository(db)
+	customerServ := customerService.InitCustomerService(customerRepo, tagServ)
+	customerCtrl := customerController.InitCustomerController(customerServ)
 
-	router.Get("/customer", middleware.Validate(nil, &appDto.PaginationDTO{}), appUtil.Controller(customerController.HandleFindAll))
-	router.Get("/customer/:cpf", appUtil.Controller(customerController.HandleFindByCPF))
-	router.Post("/customer", middleware.Validate(&customerDTO.CreateCustomerDTO{}, nil), appUtil.Controller(customerController.HandleCreateCustomer))
-	router.Patch("/customer/:cpf", middleware.Validate(&customerDTO.UpdateCustomerDTO{}, nil), appUtil.Controller(customerController.HandleUpdateCustomer))
-	router.Delete("/customer/:cpf", appUtil.Controller(customerController.HandleDeleteCustomer))
+	return customerCtrl, customerServ
+}
 
-	return customerService
+func InitCustomerRouter(
+	router *fiber.App,
+	customerController *customerController.CustomerController,
+	validatorMiddleware func(interface{}, interface{}) func(*fiber.Ctx) error,
+) {
+	customerRouter := router.Group("/customer")
+
+	customerRouter.Get("/",
+		validatorMiddleware(nil, &appDto.PaginationDTO{}),
+		appUtil.Controller(customerController.HandleFindAll),
+	)
+	customerRouter.Get("/:cpf",
+		appUtil.Controller(customerController.HandleFindByCPF),
+	)
+	customerRouter.Post("/",
+		validatorMiddleware(&customerDTO.CreateCustomerDTO{}, nil),
+		appUtil.Controller(customerController.HandleCreateCustomer))
+	customerRouter.Patch("/:cpf",
+		validatorMiddleware(&customerDTO.UpdateCustomerDTO{}, nil),
+		appUtil.Controller(customerController.HandleUpdateCustomer),
+	)
+	customerRouter.Delete("/:cpf",
+		appUtil.Controller(customerController.HandleDeleteCustomer),
+	)
 }

@@ -4,7 +4,6 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
 
-	"github.com/chronicler-org/core/src/app/middleware"
 	appUtil "github.com/chronicler-org/core/src/app/utils"
 	managerController "github.com/chronicler-org/core/src/manager/controller"
 	managerDTO "github.com/chronicler-org/core/src/manager/dto"
@@ -13,17 +12,40 @@ import (
 	teamService "github.com/chronicler-org/core/src/team/service"
 )
 
-func InitManagerRouter(router *fiber.App, db *gorm.DB, teamServ *teamService.TeamService) *managerService.ManagerService {
+func InitManagerModule(
+	db *gorm.DB,
+	teamServ *teamService.TeamService,
+) (*managerController.ManagerController, *managerService.ManagerService) {
+	managerRepo := managerRepository.InitManagerRepository(db)
+	managerServ := managerService.InitManagerService(managerRepo, teamServ)
+	managerCtrl := managerController.InitManagerController(managerServ)
 
-	managerRepository := managerRepository.InitManagerRepository(db)
-	managerService := managerService.InitManagerService(managerRepository, teamServ)
-	managerController := managerController.InitManagerController(managerService)
+	return managerCtrl, managerServ
+}
 
-	router.Get("/manager", middleware.Validate(nil, &managerDTO.QueryManagerDTO{}), appUtil.Controller(managerController.HandleFindAll))
-	router.Get("/manager/:id", appUtil.Controller(managerController.HandleFindByID))
-	router.Post("/manager", middleware.Validate(&managerDTO.CreateManagerDTO{}, nil), appUtil.Controller(managerController.HandleCreateManager))
-	router.Patch("/manager/:id", middleware.Validate(&managerDTO.UpdateManagerDTO{}, nil), appUtil.Controller(managerController.HandleUpdateManager))
-	router.Delete("/manager/:id", appUtil.Controller(managerController.HandleDeleteManager))
+func InitManagerRouter(
+	router *fiber.App,
+	managerController *managerController.ManagerController,
+	validatorMiddleware func(interface{}, interface{}) func(*fiber.Ctx) error,
+) {
+	managerRouter := router.Group("/manager")
 
-	return managerService
+	managerRouter.Get("/",
+		validatorMiddleware(nil, &managerDTO.QueryManagerDTO{}),
+		appUtil.Controller(managerController.HandleFindAll),
+	)
+	managerRouter.Get("/:id",
+		appUtil.Controller(managerController.HandleFindByID),
+	)
+	managerRouter.Post("/",
+		validatorMiddleware(&managerDTO.CreateManagerDTO{}, nil),
+		appUtil.Controller(managerController.HandleCreateManager),
+	)
+	managerRouter.Patch("/:id",
+		validatorMiddleware(&managerDTO.UpdateManagerDTO{}, nil),
+		appUtil.Controller(managerController.HandleUpdateManager),
+	)
+	managerRouter.Delete("/:id",
+		appUtil.Controller(managerController.HandleDeleteManager),
+	)
 }

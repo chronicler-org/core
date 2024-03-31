@@ -1,9 +1,10 @@
 package managerRepository
 
 import (
+	"gorm.io/gorm"
+
 	appRepository "github.com/chronicler-org/core/src/app/repository"
 	managerModel "github.com/chronicler-org/core/src/manager/model"
-	"gorm.io/gorm"
 )
 
 type ManagerRepository struct {

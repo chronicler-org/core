@@ -4,25 +4,24 @@ import (
 	"log"
 	"os"
 
+	"github.com/go-playground/locales/pt_BR"
+	ut "github.com/go-playground/universal-translator"
+	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 
-	addressRouter "github.com/chronicler-org/core/src/address/router"
+	appRouter "github.com/chronicler-org/core/src/app/router"
+	appUtil "github.com/chronicler-org/core/src/app/utils"
 	attendantModel "github.com/chronicler-org/core/src/attendant/model"
-	attendantRouter "github.com/chronicler-org/core/src/attendant/router"
-	authRouter "github.com/chronicler-org/core/src/auth/router"
 	customerModel "github.com/chronicler-org/core/src/customer/model"
-	customerRouter "github.com/chronicler-org/core/src/customer/router"
 	customerCareModel "github.com/chronicler-org/core/src/customerCare/model"
-	customerCareRouter "github.com/chronicler-org/core/src/customerCare/router"
 	managerModel "github.com/chronicler-org/core/src/manager/model"
-	managerRouter "github.com/chronicler-org/core/src/manager/router"
+	productEnum "github.com/chronicler-org/core/src/product/enum"
+	productModel "github.com/chronicler-org/core/src/product/model"
 	tagModel "github.com/chronicler-org/core/src/tag/model"
-	tagRouter "github.com/chronicler-org/core/src/tag/router"
 	teamModel "github.com/chronicler-org/core/src/team/model"
-	teamRouter "github.com/chronicler-org/core/src/team/router"
 )
 
 func main() {
@@ -33,7 +32,7 @@ func main() {
 		log.Fatal(err)
 	}
 	// realiza migration das entidades no banco de dados
-	db.AutoMigrate(&managerModel.Manager{}, &customerModel.Customer{}, &tagModel.Tag{}, &attendantModel.Attendant{}, &teamModel.Team{}, &customerCareModel.CustomerCare{}, &customerCareModel.CustomerCareEvaluation{})
+	db.AutoMigrate(&managerModel.Manager{}, &customerModel.Customer{}, &tagModel.Tag{}, &attendantModel.Attendant{}, &attendantModel.AttendantEvaluation{}, &teamModel.Team{}, &customerCareModel.CustomerCare{}, &customerCareModel.CustomerCareEvaluation{}, &productModel.Product{})
 
 	// inicializa app principal
 	app := fiber.New()
@@ -46,18 +45,18 @@ func main() {
 		return c.SendString("Hello, World 2!")
 	})
 
-	// instancia as rotas para cada entidade
-	tagService := tagRouter.InitTagRouter(app, db)
-	customerService := customerRouter.InitCustomerRouter(app, db, tagService)
-	teamService := teamRouter.InitTeamRouter(app, db)
-	managerService := managerRouter.InitManagerRouter(app, db, teamService)
-	attendantService := attendantRouter.InitAttendantRouter(app, db, teamService)
-	customerCareRouter.InitCustomerCareRouter(app, db, customerService, teamService)
+	// validator
+	Validator := validator.New()
 
-	managerRouter.InitManagerRouter(app, db)
-	customerRouter.InitCustomerRouter(app, db, tagService)
-	attendantRouter.InitAttendantRouter(app, db)
-	addressRouter.InitAddressRouter(app, db)
+	pt := pt_BR.New()
+	uni := ut.New(pt, pt)
+	trans, _ := uni.GetTranslator("pt_BR")
+
+	appUtil.RegisterCPFValidationAndTranslation(Validator, trans)
+	productEnum.RegisterModelValidationAndTranslation(Validator, trans)
+	productEnum.RegisterSizeValidationAndTranslation(Validator, trans)
+
+	appRouter.InitAppRouter(app, db, Validator)
 
 	app.Listen(":8080")
 }

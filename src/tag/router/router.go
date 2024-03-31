@@ -5,7 +5,6 @@ import (
 	"gorm.io/gorm"
 
 	appDto "github.com/chronicler-org/core/src/app/dto"
-	"github.com/chronicler-org/core/src/app/middleware"
 	appUtil "github.com/chronicler-org/core/src/app/utils"
 	tagController "github.com/chronicler-org/core/src/tag/controller"
 	tagDTO "github.com/chronicler-org/core/src/tag/dto"
@@ -13,16 +12,39 @@ import (
 	tagService "github.com/chronicler-org/core/src/tag/service"
 )
 
-func InitTagRouter(router *fiber.App, db *gorm.DB) *tagService.TagService {
-	tagRepository := tagRepository.InitTagRepository(db)
-	tagService := tagService.InitTagService(tagRepository)
-	tagController := tagController.InitTagController(tagService)
+func InitTagModule(
+	db *gorm.DB,
+) (*tagController.TagController, *tagService.TagService) {
+	tagRepo := tagRepository.InitTagRepository(db)
+	tagServ := tagService.InitTagService(tagRepo)
+	tagCtrl := tagController.InitTagController(tagServ)
 
-	router.Get("/tag", middleware.Validate(nil, &appDto.PaginationDTO{}), appUtil.Controller(tagController.HandleFindAll))
-	router.Get("/tag/:id", appUtil.Controller(tagController.HandleFindByID))
-	router.Post("/tag", middleware.Validate(&tagDTO.CreateTagDTO{}, nil), appUtil.Controller(tagController.HandleCreateTag))
-	router.Patch("/tag/:id", middleware.Validate(&tagDTO.UpdateTagDTO{}, nil), appUtil.Controller(tagController.HandleUpdateTag))
-	router.Delete("/tag/:id", appUtil.Controller(tagController.HandleDeleteTag))
+	return tagCtrl, tagServ
+}
 
-	return tagService
+func InitTagRouter(
+	router *fiber.App,
+	tagController *tagController.TagController,
+	validatorMiddleware func(interface{}, interface{}) func(*fiber.Ctx) error,
+) {
+	tagRouter := router.Group("/tag")
+
+	tagRouter.Get("/",
+		validatorMiddleware(nil, &appDto.PaginationDTO{}),
+		appUtil.Controller(tagController.HandleFindAll),
+	)
+	tagRouter.Get("/:id",
+		appUtil.Controller(tagController.HandleFindByID),
+	)
+	tagRouter.Post("/",
+		validatorMiddleware(&tagDTO.CreateTagDTO{}, nil),
+		appUtil.Controller(tagController.HandleCreateTag),
+	)
+	tagRouter.Patch("/:id",
+		validatorMiddleware(&tagDTO.UpdateTagDTO{}, nil),
+		appUtil.Controller(tagController.HandleUpdateTag),
+	)
+	tagRouter.Delete("/:id",
+		appUtil.Controller(tagController.HandleDeleteTag),
+	)
 }

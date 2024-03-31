@@ -1,6 +1,8 @@
-package appEnum
+package authEnum
+
+type Role string
 
 const (
-	AttendantRole = "Attendant"
-	ManagerRole   = "Manager"
+	ManagerRole   Role = "MANAGER"
+	AttendantRole Role = "ATTENDANT"
 )

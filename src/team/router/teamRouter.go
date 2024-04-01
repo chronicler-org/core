@@ -5,7 +5,9 @@ import (
 	"gorm.io/gorm"
 
 	appDto "github.com/chronicler-org/core/src/app/dto"
+	appMiddleware "github.com/chronicler-org/core/src/app/middleware"
 	appUtil "github.com/chronicler-org/core/src/app/utils"
+	authEnum "github.com/chronicler-org/core/src/auth/enum"
 	teamController "github.com/chronicler-org/core/src/team/controller"
 	teamDTO "github.com/chronicler-org/core/src/team/dto"
 	teamRepository "github.com/chronicler-org/core/src/team/repository"
@@ -36,6 +38,9 @@ func InitTeamRouter(
 	teamRouter.Get("/:id",
 		appUtil.Controller(teamController.HandleFindByID),
 	)
+
+	teamRouter.Use(appMiddleware.RouteAccessMiddleware([]authEnum.Role{authEnum.ManagerRole}))
+
 	teamRouter.Post("/",
 		validatorMiddleware(&teamDTO.CreateTeamDTO{}, nil),
 		appUtil.Controller(teamController.HandleCreateTeam),

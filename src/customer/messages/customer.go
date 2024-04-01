@@ -7,3 +7,9 @@ var CUSTOMER_NOT_FOUND = appDto.CustomErrorDTO{
 	Title:  "Cliente não encontrado",
 	Detail: "Cliente não foi encontrado na base de dados",
 }
+
+var ADDRESS_NOT_FOUND = appDto.CustomErrorDTO{
+	Code: "ADDRESS_NOT_FOUND",
+	Title: "Endereço não encontrado",
+	Detail: "Endereço não foi encontrado na base de dados",
+}

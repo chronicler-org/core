@@ -11,4 +11,5 @@ type UpdateCustomerDTO struct {
 	Job       string    `validate:"omitempty,min=5,max=30" json:"job,omitempty"`
 	BirthDate time.Time `validate:"omitempty" json:"birth_date,omitempty"`
 	TagIDs    []string  `validate:"omitempty,dive,uuid" json:"tag_ids"`
+	AddressId string    `validate:"omitempty,uuid" json:"address_id"`
 }

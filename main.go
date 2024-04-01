@@ -32,7 +32,7 @@ func main() {
 		log.Fatal(err)
 	}
 	// realiza migration das entidades no banco de dados
-	db.AutoMigrate(&managerModel.Manager{}, &customerModel.Customer{}, &tagModel.Tag{}, &attendantModel.Attendant{}, &attendantModel.AttendantEvaluation{}, &teamModel.Team{}, &customerCareModel.CustomerCare{}, &customerCareModel.CustomerCareEvaluation{}, &productModel.Product{})
+	db.AutoMigrate(&managerModel.Manager{}, &customerModel.Customer{}, &customerModel.CustomerAddress{}, &tagModel.Tag{}, &attendantModel.Attendant{}, &attendantModel.AttendantEvaluation{}, &teamModel.Team{}, &customerCareModel.CustomerCare{}, &customerCareModel.CustomerCareEvaluation{}, &productModel.Product{})
 
 	// inicializa app principal
 	app := fiber.New()
@@ -42,7 +42,7 @@ func main() {
 
 	// rota raiz
 	app.Get("/", func(c *fiber.Ctx) error {
-		return c.SendString("Hello, World!")
+		return c.SendString("Hello, World 2!")
 	})
 
 	// validator

@@ -4,7 +4,9 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
 
+	appMiddleware "github.com/chronicler-org/core/src/app/middleware"
 	appUtil "github.com/chronicler-org/core/src/app/utils"
+	authEnum "github.com/chronicler-org/core/src/auth/enum"
 	managerController "github.com/chronicler-org/core/src/manager/controller"
 	managerDTO "github.com/chronicler-org/core/src/manager/dto"
 	managerRepository "github.com/chronicler-org/core/src/manager/repository"
@@ -29,6 +31,7 @@ func InitManagerRouter(
 	validatorMiddleware func(interface{}, interface{}) func(*fiber.Ctx) error,
 ) {
 	managerRouter := router.Group("/manager")
+	managerRouter.Use(appMiddleware.RouteAccessMiddleware([]authEnum.Role{authEnum.ManagerRole}))
 
 	managerRouter.Get("/",
 		validatorMiddleware(nil, &managerDTO.QueryManagerDTO{}),

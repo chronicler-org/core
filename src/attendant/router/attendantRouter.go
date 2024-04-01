@@ -5,11 +5,13 @@ import (
 	"gorm.io/gorm"
 
 	appDto "github.com/chronicler-org/core/src/app/dto"
+	appMiddleware "github.com/chronicler-org/core/src/app/middleware"
 	appUtil "github.com/chronicler-org/core/src/app/utils"
 	attendantController "github.com/chronicler-org/core/src/attendant/controller"
 	attendantDTO "github.com/chronicler-org/core/src/attendant/dto"
 	attendantRepository "github.com/chronicler-org/core/src/attendant/repository"
 	attendantService "github.com/chronicler-org/core/src/attendant/service"
+	authEnum "github.com/chronicler-org/core/src/auth/enum"
 	teamService "github.com/chronicler-org/core/src/team/service"
 )
 
@@ -31,6 +33,8 @@ func InitAttendantRouter(
 	validatorMiddleware func(interface{}, interface{}) func(*fiber.Ctx) error,
 ) {
 	attendantRoute := router.Group("/attendant")
+	managerAccessMiddleware := appMiddleware.RouteAccessMiddleware([]authEnum.Role{authEnum.ManagerRole})
+	attendantAccessMiddleware := appMiddleware.RouteAccessMiddleware([]authEnum.Role{authEnum.AttendantRole})
 
 	attendantRoute.Get("/evaluation",
 		validatorMiddleware(nil, &appDto.PaginationDTO{}),
@@ -40,10 +44,12 @@ func InitAttendantRouter(
 		appUtil.Controller(attendantController.HandleFindAttendantEvaluationByID),
 	)
 	attendantRoute.Post("/evaluation",
+		attendantAccessMiddleware,
 		validatorMiddleware(&attendantDTO.CreateAttendantDTO{}, nil),
 		appUtil.Controller(attendantController.HandleCreateAttendantEvaluation),
 	)
 	attendantRoute.Patch("/evaluation/:id",
+		attendantAccessMiddleware,
 		validatorMiddleware(&attendantDTO.UpdateAttendantDTO{}, nil),
 		appUtil.Controller(attendantController.HandleUpdateAttendantEvaluation),
 	)
@@ -51,14 +57,19 @@ func InitAttendantRouter(
 		appUtil.Controller(attendantController.HandleDeleteAttendantEvaluation),
 	)
 
-	attendantRoute.Get("",
+	attendantRoute.Get("/",
 		validatorMiddleware(nil, &appDto.PaginationDTO{}),
 		appUtil.Controller(attendantController.HandleFindAllAttendants),
+	)
+	attendantRoute.Get("/me",
+		attendantAccessMiddleware,
+		appUtil.Controller(attendantController.HandleGetLoggedAttendant),
 	)
 	attendantRoute.Get("/:id",
 		appUtil.Controller(attendantController.HandleFindAttendantByID),
 	)
-	attendantRoute.Post("",
+	attendantRoute.Post("/",
+		managerAccessMiddleware,
 		validatorMiddleware(&attendantDTO.CreateAttendantDTO{}, nil),
 		appUtil.Controller(attendantController.HandleCreateAttendant),
 	)
@@ -67,6 +78,7 @@ func InitAttendantRouter(
 		appUtil.Controller(attendantController.HandleUpdateAttendant),
 	)
 	attendantRoute.Delete("/:id",
+		managerAccessMiddleware,
 		appUtil.Controller(attendantController.HandleDeleteAttendant),
 	)
 }

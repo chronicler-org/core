@@ -8,6 +8,7 @@ import (
 	attendantDTO "github.com/chronicler-org/core/src/attendant/dto"
 	attendantModel "github.com/chronicler-org/core/src/attendant/model"
 	attendantService "github.com/chronicler-org/core/src/attendant/service"
+	authEnum "github.com/chronicler-org/core/src/auth/enum"
 )
 
 type AttendantController struct {
@@ -24,7 +25,6 @@ func (controller *AttendantController) HandleFindAllAttendants(c *fiber.Ctx) (ap
 	c.QueryParser(&paginationDto)
 
 	totalCount, attendants, err := controller.attendantService.FindAllAttendants(paginationDto)
-
 	return appUtil.Paginate(attendants, totalCount, paginationDto.GetPage(), paginationDto.GetLimit()), err
 }
 
@@ -35,13 +35,18 @@ func (controller *AttendantController) HandleFindAttendantByID(c *fiber.Ctx) (ap
 	return appUtil.PaginateSingle(attendant), err
 }
 
+func (controller *AttendantController) HandleGetLoggedAttendant(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
+	loggedAttendant := c.Locals(authEnum.AttendantRole).(attendantModel.Attendant)
+
+	return appUtil.PaginateSingle(loggedAttendant), nil
+}
+
 func (controller *AttendantController) HandleCreateAttendant(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
 	var createAttendantDTO attendantDTO.CreateAttendantDTO
 
 	c.BodyParser(&createAttendantDTO)
 
 	attendantCreated, err := controller.attendantService.CreateAttendant(createAttendantDTO)
-
 	return appUtil.PaginateSingle(attendantCreated), err
 }
 
@@ -52,7 +57,6 @@ func (controller *AttendantController) HandleUpdateAttendant(c *fiber.Ctx) (appU
 	id := c.Params("id")
 
 	attendantUpdated, err := controller.attendantService.UpdateAttendant(id, updatedAttendantDTO)
-
 	return appUtil.PaginateSingle(attendantUpdated), err
 }
 
@@ -79,12 +83,12 @@ func (controller *AttendantController) HandleFindAttendantEvaluationByID(c *fibe
 }
 
 func (controller *AttendantController) HandleCreateAttendantEvaluation(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
-	loggedAttendant := c.Locals("attendant").(attendantModel.Attendant)
+	loggedAttendant := c.Locals(authEnum.AttendantRole).(attendantModel.Attendant)
 	var createAttendantEvaluationDTO attendantDTO.CreateAttendantEvaluationDTO
 
 	c.BodyParser(&createAttendantEvaluationDTO)
 
-	attendantEvaluationCreated, err := controller.attendantService.CreateAttendantEvaluation(createAttendantEvaluationDTO,loggedAttendant)
+	attendantEvaluationCreated, err := controller.attendantService.CreateAttendantEvaluation(createAttendantEvaluationDTO, loggedAttendant)
 	return appUtil.PaginateSingle(attendantEvaluationCreated), err
 }
 

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"time"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 
 	appDto "github.com/chronicler-org/core/src/app/dto"
@@ -15,7 +16,6 @@ import (
 	customerRepository "github.com/chronicler-org/core/src/customer/repository"
 	tagModel "github.com/chronicler-org/core/src/tag/model"
 	tagService "github.com/chronicler-org/core/src/tag/service"
-	"github.com/google/uuid"
 )
 
 type CustomerService struct {
@@ -37,7 +37,7 @@ func InitCustomerService(
 }
 
 func (service *CustomerService) FindCustomerByCPF(cpf string) (customerModel.Customer, error) {
-	result, err := service.customerRepository.FindOneByField("CPF", cpf, "Tags")
+	result, err := service.customerRepository.FindOneByField("CPF", cpf, "Tags", "Address")
 	customer, _ := result.(*customerModel.Customer)
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -47,12 +47,18 @@ func (service *CustomerService) FindCustomerByCPF(cpf string) (customerModel.Cus
 }
 
 func (service *CustomerService) CreateCustomer(dto customerDTO.CreateCustomerDTO) (customerModel.Customer, error) {
+	customerAddressExists, err := service.FindCustomerAddressByID(dto.AddressId)
+	if err != nil {
+		return customerModel.Customer{}, err
+	}
+
 	model := customerModel.Customer{
 		CPF:       dto.CPF,
 		Name:      dto.Name,
 		Email:     dto.Email,
 		Phone:     dto.Phone,
 		Job:       dto.Job,
+		AddressID: customerAddressExists.ID,
 		BirthDate: dto.BirthDate,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
@@ -67,11 +73,11 @@ func (service *CustomerService) CreateCustomer(dto customerDTO.CreateCustomerDTO
 	}
 	model.Tags = tags
 
-	err := service.customerRepository.Create(model)
+	err = service.customerRepository.Create(model)
 	if err != nil {
 		return customerModel.Customer{}, err
 	}
-
+	model.Address = customerAddressExists
 	return model, err
 }
 
@@ -80,6 +86,20 @@ func (service *CustomerService) UpdateCustomer(cpf string, dto customerDTO.Updat
 	if err != nil {
 		return customerModel.Customer{}, err
 	}
+	customerAddress := customerModel.CustomerAddress{}
+
+	if dto.AddressId != "" {
+		customerAddressExists, err := service.FindCustomerAddressByID(dto.AddressId)
+		if err != nil {
+			return customerModel.Customer{}, err
+		}
+		customerAddress = customerAddressExists
+	}
+
+	if err != nil {
+		return customerModel.Customer{}, err
+	}
+
 	appUtil.UpdateModelFromDTO(&customerExists, &dto)
 
 	err = service.updateCustomerTags(&customerExists, dto.TagIDs)
@@ -94,13 +114,13 @@ func (service *CustomerService) UpdateCustomer(cpf string, dto customerDTO.Updat
 	}
 
 	customerUpdated, err := service.FindCustomerByCPF(cpf)
-
+	customerUpdated.Address = customerAddress
 	return customerUpdated, err
 }
 
 func (service *CustomerService) FindAllCustomers(dto appDto.PaginationDTO) (int64, []customerModel.Customer, error) {
 	var customers []customerModel.Customer
-	totalCount, err := service.customerRepository.FindAll(dto, &customers, "Tags")
+	totalCount, err := service.customerRepository.FindAll(dto, &customers, "Tags", "Address")
 	if err != nil {
 		return 0, nil, err
 	}

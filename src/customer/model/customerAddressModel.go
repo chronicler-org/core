@@ -7,14 +7,14 @@ import (
 )
 
 type CustomerAddress struct {
-	ID 						uuid.UUID	`gorm:"primarykey"`
-	CEP 					string		`json:"cep"`
-	City 					string 		`json:"city"`
-	Number 				string		`json:"number"`
-	Estate 				string		`json:"estate"`
-	StreetName 		string		`json:"street_name"`
-	Complement 		string		`json:"complement"`
-	Neighborhood	string 		`json:"neighborhood"`
-	CreatedAt			time.Time	`json:"created_at"`
-	UpdatedAt 		time.Time `json:"updated_at"`
+	ID           uuid.UUID `gorm:"primarykey"`
+	CEP          string    `gorm:"not null" json:"cep"`
+	City         string    `gorm:"not null" json:"city"`
+	Number       string    `gorm:"not null" json:"number"`
+	Estate       string    `gorm:"not null" json:"estate"`
+	StreetName   string    `json:"street_name"`
+	Complement   string    `json:"complement"`
+	Neighborhood string    `json:"neighborhood"`
+	CreatedAt    time.Time `json:"created_at"`
+	UpdatedAt    time.Time `json:"updated_at"`
 }

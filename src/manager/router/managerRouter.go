@@ -37,6 +37,9 @@ func InitManagerRouter(
 		validatorMiddleware(nil, &managerDTO.QueryManagerDTO{}),
 		appUtil.Controller(managerController.HandleFindAll),
 	)
+	managerRouter.Get("/me",
+	appUtil.Controller(managerController.HandleGetLoggedManager),
+)
 	managerRouter.Get("/:id",
 		appUtil.Controller(managerController.HandleFindByID),
 	)

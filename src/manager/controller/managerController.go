@@ -4,7 +4,9 @@ import (
 	"github.com/gofiber/fiber/v2"
 
 	appUtil "github.com/chronicler-org/core/src/app/utils"
+	authEnum "github.com/chronicler-org/core/src/auth/enum"
 	managerDTO "github.com/chronicler-org/core/src/manager/dto"
+	managerModel "github.com/chronicler-org/core/src/manager/model"
 	managerService "github.com/chronicler-org/core/src/manager/service"
 )
 
@@ -31,6 +33,12 @@ func (controller *ManagerController) HandleFindByID(c *fiber.Ctx) (appUtil.Pagin
 
 	manager, err := controller.managerService.FindByID(id)
 	return appUtil.PaginateSingle(manager), err
+}
+
+func (controller *ManagerController) HandleGetLoggedManager(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
+	loggedManager := c.Locals(authEnum.ManagerRole).(managerModel.Manager)
+
+	return appUtil.PaginateSingle(loggedManager), nil
 }
 
 func (controller *ManagerController) HandleCreateManager(c *fiber.Ctx) (appUtil.PaginateResponse, error) {

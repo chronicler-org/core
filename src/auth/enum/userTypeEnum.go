@@ -3,6 +3,6 @@ package authEnum
 type Role string
 
 const (
-	ManagerRole   Role = "MANAGER"
-	AttendantRole Role = "ATTENDANT"
+	ManagerRole   Role = "Gerente"
+	AttendantRole Role = "Atendente"
 )

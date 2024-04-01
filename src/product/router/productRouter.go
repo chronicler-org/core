@@ -4,7 +4,9 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
 
+	appMiddleware "github.com/chronicler-org/core/src/app/middleware"
 	appUtil "github.com/chronicler-org/core/src/app/utils"
+	authEnum "github.com/chronicler-org/core/src/auth/enum"
 	productController "github.com/chronicler-org/core/src/product/controller"
 	productDTO "github.com/chronicler-org/core/src/product/dto"
 	productRepository "github.com/chronicler-org/core/src/product/repository"
@@ -35,6 +37,9 @@ func InitProductRouter(
 	productRouter.Get("/:id",
 		appUtil.Controller(productController.HandleFindProductByID),
 	)
+
+	productRouter.Use(appMiddleware.RouteAccessMiddleware([]authEnum.Role{authEnum.ManagerRole}))
+	
 	productRouter.Post("/",
 		validatorMiddleware(&productDTO.CreateProductDTO{}, nil),
 		appUtil.Controller(productController.HandleCreateProduct),

@@ -30,43 +30,43 @@ func InitAttendantRouter(
 	attendantController *attendantController.AttendantController,
 	validatorMiddleware func(interface{}, interface{}) func(*fiber.Ctx) error,
 ) {
-	router.Group("/attendant")
+	attendantRoute := router.Group("/attendant")
 
-	router.Get("/evaluation",
+	attendantRoute.Get("/evaluation",
 		validatorMiddleware(nil, &appDto.PaginationDTO{}),
 		appUtil.Controller(attendantController.HandleFindAllAttendantEvaluations),
 	)
-	router.Get("/evaluation/:id",
+	attendantRoute.Get("/evaluation/:id",
 		appUtil.Controller(attendantController.HandleFindAttendantEvaluationByID),
 	)
-	router.Post("/evaluation",
+	attendantRoute.Post("/evaluation",
 		validatorMiddleware(&attendantDTO.CreateAttendantDTO{}, nil),
 		appUtil.Controller(attendantController.HandleCreateAttendantEvaluation),
 	)
-	router.Patch("/evaluation/:id",
+	attendantRoute.Patch("/evaluation/:id",
 		validatorMiddleware(&attendantDTO.UpdateAttendantDTO{}, nil),
 		appUtil.Controller(attendantController.HandleUpdateAttendantEvaluation),
 	)
-	router.Delete("/evaluation/:id",
+	attendantRoute.Delete("/evaluation/:id",
 		appUtil.Controller(attendantController.HandleDeleteAttendantEvaluation),
 	)
 
-	router.Get("",
+	attendantRoute.Get("",
 		validatorMiddleware(nil, &appDto.PaginationDTO{}),
 		appUtil.Controller(attendantController.HandleFindAllAttendants),
 	)
-	router.Get("/:id",
+	attendantRoute.Get("/:id",
 		appUtil.Controller(attendantController.HandleFindAttendantByID),
 	)
-	router.Post("",
+	attendantRoute.Post("",
 		validatorMiddleware(&attendantDTO.CreateAttendantDTO{}, nil),
 		appUtil.Controller(attendantController.HandleCreateAttendant),
 	)
-	router.Patch("/:id",
+	attendantRoute.Patch("/:id",
 		validatorMiddleware(&attendantDTO.UpdateAttendantDTO{}, nil),
 		appUtil.Controller(attendantController.HandleUpdateAttendant),
 	)
-	router.Delete("/:id",
+	attendantRoute.Delete("/:id",
 		appUtil.Controller(attendantController.HandleDeleteAttendant),
 	)
 }

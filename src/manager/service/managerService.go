@@ -14,6 +14,7 @@ import (
 	managerExceptionMessage "github.com/chronicler-org/core/src/manager/messages"
 	managerModel "github.com/chronicler-org/core/src/manager/model"
 	managerRepository "github.com/chronicler-org/core/src/manager/repository"
+	teamModel "github.com/chronicler-org/core/src/team/model"
 	teamService "github.com/chronicler-org/core/src/team/service"
 )
 
@@ -55,21 +56,24 @@ func (service *ManagerService) Create(dto managerDTO.CreateManagerDTO) (managerM
 		return managerModel.Manager{}, err
 	}
 
-	team, err := service.teamService.FindByID(dto.TeamId)
-	if err != nil {
-		return managerModel.Manager{}, err
-	}
-
 	model := managerModel.Manager{
 		ID:        uuid.New(),
 		Name:      dto.Name,
 		CPF:       dto.CPF,
 		Email:     dto.Email,
 		Password:  string(newPassword),
-		TeamID:    team.ID,
 		BirthDate: dto.BirthDate,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
+	}
+
+	team := teamModel.Team{}
+	if dto.TeamId != "" {
+		team, err = service.teamService.FindByID(dto.TeamId)
+		if err != nil {
+			return managerModel.Manager{}, err
+		}
+		model.TeamID = team.ID
 	}
 
 	err = service.managerRepository.Create(model)

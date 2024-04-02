@@ -1,7 +1,7 @@
 package customerDTO
 
 type UpdateCustomerAddressDTO struct {
-	CEP          string `validate:"omitempty,number,len=7" json:"cep"`
+	CEP          string `validate:"omitempty,number,len=8" json:"cep"`
 	City         string `validate:"omitempty,max=30" json:"city"`
 	Estate       string `validate:"omitempty,len=2" json:"estate"`
 	Number       string `validate:"omitempty,max=20" json:"number"`

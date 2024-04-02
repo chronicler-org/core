@@ -1,7 +1,7 @@
 package customerDTO
 
 type CreateCustomerAddressDTO struct {
-	CEP          string `validate:"required,number,len=8" json:"cep"`
+	CEP          string `validate:"required,number,len=9" json:"cep"`
 	City         string `validate:"required,max=30" json:"city"`
 	Number       string `validate:"required,max=20" json:"number"`
 	Estate       string `validate:"required,len=2" json:"estate"`

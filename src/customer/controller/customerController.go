@@ -62,6 +62,12 @@ func (controller *CustomerController) HandleDeleteCustomer(c *fiber.Ctx) (appUti
 	return appUtil.PaginateSingle(customerDeleted), err
 }
 
+func (controller *CustomerController) HandleGetNewCustomersVariationPercent(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
+
+	newCustomersVariationPercent, err := controller.customerService.GetNewCustomersVariationPercent()
+	return appUtil.PaginateSingle(newCustomersVariationPercent), err
+}
+
 func (controller *CustomerController) HandleFindCustomerAddressByID(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
 	id := c.Params("id")
 

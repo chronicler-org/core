@@ -140,6 +140,42 @@ func (service *CustomerService) DeleteCustomer(cpf string) (customerModel.Custom
 	return customerExists, nil
 }
 
+func (service *CustomerService) GetNewCustomersVariationPercent() (customerDTO.NewCustomersVariationDTO, error) {
+	currentMonth := time.Now().Month()
+	currentYear := time.Now().Year()
+	currentMonthCount, err := service.customerRepository.CountByCreatedMonth(currentMonth, currentYear)
+
+	if err != nil {
+		return customerDTO.NewCustomersVariationDTO{}, err
+	}
+
+	lastMonth := currentMonth - 1
+	lastYear := currentYear
+	if lastMonth == 0 {
+		lastMonth = 12
+		lastYear--
+	}
+	lastMonthCount, err := service.customerRepository.CountByCreatedMonth(lastMonth, lastYear)
+	if err != nil {
+		return customerDTO.NewCustomersVariationDTO{}, err
+	}
+
+	var percentVariation float64
+	if lastMonthCount != 0 {
+		percentVariation = float64(currentMonthCount-lastMonthCount) / float64(lastMonthCount) * 100
+	} else {
+		if currentMonthCount == 0 {
+			percentVariation = 0
+		} else {
+			percentVariation = 100
+		}
+	}
+
+	return customerDTO.NewCustomersVariationDTO{
+		PercentVariation: percentVariation,
+	}, nil
+}
+
 func (service *CustomerService) updateCustomerTags(customer *customerModel.Customer, tagIDs []string) error {
 	err := service.customerRepository.ClearAssociationsByField("CPF", customer.CPF, "Tags")
 	if err != nil {

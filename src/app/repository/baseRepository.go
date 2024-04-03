@@ -103,7 +103,7 @@ func (r *BaseRepository) ClearAssociationsByField(field, value string, associati
 	return nil
 }
 
-func (r *BaseRepository) CountByMonth(month time.Month, year int) (int64, error) {
+func (r *BaseRepository) CountByCreatedMonth(month time.Month, year int) (int64, error) {
 	modelType := reflect.TypeOf(r.Model)
 	modelPtr := reflect.New(modelType).Interface()
 

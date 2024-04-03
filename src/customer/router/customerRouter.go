@@ -55,12 +55,15 @@ func InitCustomerRouter(
 		validatorMiddleware(nil, &customerDTO.CustomerQueryDTO{}),
 		appUtil.Controller(customerController.HandleFindAllCustomers),
 	)
-	customerRouter.Get("/:cpf",
-		appUtil.Controller(customerController.HandleFindCustomerByCPF),
+	customerRouter.Get("/new-variation-percent",
+		appUtil.Controller(customerController.HandleGetNewCustomersVariationPercent),
 	)
 	customerRouter.Post("/",
 		validatorMiddleware(&customerDTO.CreateCustomerDTO{}, nil),
 		appUtil.Controller(customerController.HandleCreateCustomer))
+	customerRouter.Get("/:cpf",
+		appUtil.Controller(customerController.HandleFindCustomerByCPF),
+	)
 	customerRouter.Patch("/:cpf",
 		validatorMiddleware(&customerDTO.UpdateCustomerDTO{}, nil),
 		appUtil.Controller(customerController.HandleUpdateCustomer),
@@ -68,4 +71,5 @@ func InitCustomerRouter(
 	customerRouter.Delete("/:cpf",
 		appUtil.Controller(customerController.HandleDeleteCustomer),
 	)
+
 }

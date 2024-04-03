@@ -118,7 +118,7 @@ func (service *CustomerService) UpdateCustomer(cpf string, dto customerDTO.Updat
 	return customerUpdated, err
 }
 
-func (service *CustomerService) FindAllCustomers(dto appDto.PaginationDTO) (int64, []customerModel.Customer, error) {
+func (service *CustomerService) FindAllCustomers(dto customerDTO.CustomerQueryDTO) (int64, []customerModel.Customer, error) {
 	var customers []customerModel.Customer
 	totalCount, err := service.customerRepository.FindAll(dto, &customers, "Tags", "Address")
 	if err != nil {

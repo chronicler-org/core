@@ -52,7 +52,7 @@ func InitCustomerRouter(
 	)
 
 	customerRouter.Get("/",
-		validatorMiddleware(nil, &appDto.PaginationDTO{}),
+		validatorMiddleware(nil, &customerDTO.CustomerQueryDTO{}),
 		appUtil.Controller(customerController.HandleFindAllCustomers),
 	)
 	customerRouter.Get("/:cpf",

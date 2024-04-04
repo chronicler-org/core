@@ -60,6 +60,7 @@ func (service *SaleService) CreateSale(
 
 	transaction := service.saleRepository.BeginTransaction()
 
+	// Create the sale record
 	saleModel := salesModel.Sale{
 		CustomerCareID: customerCareExists.ID,
 		Status:         dto.Status,
@@ -73,6 +74,7 @@ func (service *SaleService) CreateSale(
 		return salesModel.Sale{}, err
 	}
 
+	// Calculate the total value of the sale and create sale items
 	var totalValue float32
 	for _, itemDTO := range dto.SalesItems {
 		saleItem := salesModel.SaleItem{
@@ -82,12 +84,13 @@ func (service *SaleService) CreateSale(
 			UpdatedAt: time.Now(),
 		}
 
-		product, err := service.productService.ValidateStock(itemDTO.ProductID, itemDTO.Quantity)
+		productHasStockAvailable, err := service.productService.ValidateStock(itemDTO.ProductID, itemDTO.Quantity)
 		if err != nil {
 			transaction.Rollback()
 			return salesModel.Sale{}, err
 		}
-		saleItem.ProductID = product.ID
+		totalValue += productHasStockAvailable.Value * float32(itemDTO.Quantity)
+		saleItem.ProductID = productHasStockAvailable.ID
 
 		err = service.saleItemRepository.CreateWithTransaction(transaction, saleItem)
 		if err != nil {
@@ -95,10 +98,16 @@ func (service *SaleService) CreateSale(
 			return salesModel.Sale{}, err
 		}
 
-		totalValue += product.Value * float32(itemDTO.Quantity)
+		_, err = service.productService.DebitStock(itemDTO.ProductID, itemDTO.Quantity, transaction)
+		if err != nil {
+			transaction.Rollback()
+			return salesModel.Sale{}, err
+		}
 	}
 
+	// Update the sale record with the total value
 	saleModel.TotalValue = totalValue
+	saleModel.UpdatedAt = time.Now()
 	err = service.saleRepository.UpdateWithTransaction(transaction, saleModel)
 	if err != nil {
 		transaction.Rollback()

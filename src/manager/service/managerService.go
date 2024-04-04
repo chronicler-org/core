@@ -101,6 +101,7 @@ func (service *ManagerService) Update(id string, dto managerDTO.UpdateManagerDTO
 		if err != nil {
 			return managerModel.Manager{}, err
 		}
+		managerExists.TeamID = team.ID
 		err = service.managerRepository.Update(managerExists)
 		managerExists.Team = team
 		return managerExists, err

@@ -9,8 +9,6 @@ import (
 )
 
 type SaleItem struct {
-	ID uuid.UUID `gorm:"primarykey" json:"id"`
-
 	SaleID    uuid.UUID            `gorm:"column:sale_id;primaryKey;not null" json:"-"`
 	Sale      Sale                 `gorm:"foreignKey:SaleID" json:"sale"`
 	ProductID uuid.UUID            `gorm:"column:product_id;primaryKey;not null" json:"-"`

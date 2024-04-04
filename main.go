@@ -4,8 +4,6 @@ import (
 	"log"
 	"os"
 
-	"github.com/go-playground/locales/pt_BR"
-	ut "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
@@ -61,13 +59,9 @@ func main() {
 	// validator
 	Validator := validator.New()
 
-	pt := pt_BR.New()
-	uni := ut.New(pt, pt)
-	trans, _ := uni.GetTranslator("pt_BR")
-
-	appUtil.RegisterCPFValidationAndTranslation(Validator, trans)
-	productEnum.RegisterModelValidationAndTranslation(Validator, trans)
-	productEnum.RegisterSizeValidationAndTranslation(Validator, trans)
+	appUtil.RegisterCPFValidation(Validator)
+	productEnum.RegisterModelValidation(Validator)
+	productEnum.RegisterSizeValidation(Validator)
 
 	appRouter.InitAppRouter(app, db, Validator)
 

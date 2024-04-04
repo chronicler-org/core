@@ -1,8 +1,6 @@
 package productEnum
 
 import (
-	appUtil "github.com/chronicler-org/core/src/app/utils"
-	ut "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
 )
 
@@ -37,23 +35,11 @@ func validateModel(fl validator.FieldLevel) bool {
 	return false
 }
 
-func RegisterModelValidationAndTranslation(validate *validator.Validate, trans ut.Translator) error {
+func RegisterModelValidation(validate *validator.Validate) error {
 	err := validate.RegisterValidation("model", validateModel)
 	if err != nil {
 		return err
 	}
-
-	validModels := []interface{}{
-		string(TShirt), string(Shirt), string(Pants), string(Skirt), string(Dress),
-		string(Jacket), string(Sportswear), string(Underwear), string(Swimwear), string(FormalWear),
-	}
-
-	err = validate.RegisterTranslation("model", trans, func(ut ut.Translator) error {
-		return ut.Add("model", appUtil.GenerateEnumErrorDetail("Model", validModels), true)
-	}, func(ut ut.Translator, fe validator.FieldError) string {
-		t, _ := ut.T("model", fe.Field())
-		return t
-	})
 
 	return err
 }

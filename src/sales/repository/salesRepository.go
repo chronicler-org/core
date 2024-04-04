@@ -1,9 +1,10 @@
 package salesRepository
 
 import (
+	"gorm.io/gorm"
+
 	appRepository "github.com/chronicler-org/core/src/app/repository"
 	salesModel "github.com/chronicler-org/core/src/sales/model"
-	"gorm.io/gorm"
 )
 
 type SalesRepository struct {
@@ -12,6 +13,6 @@ type SalesRepository struct {
 
 func InitSalesRepository(db *gorm.DB) *SalesRepository {
 	return &SalesRepository{
-		BaseRepository: appRepository.NewRepository(db, salesModel.Sales{}),
+		BaseRepository: appRepository.NewRepository(db, salesModel.Sale{}),
 	}
 }

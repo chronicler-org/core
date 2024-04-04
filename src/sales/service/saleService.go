@@ -29,9 +29,9 @@ func InitSaleService(
 	}
 }
 
-func (service *SaleService) FindSaleByID(id string) (salesModel.Sales, error) {
+func (service *SaleService) FindSaleByID(id string) (salesModel.Sale, error) {
 	result, err := service.salesRepository.FindOneByField("CustomerCareID", id, "CustomerCare")
-	sale, _ := result.(*salesModel.Sales)
+	sale, _ := result.(*salesModel.Sale)
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return *sale, appException.NotFoundException(saleExceptionMessage.SALE_NOT_FOUND)
@@ -43,14 +43,14 @@ func (service *SaleService) FindSaleByID(id string) (salesModel.Sales, error) {
 func (service *SaleService) CreateSale(
 	dto salesDTO.CreateSaleDTO,
 	customerCareID string,
-) (salesModel.Sales, error) {
+) (salesModel.Sale, error) {
 	customerCareExists, err := service.customerCareService.FindCustomerCareByID(customerCareID)
 
 	if err != nil {
-		return salesModel.Sales{}, err
+		return salesModel.Sale{}, err
 	}
 
-	model := salesModel.Sales{
+	model := salesModel.Sale{
 		CustomerCareID: customerCareExists.ID,
 		TotalValue:     dto.TotalValue,
 		Status:         dto.Status,
@@ -61,15 +61,15 @@ func (service *SaleService) CreateSale(
 
 	err = service.salesRepository.Create(model)
 	if err != nil {
-		return salesModel.Sales{}, err
+		return salesModel.Sale{}, err
 	}
 
 	model.CustomerCare = customerCareExists
 	return model, err
 }
 
-func (service *SaleService) FindAllSales(dto salesDTO.QuerySalesDTO) (int64, []salesModel.Sales, error) {
-	var sales []salesModel.Sales
+func (service *SaleService) FindAllSales(dto salesDTO.QuerySalesDTO) (int64, []salesModel.Sale, error) {
+	var sales []salesModel.Sale
 
 	count, err := service.salesRepository.FindAll(dto, &sales, "CustomerCare")
 	if err != nil {
@@ -79,10 +79,10 @@ func (service *SaleService) FindAllSales(dto salesDTO.QuerySalesDTO) (int64, []s
 	return count, sales, err
 }
 
-func (service *SaleService) UpdateSale(dto salesDTO.UpdateSaleDTO, id string) (salesModel.Sales, error) {
+func (service *SaleService) UpdateSale(dto salesDTO.UpdateSaleDTO, id string) (salesModel.Sale, error) {
 	sale, err := service.FindSaleByID(id)
 	if err != nil {
-		return salesModel.Sales{}, err
+		return salesModel.Sale{}, err
 	}
 
 	appUtil.UpdateModelFromDTO(&sale, &dto)
@@ -91,21 +91,21 @@ func (service *SaleService) UpdateSale(dto salesDTO.UpdateSaleDTO, id string) (s
 
 	err = service.salesRepository.Update(sale)
 	if err != nil {
-		return salesModel.Sales{}, nil
+		return salesModel.Sale{}, nil
 	}
 
 	return sale, err
 }
 
-func (service *SaleService) DeleteSale(id string) (salesModel.Sales, error) {
+func (service *SaleService) DeleteSale(id string) (salesModel.Sale, error) {
 	sale, err := service.FindSaleByID(id)
 	if err != nil {
-		return salesModel.Sales{}, err
+		return salesModel.Sale{}, err
 	}
 
 	err = service.salesRepository.Delete("CustomerCareID", id)
 	if err != nil {
-		return salesModel.Sales{}, err
+		return salesModel.Sale{}, err
 	}
 
 	return sale, err

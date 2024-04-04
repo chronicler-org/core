@@ -44,7 +44,8 @@ func main() {
 		&customerCareModel.CustomerCare{},
 		&customerCareModel.CustomerCareEvaluation{},
 		&productModel.Product{},
-		&salesModel.Sales{})
+		&salesModel.Sale{},
+		&salesModel.SaleItem{})
 
 	// inicializa app principal
 	app := fiber.New()

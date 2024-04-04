@@ -2,6 +2,7 @@ package productService
 
 import (
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -84,4 +85,19 @@ func (service *ProductService) DeleteProduct(id string) (productModel.Product, e
 		return productModel.Product{}, err
 	}
 	return productExists, nil
+}
+
+func (service *ProductService) ValidateStock(productID string, requestedQuantity uint32) (productModel.Product, error) {
+	product, err := service.FindProductByID(productID)
+	if err != nil {
+		return productModel.Product{}, err
+	}
+
+	if product.Stock < requestedQuantity {
+		outOfStock := productExceptionMessage.OUT_OF_STOCK
+		outOfStock.Detail = fmt.Sprintf(outOfStock.Detail, product.ID.String(), product.Stock, requestedQuantity)
+		return product, appException.ConflictException(outOfStock)
+	}
+
+	return product, nil
 }

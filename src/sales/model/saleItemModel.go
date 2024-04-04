@@ -13,7 +13,7 @@ type SaleItem struct {
 	Sale      Sale                 `gorm:"foreignKey:SaleID;constraint:OnDelete:CASCADE" json:"sale"`
 	ProductID uuid.UUID            `gorm:"column:product_id;primaryKey;not null" json:"-"`
 	Product   productModel.Product `gorm:"foreignKey:ProductID" json:"product"`
-	Quantity  int                  `gorm:"not null" json:"quantity"`
+	Quantity  uint32               `gorm:"not null" json:"quantity"`
 	CreatedAt time.Time            `json:"created_at"`
 	UpdatedAt time.Time            `json:"updated_at"`
 }

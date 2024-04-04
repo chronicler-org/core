@@ -76,11 +76,12 @@ func (service *SaleService) CreateSale(
 			UpdatedAt: time.Now(),
 		}
 
-		product, err := service.productService.FindProductByID(itemDTO.ProductID)
-		totalValue += product.Value * float32(itemDTO.Quantity)
+		product, err := service.productService.ValidateStock(itemDTO.ProductID, itemDTO.Quantity)
 		if err != nil {
 			return salesModel.Sale{}, err
 		}
+
+		totalValue += product.Value * float32(itemDTO.Quantity)
 		saleItem.ProductID = product.ID
 		salesItems = append(salesItems, saleItem)
 	}

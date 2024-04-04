@@ -6,11 +6,12 @@ import (
 
 	"gorm.io/gorm"
 
+	appDto "github.com/chronicler-org/core/src/app/dto"
 	appException "github.com/chronicler-org/core/src/app/exceptions"
-	appUtil "github.com/chronicler-org/core/src/app/utils"
 	customerCareService "github.com/chronicler-org/core/src/customerCare/service"
 	productService "github.com/chronicler-org/core/src/product/service"
 	salesDTO "github.com/chronicler-org/core/src/sales/dto"
+	saleEnum "github.com/chronicler-org/core/src/sales/enum"
 	saleExceptionMessage "github.com/chronicler-org/core/src/sales/messages"
 	salesModel "github.com/chronicler-org/core/src/sales/model"
 	salesRepository "github.com/chronicler-org/core/src/sales/repository"
@@ -130,21 +131,78 @@ func (service *SaleService) FindAllSales(dto salesDTO.QuerySalesDTO) (int64, []s
 	return count, sales, err
 }
 
-func (service *SaleService) UpdateSale(dto salesDTO.UpdateSaleDTO, id string) (salesModel.Sale, error) {
+func (service *SaleService) UpdateSale(updateSaleDTO salesDTO.UpdateSaleDTO, id string) (salesModel.Sale, error) {
 	sale, err := service.FindSaleByID(id)
 	if err != nil {
 		return salesModel.Sale{}, err
 	}
 
-	appUtil.UpdateModelFromDTO(&sale, &dto)
+	switch sale.Status {
+	case string(saleEnum.AGUARDANDO_PAGAMENTO):
+		switch updateSaleDTO.Transition {
+
+		case string(saleEnum.PAGAMENTO_CONFIRMADO):
+			sale.Status = string(saleEnum.COMPRA_CONFIRMADA)
+
+		case string(saleEnum.CANCELAR_COMPRA):
+			sale.Status = string(saleEnum.COMPRA_CANCELADA)
+
+		default:
+			return sale, appException.ConflictException(saleExceptionMessage.INVALID_TRANSITION)
+		}
+
+	case string(saleEnum.COMPRA_CONFIRMADA):
+		switch updateSaleDTO.Transition {
+
+		case string(saleEnum.CONCLUIR_COMPRA):
+			sale.Status = string(saleEnum.COMPRA_CONCLUIDA)
+
+		case string(saleEnum.CANCELAR_COMPRA):
+			sale.Status = string(saleEnum.COMPRA_CANCELADA)
+
+		default:
+			return sale, appException.ConflictException(saleExceptionMessage.INVALID_TRANSITION)
+		}
+
+	default:
+		return sale, appException.ConflictException(saleExceptionMessage.INVALID_TRANSITION)
+	}
+
+	transaction := service.saleRepository.BeginTransaction()
+
+	if sale.Status == string(saleEnum.COMPRA_CANCELADA) {
+		var items []salesModel.SaleItem
+		_, err := service.saleItemRepository.FindAll(
+			salesDTO.QuerySaleItemsDTO{
+				SaleID: sale.CustomerCareID.String(),
+			},
+			&items,
+			"CustomerCare",
+		)
+		if err != nil {
+			return salesModel.Sale{}, err
+		}
+
+		for _, item := range items {
+			_, err := service.productService.CreditStock(item.ProductID.String(), item.Quantity, transaction)
+			if err != nil {
+				transaction.Rollback()
+				return salesModel.Sale{}, err
+			}
+		}
+
+		service.saleItemRepository.DeleteWithTransaction(transaction, "SaleID", sale.CustomerCareID.String())
+	}
 
 	sale.UpdatedAt = time.Now()
 
-	err = service.saleRepository.Update(sale)
+	err = service.saleRepository.UpdateWithTransaction(transaction, sale)
 	if err != nil {
-		return salesModel.Sale{}, nil
+		transaction.Rollback()
+		return salesModel.Sale{}, err
 	}
 
+	transaction.Commit()
 	return sale, err
 }
 

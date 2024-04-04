@@ -120,3 +120,22 @@ func (service *ProductService) DebitStock(productID string, quantity uint32, tx 
 
 	return productHasStockAvailable, nil
 }
+
+func (service *ProductService) CreditStock(productID string, quantity uint32, tx *gorm.DB) (productModel.Product, error) {
+	productHasStockAvailable, err := service.ValidateStock(productID, quantity)
+	if err != nil {
+		return productModel.Product{}, err
+	}
+
+	// Credit the stock
+	productHasStockAvailable.Stock += quantity
+
+	// Update the product with the new stock value
+	productHasStockAvailable.UpdatedAt = time.Now()
+	err = service.productRepository.UpdateWithTransaction(tx, productHasStockAvailable)
+	if err != nil {
+		return productModel.Product{}, err
+	}
+
+	return productHasStockAvailable, nil
+}

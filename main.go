@@ -20,6 +20,7 @@ import (
 	managerModel "github.com/chronicler-org/core/src/manager/model"
 	productEnum "github.com/chronicler-org/core/src/product/enum"
 	productModel "github.com/chronicler-org/core/src/product/model"
+	saleStatusEnum "github.com/chronicler-org/core/src/sales/enum"
 	salesModel "github.com/chronicler-org/core/src/sales/model"
 	tagModel "github.com/chronicler-org/core/src/tag/model"
 	teamModel "github.com/chronicler-org/core/src/team/model"
@@ -45,7 +46,8 @@ func main() {
 		&customerCareModel.CustomerCareEvaluation{},
 		&productModel.Product{},
 		&salesModel.Sale{},
-		&salesModel.SaleItem{})
+		&salesModel.SaleItem{},
+	)
 
 	// inicializa app principal
 	app := fiber.New()
@@ -68,6 +70,7 @@ func main() {
 	appUtil.RegisterCPFValidationAndTranslation(Validator, trans)
 	productEnum.RegisterModelValidationAndTranslation(Validator, trans)
 	productEnum.RegisterSizeValidationAndTranslation(Validator, trans)
+	saleStatusEnum.RegisterTransitionValidationAndTranslation(Validator, trans)
 
 	appRouter.InitAppRouter(app, db, Validator)
 

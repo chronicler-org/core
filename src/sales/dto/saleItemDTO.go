@@ -1,10 +1,6 @@
 package salesDTO
 
-import (
-	"github.com/google/uuid"
-)
-
 type SaleItemDTO struct {
-	ProductID uuid.UUID `gorm:"column:product_id;primaryKey;not null" json:"product_id"`
-	Quantity  int       `gorm:"not null" json:"quantity"`
+	ProductID string `validate:"required,uuid" json:"product_id"`
+	Quantity  int    `validate:"required,min=1" json:"quantity"`
 }

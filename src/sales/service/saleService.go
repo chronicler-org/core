@@ -71,17 +71,17 @@ func (service *SaleService) CreateSale(
 	for _, itemDTO := range dto.SalesItems {
 		saleItem := salesModel.SaleItem{
 			SaleID:    saleModel.CustomerCareID,
-			ProductID: itemDTO.ProductID,
 			Quantity:  itemDTO.Quantity,
 			CreatedAt: time.Now(),
 			UpdatedAt: time.Now(),
 		}
 
-		product, err := service.productService.FindProductByID(itemDTO.ProductID.String())
+		product, err := service.productService.FindProductByID(itemDTO.ProductID)
 		totalValue += product.Value * float32(itemDTO.Quantity)
 		if err != nil {
 			return salesModel.Sale{}, err
 		}
+		saleItem.ProductID = product.ID
 		salesItems = append(salesItems, saleItem)
 	}
 

@@ -234,7 +234,7 @@ func (service *CustomerService) UpdateCustomerAddress(id string, dto customerDTO
 		return customerModel.CustomerAddress{}, err
 	}
 
-	appUtil.UpdateModelFromDTO(&customerAddressExists, dto)
+	appUtil.UpdateModelFromDTO(&customerAddressExists, &dto)
 
 	customerAddressExists.UpdatedAt = time.Now()
 	err = service.customerAddressRepository.Update(customerAddressExists)

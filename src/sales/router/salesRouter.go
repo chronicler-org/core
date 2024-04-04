@@ -1,22 +1,24 @@
 package salesRouter
 
 import (
+	"github.com/gofiber/fiber/v2"
+	"gorm.io/gorm"
+
 	appUtil "github.com/chronicler-org/core/src/app/utils"
 	customerCareService "github.com/chronicler-org/core/src/customerCare/service"
 	salesController "github.com/chronicler-org/core/src/sales/controller"
 	salesDTO "github.com/chronicler-org/core/src/sales/dto"
 	salesRepository "github.com/chronicler-org/core/src/sales/repository"
 	saleService "github.com/chronicler-org/core/src/sales/service"
-	"github.com/gofiber/fiber/v2"
-	"gorm.io/gorm"
 )
 
 func InitSalesModule(
 	db *gorm.DB,
 	customerCareService *customerCareService.CustomerCareService,
 ) (*salesController.SalesController, *saleService.SaleService) {
-	salesRepository := salesRepository.InitSalesRepository(db)
-	saleService := saleService.InitSaleService(salesRepository, customerCareService)
+	saleItemRepository := salesRepository.InitSaleItemRepository(db)
+	saleRepository := salesRepository.InitSaleRepository(db)
+	saleService := saleService.InitSaleService(saleRepository, saleItemRepository, customerCareService)
 	salesController := salesController.InitSalesController(saleService)
 
 	return salesController, saleService

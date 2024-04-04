@@ -7,12 +7,12 @@ import (
 	salesModel "github.com/chronicler-org/core/src/sales/model"
 )
 
-type SalesRepository struct {
+type SaleRepository struct {
 	*appRepository.BaseRepository
 }
 
-func InitSalesRepository(db *gorm.DB) *SalesRepository {
-	return &SalesRepository{
+func InitSaleRepository(db *gorm.DB) *SaleRepository {
+	return &SaleRepository{
 		BaseRepository: appRepository.NewRepository(db, salesModel.Sale{}),
 	}
 }

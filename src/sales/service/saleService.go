@@ -4,6 +4,8 @@ import (
 	"errors"
 	"time"
 
+	"gorm.io/gorm"
+
 	appException "github.com/chronicler-org/core/src/app/exceptions"
 	appUtil "github.com/chronicler-org/core/src/app/utils"
 	customerCareService "github.com/chronicler-org/core/src/customerCare/service"
@@ -11,26 +13,27 @@ import (
 	saleExceptionMessage "github.com/chronicler-org/core/src/sales/messages"
 	salesModel "github.com/chronicler-org/core/src/sales/model"
 	salesRepository "github.com/chronicler-org/core/src/sales/repository"
-	"gorm.io/gorm"
 )
 
 type SaleService struct {
-	salesRepository     *salesRepository.SalesRepository
+	saleRepository      *salesRepository.SaleRepository
+	saleItemRepository  *salesRepository.SaleItemRepository
 	customerCareService *customerCareService.CustomerCareService
 }
 
 func InitSaleService(
-	salesRepository *salesRepository.SalesRepository,
+	saleRepository *salesRepository.SaleRepository,
+	saleItemRepository *salesRepository.SaleItemRepository,
 	customerCareService *customerCareService.CustomerCareService,
 ) *SaleService {
 	return &SaleService{
-		salesRepository:     salesRepository,
+		saleRepository:      saleRepository,
 		customerCareService: customerCareService,
 	}
 }
 
 func (service *SaleService) FindSaleByID(id string) (salesModel.Sale, error) {
-	result, err := service.salesRepository.FindOneByField("CustomerCareID", id, "CustomerCare")
+	result, err := service.saleRepository.FindOneByField("CustomerCareID", id, "CustomerCare")
 	sale, _ := result.(*salesModel.Sale)
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -59,7 +62,7 @@ func (service *SaleService) CreateSale(
 		UpdatedAt:      time.Now(),
 	}
 
-	err = service.salesRepository.Create(model)
+	err = service.saleRepository.Create(model)
 	if err != nil {
 		return salesModel.Sale{}, err
 	}
@@ -71,7 +74,7 @@ func (service *SaleService) CreateSale(
 func (service *SaleService) FindAllSales(dto salesDTO.QuerySalesDTO) (int64, []salesModel.Sale, error) {
 	var sales []salesModel.Sale
 
-	count, err := service.salesRepository.FindAll(dto, &sales, "CustomerCare")
+	count, err := service.saleRepository.FindAll(dto, &sales, "CustomerCare")
 	if err != nil {
 		return 0, nil, err
 	}
@@ -89,7 +92,7 @@ func (service *SaleService) UpdateSale(dto salesDTO.UpdateSaleDTO, id string) (s
 
 	sale.UpdatedAt = time.Now()
 
-	err = service.salesRepository.Update(sale)
+	err = service.saleRepository.Update(sale)
 	if err != nil {
 		return salesModel.Sale{}, nil
 	}
@@ -103,7 +106,7 @@ func (service *SaleService) DeleteSale(id string) (salesModel.Sale, error) {
 		return salesModel.Sale{}, err
 	}
 
-	err = service.salesRepository.Delete("CustomerCareID", id)
+	err = service.saleRepository.Delete("CustomerCareID", id)
 	if err != nil {
 		return salesModel.Sale{}, err
 	}

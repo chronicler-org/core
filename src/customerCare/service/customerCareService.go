@@ -4,6 +4,7 @@ import (
 	"errors"
 	"time"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 
 	appException "github.com/chronicler-org/core/src/app/exceptions"
@@ -14,7 +15,6 @@ import (
 	customerCareModel "github.com/chronicler-org/core/src/customerCare/model"
 	customerCareRepository "github.com/chronicler-org/core/src/customerCare/repository"
 	teamService "github.com/chronicler-org/core/src/team/service"
-	"github.com/google/uuid"
 )
 
 type CustomerCareService struct {

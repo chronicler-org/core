@@ -32,10 +32,10 @@ func (controller *SalesController) HandleFindSaleByID(c *fiber.Ctx) (appUtil.Pag
 }
 
 func (controller *SalesController) HandleCreateSale(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
-	customerCareID := c.Params("customer_care_id")
 	var createSaleDTO salesDTO.CreateSaleDTO
 	c.BodyParser(&createSaleDTO)
-	createdSale, err := controller.salesService.CreateSale(createSaleDTO, customerCareID)
+
+	createdSale, err := controller.salesService.CreateSale(createSaleDTO)
 	return appUtil.PaginateSingle(createdSale), err
 }
 

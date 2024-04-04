@@ -50,9 +50,8 @@ func (service *SaleService) FindSaleByID(id string) (salesModel.Sale, error) {
 
 func (service *SaleService) CreateSale(
 	dto salesDTO.CreateSaleDTO,
-	customerCareID string,
 ) (salesModel.Sale, error) {
-	customerCareExists, err := service.customerCareService.FindCustomerCareByID(customerCareID)
+	customerCareExists, err := service.customerCareService.FindCustomerCareByID(dto.CostumerCareID)
 
 	if err != nil {
 		return salesModel.Sale{}, err

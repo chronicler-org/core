@@ -20,12 +20,11 @@ func InitCustomerController(s *customerService.CustomerService) *CustomerControl
 }
 
 func (controller *CustomerController) HandleFindAllCustomers(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
-	var paginationDto appDto.PaginationDTO
-	c.QueryParser(&paginationDto)
+	var customerQueryDTO customerDTO.CustomerQueryDTO
+	c.QueryParser(&customerQueryDTO)
 
-	totalCount, customers, err := controller.customerService.FindAllCustomers(paginationDto)
-
-	return appUtil.Paginate(customers, totalCount, paginationDto.GetPage(), paginationDto.GetLimit()), err
+	totalCount, customers, err := controller.customerService.FindAllCustomers(customerQueryDTO)
+	return appUtil.Paginate(customers, totalCount, customerQueryDTO.GetPage(), customerQueryDTO.GetLimit()), err
 }
 
 func (controller *CustomerController) HandleFindCustomerByCPF(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
@@ -61,6 +60,12 @@ func (controller *CustomerController) HandleDeleteCustomer(c *fiber.Ctx) (appUti
 
 	customerDeleted, err := controller.customerService.DeleteCustomer(cpf)
 	return appUtil.PaginateSingle(customerDeleted), err
+}
+
+func (controller *CustomerController) HandleGetNewCustomersVariationPercent(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
+
+	newCustomersVariationPercent, err := controller.customerService.GetNewCustomersVariationPercent()
+	return appUtil.PaginateSingle(newCustomersVariationPercent), err
 }
 
 func (controller *CustomerController) HandleFindCustomerAddressByID(c *fiber.Ctx) (appUtil.PaginateResponse, error) {

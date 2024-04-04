@@ -54,7 +54,7 @@ func (service *TeamService) Update(id string, dto teamDTO.UpdateTeamDTO) (teamMo
 		return teamModel.Team{}, err
 	}
 
-	appUtil.UpdateModelFromDTO(&teamExists, dto)
+	appUtil.UpdateModelFromDTO(&teamExists, &dto)
 
 	teamExists.UpdatedAt = time.Now()
 	err = service.teamRepository.Update(teamExists)

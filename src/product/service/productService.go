@@ -58,7 +58,7 @@ func (service *ProductService) UpdateProduct(id string, dto productDTO.UpdatePro
 	if err != nil {
 		return productModel.Product{}, err
 	}
-	appUtil.UpdateModelFromDTO(&productExists, dto)
+	appUtil.UpdateModelFromDTO(&productExists, &dto)
 
 	productExists.UpdatedAt = time.Now()
 	err = service.productRepository.Update(productExists)

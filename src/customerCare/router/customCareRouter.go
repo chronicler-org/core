@@ -4,7 +4,9 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
 
+	appMiddleware "github.com/chronicler-org/core/src/app/middleware"
 	appUtil "github.com/chronicler-org/core/src/app/utils"
+	authEnum "github.com/chronicler-org/core/src/auth/enum"
 	customerService "github.com/chronicler-org/core/src/customer/service"
 	customerCareController "github.com/chronicler-org/core/src/customerCare/controller"
 	customerCareDTO "github.com/chronicler-org/core/src/customerCare/dto"
@@ -32,21 +34,7 @@ func InitCustomerCareRouter(
 	validatorMiddleware func(interface{}, interface{}) func(*fiber.Ctx) error,
 ) {
 	customerCareRouter := router.Group("/customer-care")
-
-	customerCareRouter.Get("/",
-		validatorMiddleware(nil, &customerCareDTO.QueryCustomerCareDTO{}),
-		appUtil.Controller(customerCareController.HandleFindAllCustomerCares),
-	)
-	customerCareRouter.Get("/:id",
-		appUtil.Controller(customerCareController.HandleFindCustomerCareByID),
-	)
-	customerCareRouter.Post("/",
-		validatorMiddleware(&customerCareDTO.CreateCustomerCareDTO{}, nil),
-		appUtil.Controller(customerCareController.HandleCreateCustomerCare),
-	)
-	customerCareRouter.Delete("/:id",
-		appUtil.Controller(customerCareController.HandleDeleteCustomerCare),
-	)
+	managerAccessMiddleware := appMiddleware.RouteAccessMiddleware([]authEnum.Role{authEnum.ManagerRole})
 
 	customerCareRouter.Get("/evaluation",
 		validatorMiddleware(nil, &customerCareDTO.QueryCustomerCareEvaluationDTO{}),
@@ -60,8 +48,28 @@ func InitCustomerCareRouter(
 		appUtil.Controller(customerCareController.HandleCreateCustomerCareEvaluation),
 	)
 	customerCareRouter.Patch("/:id/evaluation",
+		managerAccessMiddleware,
 		validatorMiddleware(&customerCareDTO.UpdateCustomerCareeEvaluationDTO{}, nil),
 		appUtil.Controller(customerCareController.HandleUpdateCustomerCareEvaluation),
 	)
-	customerCareRouter.Delete("/:id/evaluation", appUtil.Controller(customerCareController.HandleDeleteCustomerCareEvaluation))
+	customerCareRouter.Delete("/:id/evaluation",
+		managerAccessMiddleware,
+		appUtil.Controller(customerCareController.HandleDeleteCustomerCareEvaluation),
+	)
+
+	customerCareRouter.Get("/",
+		validatorMiddleware(nil, &customerCareDTO.QueryCustomerCareDTO{}),
+		appUtil.Controller(customerCareController.HandleFindAllCustomerCares),
+	)
+	customerCareRouter.Get("/:id",
+		appUtil.Controller(customerCareController.HandleFindCustomerCareByID),
+	)
+	customerCareRouter.Post("/",
+		validatorMiddleware(&customerCareDTO.CreateCustomerCareDTO{}, nil),
+		appUtil.Controller(customerCareController.HandleCreateCustomerCare),
+	)
+	customerCareRouter.Delete("/:id",
+		managerAccessMiddleware,
+		appUtil.Controller(customerCareController.HandleDeleteCustomerCare),
+	)
 }

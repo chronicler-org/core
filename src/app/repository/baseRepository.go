@@ -57,7 +57,10 @@ func (r *BaseRepository) Update(data interface{}) error {
 }
 
 func (r *BaseRepository) UpdateWithTransaction(tx *gorm.DB, data interface{}) error {
-	return tx.Save(data).Error
+	modelType := reflect.TypeOf(r.Model)
+	modelPtr := reflect.New(modelType).Interface()
+
+	return tx.Save(modelPtr).Error
 }
 
 func (r *BaseRepository) FindAll(dto interface{}, results interface{}, preloads ...string) (int64, error) {

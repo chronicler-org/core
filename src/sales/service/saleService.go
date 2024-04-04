@@ -58,6 +58,8 @@ func (service *SaleService) CreateSale(
 		return salesModel.Sale{}, err
 	}
 
+	transaction := service.saleRepository.BeginTransaction()
+
 	saleModel := salesModel.Sale{
 		CustomerCareID: customerCareExists.ID,
 		Status:         dto.Status,
@@ -65,9 +67,13 @@ func (service *SaleService) CreateSale(
 		CreatedAt:      time.Now(),
 		UpdatedAt:      time.Now(),
 	}
+	err = service.saleRepository.CreateWithTransaction(transaction, saleModel)
+	if err != nil {
+		transaction.Rollback()
+		return salesModel.Sale{}, err
+	}
 
 	var totalValue float32
-	salesItems := []salesModel.SaleItem{}
 	for _, itemDTO := range dto.SalesItems {
 		saleItem := salesModel.SaleItem{
 			SaleID:    saleModel.CustomerCareID,
@@ -78,30 +84,30 @@ func (service *SaleService) CreateSale(
 
 		product, err := service.productService.ValidateStock(itemDTO.ProductID, itemDTO.Quantity)
 		if err != nil {
+			transaction.Rollback()
+			return salesModel.Sale{}, err
+		}
+		saleItem.ProductID = product.ID
+
+		err = service.saleItemRepository.CreateWithTransaction(transaction, saleItem)
+		if err != nil {
+			transaction.Rollback()
 			return salesModel.Sale{}, err
 		}
 
 		totalValue += product.Value * float32(itemDTO.Quantity)
-		saleItem.ProductID = product.ID
-		salesItems = append(salesItems, saleItem)
 	}
 
 	saleModel.TotalValue = totalValue
-	err = service.saleRepository.Create(saleModel)
+	err = service.saleRepository.UpdateWithTransaction(transaction, saleModel)
 	if err != nil {
+		transaction.Rollback()
 		return salesModel.Sale{}, err
 	}
 
-	for _, saleItem := range salesItems {
-		err := service.saleItemRepository.Create(saleItem)
-		if err != nil {
-			service.saleRepository.Delete("CustomerCareID", saleModel.CustomerCareID.String())
-			return salesModel.Sale{}, err
-		}
-	}
-
+	transaction.Commit()
 	saleModel.CustomerCare = customerCareExists
-	return saleModel, err
+	return saleModel, nil
 }
 
 func (service *SaleService) FindAllSales(dto salesDTO.QuerySalesDTO) (int64, []salesModel.Sale, error) {

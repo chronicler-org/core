@@ -91,7 +91,7 @@ func (service *AttendantService) UpdateAttendant(id string, dto attendantDTO.Upd
 		return attendantModel.Attendant{}, err
 	}
 
-	appUtil.UpdateModelFromDTO(&attendantExists, dto)
+	appUtil.UpdateModelFromDTO(&attendantExists, &dto)
 	if dto.Password != "" {
 		newPassword, err := bcrypt.GenerateFromPassword([]byte(dto.Password), 10)
 		if err == nil {

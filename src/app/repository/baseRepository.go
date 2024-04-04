@@ -40,7 +40,10 @@ func (r *BaseRepository) FindOneByField(field string, value interface{}, preload
 }
 
 func (r *BaseRepository) Update(data interface{}) error {
-	return r.Db.Save(data).Error
+	modelType := reflect.TypeOf(r.Model)
+	modelPtr := reflect.New(modelType).Interface()
+
+	return r.Db.Save(modelPtr).Error
 }
 
 func (r *BaseRepository) FindAll(dto interface{}, results interface{}, preloads ...string) (int64, error) {

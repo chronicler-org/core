@@ -55,7 +55,7 @@ func (service *TagService) Update(id string, dto tagDTO.UpdateTagDTO) (tagModel.
 		return tagModel.Tag{}, err
 	}
 
-	appUtil.UpdateModelFromDTO(&tagExists, dto)
+	appUtil.UpdateModelFromDTO(&tagExists, &dto)
 
 	tagExists.UpdatedAt = time.Now()
 	err = service.tagRepository.Update(tagExists)

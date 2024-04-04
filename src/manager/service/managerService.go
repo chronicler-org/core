@@ -87,25 +87,27 @@ func (service *ManagerService) Update(id string, dto managerDTO.UpdateManagerDTO
 		return managerModel.Manager{}, err
 	}
 
-	appUtil.UpdateModelFromDTO(&managerExists, dto)
+	appUtil.UpdateModelFromDTO(&managerExists, &dto)
 	if dto.Password != "" {
 		newPassword, err := bcrypt.GenerateFromPassword([]byte(dto.Password), 10)
 		if err == nil {
 			managerExists.Password = string(newPassword)
 		}
 	}
+	managerExists.UpdatedAt = time.Now()
 
 	if dto.TeamId != "" {
 		team, err := service.teamService.FindByID(dto.TeamId)
 		if err != nil {
 			return managerModel.Manager{}, err
 		}
-		managerExists.TeamID = team.ID
+		err = service.managerRepository.Update(managerExists)
+		managerExists.Team = team
+		return managerExists, err
+	} else {
+		err = service.managerRepository.Update(managerExists)
+		return managerExists, err
 	}
-
-	managerExists.UpdatedAt = time.Now()
-	err = service.managerRepository.Update(managerExists)
-	return managerExists, err
 }
 
 func (service *ManagerService) FindAll(queryCustomerDTO managerDTO.QueryManagerDTO) (int64, []managerModel.Manager, error) {

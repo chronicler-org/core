@@ -8,13 +8,13 @@ import (
 
 	appException "github.com/chronicler-org/core/src/app/exceptions"
 	appUtil "github.com/chronicler-org/core/src/app/utils"
-	attendantModel "github.com/chronicler-org/core/src/attendant/model"
 	customerService "github.com/chronicler-org/core/src/customer/service"
 	customerCareDTO "github.com/chronicler-org/core/src/customerCare/dto"
 	customerCareExceptionMessage "github.com/chronicler-org/core/src/customerCare/messages"
 	customerCareModel "github.com/chronicler-org/core/src/customerCare/model"
 	customerCareRepository "github.com/chronicler-org/core/src/customerCare/repository"
 	teamService "github.com/chronicler-org/core/src/team/service"
+	"github.com/google/uuid"
 )
 
 type CustomerCareService struct {
@@ -50,7 +50,7 @@ func (service *CustomerCareService) FindCustomerCareByID(id string) (customerCar
 
 func (service *CustomerCareService) CreateCustomerCare(
 	dto customerCareDTO.CreateCustomerCareDTO,
-	attendant attendantModel.Attendant,
+	teamId uuid.UUID,
 ) (customerCareModel.CustomerCare, error) {
 
 	customerExists, err := service.customerService.FindCustomerByCPF(dto.CustomerCPF)
@@ -58,7 +58,7 @@ func (service *CustomerCareService) CreateCustomerCare(
 		return customerCareModel.CustomerCare{}, err
 	}
 
-	teamExists, err := service.teamService.FindByID(attendant.TeamID.String())
+	teamExists, err := service.teamService.FindByID(teamId.String())
 	if err != nil {
 		return customerCareModel.CustomerCare{}, err
 	}
@@ -66,7 +66,7 @@ func (service *CustomerCareService) CreateCustomerCare(
 	model := customerCareModel.CustomerCare{
 		Date:        dto.Date,
 		CustomerCPF: customerExists.CPF,
-		TeamID:      attendant.TeamID,
+		TeamID:      teamId,
 		CreatedAt:   time.Now(),
 		UpdatedAt:   time.Now(),
 	}

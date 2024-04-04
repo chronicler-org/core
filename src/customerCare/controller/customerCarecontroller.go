@@ -2,11 +2,14 @@ package customerCareController
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 
 	appUtil "github.com/chronicler-org/core/src/app/utils"
 	attendantModel "github.com/chronicler-org/core/src/attendant/model"
+	authEnum "github.com/chronicler-org/core/src/auth/enum"
 	customerCareDTO "github.com/chronicler-org/core/src/customerCare/dto"
 	customerCareService "github.com/chronicler-org/core/src/customerCare/service"
+	managerModel "github.com/chronicler-org/core/src/manager/model"
 )
 
 type CustomerCareController struct {
@@ -35,12 +38,19 @@ func (controller *CustomerCareController) HandleFindCustomerCareByID(c *fiber.Ct
 }
 
 func (controller *CustomerCareController) HandleCreateCustomerCare(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
-	loggedAttendant := c.Locals("attendant").(attendantModel.Attendant)
-	var createCustomerCareDTO customerCareDTO.CreateCustomerCareDTO
+	var teamId uuid.UUID
+	if c.Locals(authEnum.ManagerRole) != nil {
+		loggedManager := c.Locals(authEnum.ManagerRole).(managerModel.Manager)
+		teamId = loggedManager.ID
+	} else {
+		loggedAttendant := c.Locals(authEnum.AttendantRole).(attendantModel.Attendant)
+		teamId = loggedAttendant.ID
+	}
 
+	var createCustomerCareDTO customerCareDTO.CreateCustomerCareDTO
 	c.BodyParser(&createCustomerCareDTO)
 
-	customerCareCreated, err := controller.customerCareService.CreateCustomerCare(createCustomerCareDTO, loggedAttendant)
+	customerCareCreated, err := controller.customerCareService.CreateCustomerCare(createCustomerCareDTO, teamId)
 	return appUtil.PaginateSingle(customerCareCreated), err
 }
 

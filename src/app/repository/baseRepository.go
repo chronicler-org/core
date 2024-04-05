@@ -6,6 +6,7 @@ import (
 	"time"
 
 	appDto "github.com/chronicler-org/core/src/app/dto"
+	appUtil "github.com/chronicler-org/core/src/app/utils"
 	"gorm.io/gorm"
 )
 
@@ -47,7 +48,8 @@ func (r *BaseRepository) Update(data interface{}) error {
 }
 
 func (r *BaseRepository) FindAll(dto interface{}, results interface{}, preloads ...string) (int64, error) {
-	query, paginationDTO := r.mapDTOToQuery(dto)
+	queryBuilder := appUtil.QueryBuilder(dto, r.Db.Model(r.Model))
+	query := queryBuilder.BuildQuery()
 
 	var count int64
 	err := query.Count(&count).Error
@@ -59,9 +61,7 @@ func (r *BaseRepository) FindAll(dto interface{}, results interface{}, preloads 
 		query = query.Preload(preload)
 	}
 
-	page := paginationDTO.GetPage()
-	limit := paginationDTO.GetLimit()
-	offset := (page - 1) * limit
+	offset, limit := queryBuilder.GetPagination()
 	err = query.Limit(limit).Offset(offset).Find(results).Error
 	return count, err
 }

@@ -61,14 +61,10 @@ func main() {
 	// validator
 	Validator := validator.New()
 
-	pt := pt_BR.New()
-	uni := ut.New(pt, pt)
-	trans, _ := uni.GetTranslator("pt_BR")
-
 	appUtil.RegisterCPFValidation(Validator)
 	productEnum.RegisterModelValidation(Validator)
 	productEnum.RegisterSizeValidation(Validator)
-	saleStatusEnum.RegisterTransitionValidation(Validator, trans)
+	saleStatusEnum.RegisterTransitionValidation(Validator)
 
 	appRouter.InitAppRouter(app, db, Validator)
 

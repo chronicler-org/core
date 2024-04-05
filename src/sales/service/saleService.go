@@ -4,6 +4,7 @@ import (
 	"errors"
 	"time"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 
 	appException "github.com/chronicler-org/core/src/app/exceptions"
@@ -15,7 +16,6 @@ import (
 	saleExceptionMessage "github.com/chronicler-org/core/src/sales/messages"
 	salesModel "github.com/chronicler-org/core/src/sales/model"
 	salesRepository "github.com/chronicler-org/core/src/sales/repository"
-	"github.com/google/uuid"
 )
 
 type SaleService struct {
@@ -64,7 +64,7 @@ func (service *SaleService) CreateSale(
 	// Create the sale record
 	saleModel := salesModel.Sale{
 		CustomerCareID: customerCareExists.ID,
-		Status:         dto.Status,
+		Status:         string(saleEnum.AWAITING_PAYMENT),
 		PaymentMethod:  dto.PaymentMethod,
 		CreatedAt:      time.Now(),
 		UpdatedAt:      time.Now(),
@@ -138,27 +138,27 @@ func (service *SaleService) UpdateSale(updateSaleDTO salesDTO.UpdateSaleDTO, id 
 	}
 
 	switch sale.Status {
-	case string(saleEnum.AGUARDANDO_PAGAMENTO):
+	case string(saleEnum.AWAITING_PAYMENT):
 		switch updateSaleDTO.Transition {
 
 		case string(saleEnum.PAGAMENTO_CONFIRMADO):
-			sale.Status = string(saleEnum.COMPRA_CONFIRMADA)
+			sale.Status = string(saleEnum.PURCHASE_CONFIRMED)
 
 		case string(saleEnum.CANCELAR_COMPRA):
-			sale.Status = string(saleEnum.COMPRA_CANCELADA)
+			sale.Status = string(saleEnum.CANCELLED_PURCHASE)
 
 		default:
 			return sale, appException.ConflictException(saleExceptionMessage.INVALID_TRANSITION)
 		}
 
-	case string(saleEnum.COMPRA_CONFIRMADA):
+	case string(saleEnum.PURCHASE_CONFIRMED):
 		switch updateSaleDTO.Transition {
 
 		case string(saleEnum.CONCLUIR_COMPRA):
-			sale.Status = string(saleEnum.COMPRA_CONCLUIDA)
+			sale.Status = string(saleEnum.PURCHASE_COMPLETED)
 
 		case string(saleEnum.CANCELAR_COMPRA):
-			sale.Status = string(saleEnum.COMPRA_CANCELADA)
+			sale.Status = string(saleEnum.CANCELLED_PURCHASE)
 
 		default:
 			return sale, appException.ConflictException(saleExceptionMessage.INVALID_TRANSITION)
@@ -170,7 +170,7 @@ func (service *SaleService) UpdateSale(updateSaleDTO salesDTO.UpdateSaleDTO, id 
 
 	transaction := service.saleRepository.BeginTransaction()
 
-	if sale.Status == string(saleEnum.COMPRA_CANCELADA) {
+	if sale.Status == string(saleEnum.CANCELLED_PURCHASE) {
 		var items []salesModel.SaleItem
 		_, err := service.saleItemRepository.FindAll(
 			salesDTO.QuerySaleItemsDTO{

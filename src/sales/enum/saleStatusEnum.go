@@ -1,10 +1,10 @@
 package saleEnum
 
-type Status string
+type SaleStatus string
 
 const (
-	AGUARDANDO_PAGAMENTO Status = "Aguardando pagamento"
-	COMPRA_CONFIRMADA    Status = "Compra confirmada"
-	COMPRA_CONCLUIDA     Status = "Compra concluida"
-	COMPRA_CANCELADA     Status = "Compra cancelada"
+	AWAITING_PAYMENT   SaleStatus = "Aguardando pagamento"
+	PURCHASE_CONFIRMED SaleStatus = "Compra confirmada"
+	PURCHASE_COMPLETED SaleStatus = "Compra concluida"
+	CANCELLED_PURCHASE SaleStatus = "Compra cancelada"
 )

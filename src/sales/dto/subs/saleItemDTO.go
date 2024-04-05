@@ -1,4 +1,4 @@
-package salesDTO
+package salesSubsDTO
 
 type SaleItemDTO struct {
 	ProductID string `validate:"required,uuid" json:"product_id"`

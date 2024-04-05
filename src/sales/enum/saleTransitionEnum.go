@@ -17,7 +17,7 @@ func validateTransition(fl validator.FieldLevel) bool {
 	validTransition := []string{
 		string(PAGAMENTO_CONFIRMADO),
 		string(CONCLUIR_COMPRA),
-		string(COMPRA_CANCELADA),
+		string(CANCELLED_PURCHASE),
 	}
 
 	for _, checkedTransition := range validTransition {

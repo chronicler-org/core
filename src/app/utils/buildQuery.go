@@ -41,6 +41,8 @@ func (qb *TQueryBuilder) BuildQuery() *gorm.DB {
 		var fieldName string
 		if tags["name"] != "" {
 			fieldName = tags["name"]
+		} else if field.Tag.Get("query") != "" {
+			fieldName = field.Tag.Get("query")
 		} else {
 			fieldName = field.Name
 		}

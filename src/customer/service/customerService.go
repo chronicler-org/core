@@ -140,13 +140,17 @@ func (service *CustomerService) DeleteCustomer(cpf string) (customerModel.Custom
 	return customerExists, nil
 }
 
-func (service *CustomerService) GetNewCustomersVariationPercent() (customerDTO.NewCustomersVariationDTO, error) {
+func (service *CustomerService) GetNewCustomersVariationPercent() (any, error) {
+	type NewCustomersVariationDTO struct {
+		PercentVariation float64 `json:"percent_variation"`
+	}
+
 	currentMonth := time.Now().Month()
 	currentYear := time.Now().Year()
-	currentMonthCount, err := service.customerRepository.CountByCreatedMonth(currentMonth, currentYear)
+	currentMonthCount, err := service.customerRepository.CountCustomersByCreatedMonth(currentMonth, currentYear)
 
 	if err != nil {
-		return customerDTO.NewCustomersVariationDTO{}, err
+		return NewCustomersVariationDTO{}, err
 	}
 
 	lastMonth := currentMonth - 1
@@ -155,9 +159,9 @@ func (service *CustomerService) GetNewCustomersVariationPercent() (customerDTO.N
 		lastMonth = 12
 		lastYear--
 	}
-	lastMonthCount, err := service.customerRepository.CountByCreatedMonth(lastMonth, lastYear)
+	lastMonthCount, err := service.customerRepository.CountCustomersByCreatedMonth(lastMonth, lastYear)
 	if err != nil {
-		return customerDTO.NewCustomersVariationDTO{}, err
+		return NewCustomersVariationDTO{}, err
 	}
 
 	var percentVariation float64
@@ -171,7 +175,7 @@ func (service *CustomerService) GetNewCustomersVariationPercent() (customerDTO.N
 		}
 	}
 
-	return customerDTO.NewCustomersVariationDTO{
+	return NewCustomersVariationDTO{
 		PercentVariation: percentVariation,
 	}, nil
 }

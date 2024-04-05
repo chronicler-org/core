@@ -153,12 +153,7 @@ func (service *CustomerService) GetNewCustomersVariationPercent() (any, error) {
 		return NewCustomersVariationDTO{}, err
 	}
 
-	lastMonth := currentMonth - 1
-	lastYear := currentYear
-	if lastMonth == 0 {
-		lastMonth = 12
-		lastYear--
-	}
+	lastMonth, lastYear := appUtil.GetLastMonth()
 	lastMonthCount, err := service.customerRepository.CountCustomersByCreatedMonth(lastMonth, lastYear)
 	if err != nil {
 		return NewCustomersVariationDTO{}, err

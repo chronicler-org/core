@@ -65,7 +65,7 @@ func (service *SaleService) CreateSale(
 	// Create the sale record
 	saleModel := salesModel.Sale{
 		CustomerCareID: customerCareExists.ID,
-		Status:         string(saleEnum.AWAITING_PAYMENT),
+		Status:         saleEnum.AWAITING_PAYMENT,
 		PaymentMethod:  dto.PaymentMethod,
 		CreatedAt:      time.Now(),
 		UpdatedAt:      time.Now(),
@@ -139,27 +139,27 @@ func (service *SaleService) UpdateSale(updateSaleDTO salesDTO.UpdateSaleDTO, id 
 	}
 
 	switch sale.Status {
-	case string(saleEnum.AWAITING_PAYMENT):
+	case saleEnum.AWAITING_PAYMENT:
 		switch updateSaleDTO.Transition {
 
 		case string(saleEnum.PAGAMENTO_CONFIRMADO):
-			sale.Status = string(saleEnum.PURCHASE_CONFIRMED)
+			sale.Status = saleEnum.PURCHASE_CONFIRMED
 
 		case string(saleEnum.CANCELAR_COMPRA):
-			sale.Status = string(saleEnum.CANCELLED_PURCHASE)
+			sale.Status = saleEnum.CANCELLED_PURCHASE
 
 		default:
 			return sale, appException.ConflictException(saleExceptionMessage.INVALID_TRANSITION)
 		}
 
-	case string(saleEnum.PURCHASE_CONFIRMED):
+	case saleEnum.PURCHASE_CONFIRMED:
 		switch updateSaleDTO.Transition {
 
 		case string(saleEnum.CONCLUIR_COMPRA):
-			sale.Status = string(saleEnum.PURCHASE_COMPLETED)
+			sale.Status = saleEnum.PURCHASE_COMPLETED
 
 		case string(saleEnum.CANCELAR_COMPRA):
-			sale.Status = string(saleEnum.CANCELLED_PURCHASE)
+			sale.Status = saleEnum.CANCELLED_PURCHASE
 
 		default:
 			return sale, appException.ConflictException(saleExceptionMessage.INVALID_TRANSITION)
@@ -171,7 +171,7 @@ func (service *SaleService) UpdateSale(updateSaleDTO salesDTO.UpdateSaleDTO, id 
 
 	transaction := service.saleRepository.BeginTransaction()
 
-	if sale.Status == string(saleEnum.CANCELLED_PURCHASE) {
+	if sale.Status == saleEnum.CANCELLED_PURCHASE {
 		var items []salesModel.SaleItem
 		_, err := service.saleItemRepository.FindAll(
 			salesDTO.QuerySaleItemsDTO{
@@ -262,4 +262,18 @@ func (service *SaleService) GetProductQuantitySoldVariation() (any, error) {
 		appUtil.CalculatePercentVariation(float64(currentMonthTotalQuantity), float64(lastMonthTotalQuantity))
 
 	return productQuantitySoldVariation, nil
+}
+
+func (service *SaleService) GetLastSoldProducts(dto salesDTO.QuerySalesProductSummaryDTO) (interface{}, int64, error) {
+	lastSoldProducts := []struct {
+		ProductID uuid.UUID                 `json:"product_id"`
+		Model     productEnum.ClothingModel `json:"model"`
+	}{}
+
+	totalCount, err := service.saleItemRepository.GetSaleProductSummary(dto, &lastSoldProducts)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return lastSoldProducts, totalCount, nil
 }

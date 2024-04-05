@@ -164,16 +164,7 @@ func (service *CustomerService) GetNewCustomersVariationPercent() (any, error) {
 		return NewCustomersVariationDTO{}, err
 	}
 
-	var percentVariation float64
-	if lastMonthCount != 0 {
-		percentVariation = float64(currentMonthCount-lastMonthCount) / float64(lastMonthCount) * 100
-	} else {
-		if currentMonthCount == 0 {
-			percentVariation = 0
-		} else {
-			percentVariation = 100
-		}
-	}
+	percentVariation := appUtil.CalculatePercentVariation(float64(currentMonthCount), float64(lastMonthCount))
 
 	return NewCustomersVariationDTO{
 		PercentVariation: percentVariation,

@@ -43,7 +43,7 @@ func InitSalesRouter(
 		appUtil.Controller(salesController.HandleFindSaleByID),
 	)
 	salesRouter.Post(
-		"/:customer_care_id",
+		"/",
 		validatorMiddleware(&salesDTO.CreateSaleDTO{}, nil),
 		appUtil.Controller(salesController.HandleCreateSale),
 	)

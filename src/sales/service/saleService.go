@@ -6,7 +6,6 @@ import (
 
 	"gorm.io/gorm"
 
-	appDto "github.com/chronicler-org/core/src/app/dto"
 	appException "github.com/chronicler-org/core/src/app/exceptions"
 	customerCareService "github.com/chronicler-org/core/src/customerCare/service"
 	productService "github.com/chronicler-org/core/src/product/service"
@@ -51,9 +50,8 @@ func (service *SaleService) FindSaleByID(id string) (salesModel.Sale, error) {
 
 func (service *SaleService) CreateSale(
 	dto salesDTO.CreateSaleDTO,
-	customerCareID string,
 ) (salesModel.Sale, error) {
-	customerCareExists, err := service.customerCareService.FindCustomerCareByID(customerCareID)
+	customerCareExists, err := service.customerCareService.FindCustomerCareByID(dto.CustomerCareID)
 
 	if err != nil {
 		return salesModel.Sale{}, err

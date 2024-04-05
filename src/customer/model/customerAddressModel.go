@@ -7,7 +7,7 @@ import (
 )
 
 type CustomerAddress struct {
-	ID           uuid.UUID `gorm:"primarykey"`
+	ID           uuid.UUID `gorm:"primarykey" json:"id"`
 	CEP          string    `gorm:"not null" json:"cep"`
 	City         string    `gorm:"not null" json:"city"`
 	Number       string    `gorm:"not null" json:"number"`

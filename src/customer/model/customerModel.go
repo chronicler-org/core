@@ -3,8 +3,9 @@ package customerModel
 import (
 	"time"
 
-	tagModel "github.com/chronicler-org/core/src/tag/model"
 	"github.com/google/uuid"
+
+	tagModel "github.com/chronicler-org/core/src/tag/model"
 )
 
 type Customer struct {

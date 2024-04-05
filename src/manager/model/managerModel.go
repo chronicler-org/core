@@ -14,7 +14,7 @@ type Manager struct {
 	Name      string         `gorm:"column:name" json:"name"`
 	Email     string         `gorm:"unique" json:"email"`
 	Password  string         `json:"-"`
-	TeamID    uuid.UUID      `gorm:"column:team_id;not null, uniqueIndex" json:"-"`
+	TeamID    uuid.UUID      `gorm:"column:team_id" json:"-"`
 	Team      teamModel.Team `gorm:"foreignKey:TeamID" json:"team"`
 	BirthDate time.Time      `json:"birth_date"`
 	CreatedAt time.Time      `json:"created_at"`

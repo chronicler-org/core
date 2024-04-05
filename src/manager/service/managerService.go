@@ -14,6 +14,7 @@ import (
 	managerExceptionMessage "github.com/chronicler-org/core/src/manager/messages"
 	managerModel "github.com/chronicler-org/core/src/manager/model"
 	managerRepository "github.com/chronicler-org/core/src/manager/repository"
+	teamModel "github.com/chronicler-org/core/src/team/model"
 	teamService "github.com/chronicler-org/core/src/team/service"
 )
 
@@ -55,21 +56,24 @@ func (service *ManagerService) Create(dto managerDTO.CreateManagerDTO) (managerM
 		return managerModel.Manager{}, err
 	}
 
-	team, err := service.teamService.FindByID(dto.TeamId)
-	if err != nil {
-		return managerModel.Manager{}, err
-	}
-
 	model := managerModel.Manager{
 		ID:        uuid.New(),
 		Name:      dto.Name,
 		CPF:       dto.CPF,
 		Email:     dto.Email,
 		Password:  string(newPassword),
-		TeamID:    team.ID,
 		BirthDate: dto.BirthDate,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
+	}
+
+	team := teamModel.Team{}
+	if dto.TeamId != "" {
+		team, err = service.teamService.FindByID(dto.TeamId)
+		if err != nil {
+			return managerModel.Manager{}, err
+		}
+		model.TeamID = team.ID
 	}
 
 	err = service.managerRepository.Create(model)
@@ -83,13 +87,14 @@ func (service *ManagerService) Update(id string, dto managerDTO.UpdateManagerDTO
 		return managerModel.Manager{}, err
 	}
 
-	appUtil.UpdateModelFromDTO(&managerExists, dto)
+	appUtil.UpdateModelFromDTO(&managerExists, &dto)
 	if dto.Password != "" {
 		newPassword, err := bcrypt.GenerateFromPassword([]byte(dto.Password), 10)
 		if err == nil {
 			managerExists.Password = string(newPassword)
 		}
 	}
+	managerExists.UpdatedAt = time.Now()
 
 	if dto.TeamId != "" {
 		team, err := service.teamService.FindByID(dto.TeamId)
@@ -97,11 +102,13 @@ func (service *ManagerService) Update(id string, dto managerDTO.UpdateManagerDTO
 			return managerModel.Manager{}, err
 		}
 		managerExists.TeamID = team.ID
+		err = service.managerRepository.Update(managerExists)
+		managerExists.Team = team
+		return managerExists, err
+	} else {
+		err = service.managerRepository.Update(managerExists)
+		return managerExists, err
 	}
-
-	managerExists.UpdatedAt = time.Now()
-	err = service.managerRepository.Update(managerExists)
-	return managerExists, err
 }
 
 func (service *ManagerService) FindAll(queryCustomerDTO managerDTO.QueryManagerDTO) (int64, []managerModel.Manager, error) {

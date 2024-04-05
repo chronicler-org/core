@@ -1,8 +1,6 @@
 package saleEnum
 
 import (
-	appUtil "github.com/chronicler-org/core/src/app/utils"
-	ut "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
 )
 
@@ -31,24 +29,10 @@ func validateTransition(fl validator.FieldLevel) bool {
 	return false
 }
 
-func RegisterTransitionValidationAndTranslation(validate *validator.Validate, translator ut.Translator) error {
+func RegisterTransitionValidation(validate *validator.Validate) error {
 	err := validate.RegisterValidation("transition", validateTransition)
 	if err != nil {
 		return err
 	}
-
-	validTransition := []interface{}{
-		string(PAGAMENTO_CONFIRMADO),
-		string(CONCLUIR_COMPRA),
-		string(CANCELAR_COMPRA),
-	}
-
-	err = validate.RegisterTranslation("transition", translator, func(ut ut.Translator) error {
-		return ut.Add("transition", appUtil.GenerateEnumErrorDetail("Transition", validTransition), true)
-	}, func(ut ut.Translator, fe validator.FieldError) string {
-		t, _ := ut.T("transition", fe.Field())
-		return t
-	})
-
 	return err
 }

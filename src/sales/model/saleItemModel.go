@@ -10,7 +10,7 @@ import (
 
 type SaleItem struct {
 	SaleID    uuid.UUID            `gorm:"column:sale_id;primaryKey;not null" json:"-"`
-	Sale      Sale                 `gorm:"foreignKey:SaleID;constraint:OnDelete:CASCADE" json:"sale"`
+	Sale      Sale                 `gorm:"foreignKey:SaleID;references:CustomerCareID;constraint:OnDelete:CASCADE" json:"sale"`
 	ProductID uuid.UUID            `gorm:"column:product_id;primaryKey;not null" json:"-"`
 	Product   productModel.Product `gorm:"foreignKey:ProductID" json:"product"`
 	Quantity  uint32               `gorm:"not null" json:"quantity"`

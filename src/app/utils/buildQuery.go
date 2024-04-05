@@ -63,11 +63,14 @@ func (qb *TQueryBuilder) BuildQuery() *gorm.DB {
 			if tags["date_extract"] != "" && value.Int() != 0 {
 				queryString = buildQueryString(fmt.Sprintf("EXTRACT(%s FROM %s)", tags["date_extract"], fieldName), tags)
 				qb.query = qb.query.Where(queryString, int(value.Int()))
-			}
-
-			if tags["date_extract"] == "" {
+			} else if tags["date_extract"] == "" && value.Interface() != "" {
 				queryString = buildQueryString(fieldName, tags)
-				qb.query = qb.query.Where(queryString, value.Interface())
+
+				if tags["operation"] == "like" && value.Type().Kind() == reflect.String {
+					qb.query = qb.query.Where(queryString, fmt.Sprintf("%%%s%%", value.Interface()))
+				} else {
+					qb.query = qb.query.Where(queryString, value.Interface())
+				}
 			}
 		}
 

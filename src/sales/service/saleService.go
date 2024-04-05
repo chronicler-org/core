@@ -8,12 +8,14 @@ import (
 
 	appException "github.com/chronicler-org/core/src/app/exceptions"
 	customerCareService "github.com/chronicler-org/core/src/customerCare/service"
+	productModel "github.com/chronicler-org/core/src/product/model"
 	productService "github.com/chronicler-org/core/src/product/service"
 	salesDTO "github.com/chronicler-org/core/src/sales/dto"
 	saleEnum "github.com/chronicler-org/core/src/sales/enum"
 	saleExceptionMessage "github.com/chronicler-org/core/src/sales/messages"
 	salesModel "github.com/chronicler-org/core/src/sales/model"
 	salesRepository "github.com/chronicler-org/core/src/sales/repository"
+	"github.com/google/uuid"
 )
 
 type SaleService struct {
@@ -216,4 +218,27 @@ func (service *SaleService) DeleteSale(id string) (salesModel.Sale, error) {
 	}
 
 	return sale, err
+}
+
+func (service *SaleService) GetSaleProductSummary(dto salesDTO.QuerySalesProductSummaryDTO) (interface{}, int64, error) {
+	summary := []struct {
+		ProductID     uuid.UUID            `json:"-"`
+		Product       productModel.Product `json:"product"`
+		TotalQuantity int64                `json:"total_quantity"`
+	}{}
+
+	totalCount, err := service.saleItemRepository.GetSaleProductSummary(dto, &summary)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	for index, value := range summary {
+		product, err := service.productService.FindProductByID(value.ProductID.String())
+		if err != nil {
+			return nil, 0, err
+		}
+		summary[index].Product = product
+	}
+
+	return summary, totalCount, nil
 }

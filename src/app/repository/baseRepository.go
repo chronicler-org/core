@@ -4,9 +4,8 @@ import (
 	"fmt"
 	"reflect"
 
+	appUtil "github.com/chronicler-org/core/src/app/utils"
 	"gorm.io/gorm"
-
-	appDto "github.com/chronicler-org/core/src/app/dto"
 )
 
 type BaseRepository struct {
@@ -57,7 +56,7 @@ func (r *BaseRepository) UpdateWithTransaction(tx *gorm.DB, data interface{}) er
 }
 
 func (r *BaseRepository) FindAll(dto interface{}, results interface{}, preloads ...string) (int64, error) {
-	query, paginationDTO := r.mapDTOToQuery(dto)
+	query, paginationDTO := appUtil.MapDTOToQuery(dto, r.Db.Model(r.Model))
 
 	var count int64
 	err := query.Count(&count).Error
@@ -118,53 +117,4 @@ func (r *BaseRepository) ClearAssociationsByField(field, value string, associati
 	}
 
 	return nil
-}
-
-func (r *BaseRepository) mapDTOToQuery(dto interface{}) (*gorm.DB, appDto.PaginationDTO) {
-	var paginationDTO appDto.PaginationDTO
-
-	dtoValue := reflect.ValueOf(dto)
-	if dtoValue.Kind() == reflect.Ptr {
-		dtoValue = dtoValue.Elem()
-	}
-	dtoType := dtoValue.Type()
-
-	query := r.Db.Model(r.Model)
-	for i := 0; i < dtoType.NumField(); i++ {
-		fieldName := dtoType.Field(i).Name
-		fieldValue := dtoValue.Field(i)
-
-		switch fieldName {
-		case "PaginationDTO":
-			paginationDTOValue := fieldValue.Interface().(appDto.PaginationDTO)
-			paginationDTO.Limit = paginationDTOValue.Limit
-			paginationDTO.Page = paginationDTOValue.Page
-		case "Limit":
-			if fieldValue.IsValid() && fieldValue.Type().Kind() == reflect.Int {
-				paginationDTO.Limit = int(fieldValue.Int())
-			}
-		case "Page":
-			if fieldValue.IsValid() && fieldValue.Type().Kind() == reflect.Int {
-				paginationDTO.Page = int(fieldValue.Int())
-			}
-		case "CreatedMonth":
-			if fieldValue.IsValid() && fieldValue.Type().Kind() == reflect.Int && fieldValue.Int() != 0 {
-				query = query.Where("EXTRACT(MONTH FROM created_at) = ?", fieldValue.Int())
-			}
-		case "CreatedYear":
-			if fieldValue.IsValid() && fieldValue.Type().Kind() == reflect.Int && fieldValue.Int() != 0 {
-				query = query.Where("EXTRACT(YEAR FROM created_at) = ?", int(fieldValue.Int()))
-			}
-		default:
-			if fieldValue.Interface() != "" {
-				tag := dtoType.Field(i).Tag.Get("query")
-				if tag != "" {
-					query = query.Where(fmt.Sprintf("%s = ?", tag), fieldValue.Interface())
-				}
-			}
-		}
-
-	}
-
-	return query, paginationDTO
 }

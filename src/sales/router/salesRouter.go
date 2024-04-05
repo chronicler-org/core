@@ -39,6 +39,11 @@ func InitSalesRouter(
 		appUtil.Controller(salesController.HandleFindAllSales),
 	)
 	salesRouter.Get(
+		"/summary",
+		validatorMiddleware(nil, &salesDTO.QuerySalesProductSummaryDTO{}),
+		appUtil.Controller(salesController.HandleGetSaleProductSummary),
+	)
+	salesRouter.Get(
 		"/:id",
 		appUtil.Controller(salesController.HandleFindSaleByID),
 	)

@@ -1,8 +1,6 @@
 package salesRepository
 
 import (
-	"fmt"
-
 	"gorm.io/gorm"
 
 	appRepository "github.com/chronicler-org/core/src/app/repository"
@@ -33,15 +31,15 @@ func (r *SaleItemRepository) GetSaleProductSummary(
 	if err != nil {
 		return 0, err
 	}
-	fmt.Println("Query", query)
 
 	page := paginationDTO.GetPage()
 	limit := paginationDTO.GetLimit()
 	offset := (page - 1) * limit
 
 	err = query.
-		Select("product_id, SUM(quantity) as total_quantity").
-		Group("product_id").
+		Joins("JOIN products ON products.id = sale_items.product_id").
+		Select("sale_items.product_id, products.model, SUM(sale_items.quantity) as total_quantity").
+		Group("sale_items.product_id, products.model").
 		Order("total_quantity DESC").
 		Limit(limit).
 		Offset(offset).

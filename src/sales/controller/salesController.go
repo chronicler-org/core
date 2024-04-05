@@ -57,10 +57,15 @@ func (controller *SalesController) HandleDeleteSale(c *fiber.Ctx) (appUtil.Pagin
 	return appUtil.PaginateSingle(deletedSale), err
 }
 
-func (controller *SalesController) HandleGetSaleProductSummary(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
+func (controller *SalesController) HandleGetSaleProductsSummary(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
 	var querySalesProductSummaryDTO salesDTO.QuerySalesProductSummaryDTO
 	c.QueryParser(&querySalesProductSummaryDTO)
 
-	summary, count, err := controller.salesService.GetSaleProductSummary(querySalesProductSummaryDTO)
-	return appUtil.Paginate(summary, count, querySalesProductSummaryDTO.GetPage(), querySalesProductSummaryDTO.GetLimit()), err
+	produtsSummary, count, err := controller.salesService.GetSaleProductsSummary(querySalesProductSummaryDTO)
+	return appUtil.Paginate(produtsSummary, count, querySalesProductSummaryDTO.GetPage(), querySalesProductSummaryDTO.GetLimit()), err
+}
+
+func (controller *SalesController) HandleGetProductQuantitySoldVariation(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
+	productQuantitySoldVariation, err := controller.salesService.GetProductQuantitySoldVariation()
+	return appUtil.PaginateSingle(productQuantitySoldVariation), err
 }

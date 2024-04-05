@@ -39,9 +39,13 @@ func InitSalesRouter(
 		appUtil.Controller(salesController.HandleFindAllSales),
 	)
 	salesRouter.Get(
-		"/product-summary",
+		"/products-summary",
 		validatorMiddleware(nil, &salesDTO.QuerySalesProductSummaryDTO{}),
-		appUtil.Controller(salesController.HandleGetSaleProductSummary),
+		appUtil.Controller(salesController.HandleGetSaleProductsSummary),
+	)
+	salesRouter.Get(
+		"/product-quantity-sold-variation",
+		appUtil.Controller(salesController.HandleGetProductQuantitySoldVariation),
 	)
 	salesRouter.Get(
 		"/:id",

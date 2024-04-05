@@ -8,6 +8,7 @@ import (
 	"gorm.io/gorm"
 
 	appException "github.com/chronicler-org/core/src/app/exceptions"
+	appUtil "github.com/chronicler-org/core/src/app/utils"
 	customerCareService "github.com/chronicler-org/core/src/customerCare/service"
 	productEnum "github.com/chronicler-org/core/src/product/enum"
 	productService "github.com/chronicler-org/core/src/product/service"
@@ -220,17 +221,45 @@ func (service *SaleService) DeleteSale(id string) (salesModel.Sale, error) {
 	return sale, err
 }
 
-func (service *SaleService) GetSaleProductSummary(dto salesDTO.QuerySalesProductSummaryDTO) (interface{}, int64, error) {
-	summary := []struct {
+func (service *SaleService) GetSaleProductsSummary(dto salesDTO.QuerySalesProductSummaryDTO) (interface{}, int64, error) {
+	produtsSummary := []struct {
 		ProductID     uuid.UUID                 `json:"product_id"`
 		Model         productEnum.ClothingModel `json:"model"`
 		TotalQuantity int64                     `json:"total_quantity"`
 	}{}
 
-	totalCount, err := service.saleItemRepository.GetSaleProductSummary(dto, &summary)
+	totalCount, err := service.saleItemRepository.GetSaleProductSummary(dto, &produtsSummary)
 	if err != nil {
 		return nil, 0, err
 	}
 
-	return summary, totalCount, nil
+	return produtsSummary, totalCount, nil
+}
+
+func (service *SaleService) GetProductQuantitySoldVariation() (any, error) {
+	productQuantitySoldVariation := struct {
+		PercentVariation  float64 `json:"percent_variation"`
+		TotalCurrentMonth int64   `json:"total_current_month"`
+	}{}
+
+	currentMonth := time.Now().Month()
+	currentYear := time.Now().Year()
+	currentMonthTotalQuantity, err :=
+		service.saleItemRepository.GetTotalQuantitySoldByCreatedMonth(currentMonth, currentYear)
+	if err != nil {
+		return productQuantitySoldVariation, err
+	}
+
+	lastMonth, lastYear := appUtil.GetLastMonth()
+	lastMonthTotalQuantity, err :=
+		service.saleItemRepository.GetTotalQuantitySoldByCreatedMonth(lastMonth, lastYear)
+	if err != nil {
+		return productQuantitySoldVariation, err
+	}
+
+	productQuantitySoldVariation.TotalCurrentMonth = currentMonthTotalQuantity
+	productQuantitySoldVariation.PercentVariation =
+		appUtil.CalculatePercentVariation(float64(currentMonthTotalQuantity), float64(lastMonthTotalQuantity))
+
+	return productQuantitySoldVariation, nil
 }

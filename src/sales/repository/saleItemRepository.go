@@ -1,6 +1,9 @@
 package salesRepository
 
 import (
+	"reflect"
+	"time"
+
 	"gorm.io/gorm"
 
 	appRepository "github.com/chronicler-org/core/src/app/repository"
@@ -49,4 +52,22 @@ func (r *SaleItemRepository) GetSaleProductSummary(
 	}
 
 	return totalCount, err
+}
+
+func (r *SaleItemRepository) GetTotalQuantitySoldByCreatedMonth(month time.Month, year int) (int64, error) {
+	modelType := reflect.TypeOf(r.Model)
+	modelPtr := reflect.New(modelType).Interface()
+
+	var TotalQuantity int64
+	err := r.Db.Model(modelPtr).
+		Select("COALESCE(SUM(sale_items.quantity), 0) as total_quantity").
+		Where("EXTRACT(MONTH FROM created_at) = ?", month).
+		Where("EXTRACT(YEAR FROM created_at) = ?", year).
+		Pluck("total_quantity", &TotalQuantity).Error
+
+	if err != nil {
+		return 0, err
+	}
+
+	return TotalQuantity, nil
 }

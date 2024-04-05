@@ -141,29 +141,27 @@ func (service *CustomerService) DeleteCustomer(cpf string) (customerModel.Custom
 }
 
 func (service *CustomerService) GetNewCustomersVariationPercent() (any, error) {
-	type NewCustomersVariationDTO struct {
+	customersVariation := struct {
 		PercentVariation float64 `json:"percent_variation"`
-	}
+	}{}
 
 	currentMonth := time.Now().Month()
 	currentYear := time.Now().Year()
 	currentMonthCount, err := service.customerRepository.CountCustomersByCreatedMonth(currentMonth, currentYear)
 
 	if err != nil {
-		return NewCustomersVariationDTO{}, err
+		return customersVariation, err
 	}
 
 	lastMonth, lastYear := appUtil.GetLastMonth()
 	lastMonthCount, err := service.customerRepository.CountCustomersByCreatedMonth(lastMonth, lastYear)
 	if err != nil {
-		return NewCustomersVariationDTO{}, err
+		return customersVariation, err
 	}
 
-	percentVariation := appUtil.CalculatePercentVariation(float64(currentMonthCount), float64(lastMonthCount))
+	customersVariation.PercentVariation = appUtil.CalculatePercentVariation(float64(currentMonthCount), float64(lastMonthCount))
 
-	return NewCustomersVariationDTO{
-		PercentVariation: percentVariation,
-	}, nil
+	return customersVariation, nil
 }
 
 func (service *CustomerService) updateCustomerTags(customer *customerModel.Customer, tagIDs []string) error {

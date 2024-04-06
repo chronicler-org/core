@@ -264,16 +264,17 @@ func (service *SaleService) GetProductQuantitySoldVariation() (any, error) {
 	return productQuantitySoldVariation, nil
 }
 
-func (service *SaleService) GetLastSoldProducts(dto salesDTO.QuerySalesProductSummaryDTO) (interface{}, int64, error) {
-	lastSoldProducts := []struct {
-		ProductID uuid.UUID                 `json:"product_id"`
-		Model     productEnum.ClothingModel `json:"model"`
-	}{}
+func (service *SaleService) FindAllSaleItems(dto salesDTO.QuerySaleItemDTO) ([]salesModel.SaleItem, int64, error) {
+	var saleItems []salesModel.SaleItem
 
-	totalCount, err := service.saleItemRepository.GetSoldProducts(dto, &lastSoldProducts)
+	totalCount, err := service.saleItemRepository.FindAll(dto, &saleItems,
+		"Sale", "Product", "Sale.CustomerCare",
+		"Sale.CustomerCare.Customer", "Sale.CustomerCare.Team",
+		"Sale.CustomerCare.Customer.Address",
+	)
 	if err != nil {
 		return nil, 0, err
 	}
 
-	return lastSoldProducts, totalCount, nil
+	return saleItems, totalCount, nil
 }

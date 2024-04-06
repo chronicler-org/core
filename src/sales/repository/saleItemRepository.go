@@ -75,30 +75,3 @@ func (r *SaleItemRepository) GetTotalQuantitySoldByCreatedMonth(month time.Month
 
 	return TotalQuantity, nil
 }
-
-func (r *SaleItemRepository) GetSoldProducts(
-	dto interface{},
-	results interface{},
-) (int64, error) {
-	queryBuilder := appUtil.QueryBuilder(dto, r.Db.Model(&salesModel.SaleItem{}))
-	query := queryBuilder.BuildQuery()
-
-	// Query to count total number of records
-	var totalCount int64
-	err := query.Count(&totalCount).Error
-	if err != nil {
-		return 0, err
-	}
-
-	offset, limit := queryBuilder.GetPagination()
-	err = query.
-		Joins("JOIN products ON products.id = sale_items.product_id").
-		Limit(limit).
-		Offset(offset).
-		Scan(results).Error
-	if err != nil {
-		return 0, err
-	}
-
-	return totalCount, err
-}

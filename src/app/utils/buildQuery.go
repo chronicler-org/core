@@ -57,13 +57,13 @@ func (qb *TQueryBuilder) BuildQuery() *gorm.DB {
 			if value.IsValid() && value.Type().Kind() == reflect.Int {
 				qb.paginationDTO.Limit = int(value.Int())
 			}
-		case "Order":
-			if value.IsValid() && value.Type().Kind() == reflect.String && value.String() != "" {
-				qb.order = value.String()
-			}
 		case "Page":
 			if value.IsValid() && value.Type().Kind() == reflect.Int {
 				qb.paginationDTO.Page = int(value.Int())
+			}
+		case "order":
+			if value.IsValid() && value.Type().Kind() == reflect.String && value.String() != "" {
+				qb.order = value.String()
 			}
 		default:
 

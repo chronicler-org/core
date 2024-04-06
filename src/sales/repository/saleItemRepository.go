@@ -8,6 +8,7 @@ import (
 
 	appRepository "github.com/chronicler-org/core/src/app/repository"
 	appUtil "github.com/chronicler-org/core/src/app/utils"
+	salesDTO "github.com/chronicler-org/core/src/sales/dto"
 	saleEnum "github.com/chronicler-org/core/src/sales/enum"
 	salesModel "github.com/chronicler-org/core/src/sales/model"
 )
@@ -23,11 +24,17 @@ func InitSaleItemRepository(db *gorm.DB) *SaleItemRepository {
 }
 
 func (r *SaleItemRepository) GetSaleProductSummary(
-	dto interface{},
+	dto salesDTO.QuerySalesProductSummaryDTO,
 	results interface{},
 ) (int64, error) {
 
-	query, paginationDTO := appUtil.MapDTOToQuery(dto, r.Db.Model(&salesModel.SaleItem{}))
+	query := r.Db.Model(&salesModel.SaleItem{})
+	if dto.Status != "" {
+		query = query.
+			Joins("INNER JOIN sales ON sales.customer_care_id = sale_items.sale_id")
+	}
+	queryBuilder := appUtil.QueryBuilder(dto, query)
+	query = queryBuilder.BuildQuery()
 
 	// Query to count total number of records
 	var totalCount int64
@@ -36,10 +43,7 @@ func (r *SaleItemRepository) GetSaleProductSummary(
 		return 0, err
 	}
 
-	page := paginationDTO.GetPage()
-	limit := paginationDTO.GetLimit()
-	offset := (page - 1) * limit
-
+	offset, limit := queryBuilder.GetPagination()
 	err = query.
 		Joins("JOIN products ON products.id = sale_items.product_id").
 		Select("sale_items.product_id, products.model, SUM(sale_items.quantity) as total_quantity").
@@ -79,8 +83,8 @@ func (r *SaleItemRepository) GetLastSoldProducts(
 	dto interface{},
 	results interface{},
 ) (int64, error) {
-
-	query, paginationDTO := appUtil.MapDTOToQuery(dto, r.Db.Model(&salesModel.SaleItem{}))
+	queryBuilder := appUtil.QueryBuilder(dto, r.Db.Model(&salesModel.SaleItem{}))
+	query := queryBuilder.BuildQuery()
 
 	// Query to count total number of records
 	var totalCount int64
@@ -89,10 +93,7 @@ func (r *SaleItemRepository) GetLastSoldProducts(
 		return 0, err
 	}
 
-	page := paginationDTO.GetPage()
-	limit := paginationDTO.GetLimit()
-	offset := (page - 1) * limit
-
+	offset, limit := queryBuilder.GetPagination()
 	err = query.
 		Joins("JOIN products ON products.id = sale_items.product_id").
 		Select("products.model as total_quantity").

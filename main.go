@@ -62,8 +62,9 @@ func main() {
 	Validator := validator.New()
 
 	appUtil.RegisterCPFValidation(Validator)
-	productEnum.RegisterModelValidation(Validator)
 	productEnum.RegisterSizeValidation(Validator)
+	productEnum.RegisterModelValidation(Validator)
+	saleStatusEnum.RegisterStatusValidation(Validator)
 	saleStatusEnum.RegisterTransitionValidation(Validator)
 
 	appRouter.InitAppRouter(app, db, Validator)

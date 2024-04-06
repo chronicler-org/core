@@ -3,7 +3,6 @@ package tagController
 import (
 	"github.com/gofiber/fiber/v2"
 
-	appDto "github.com/chronicler-org/core/src/app/dto"
 	appUtil "github.com/chronicler-org/core/src/app/utils"
 	tagDTO "github.com/chronicler-org/core/src/tag/dto"
 	tagService "github.com/chronicler-org/core/src/tag/service"
@@ -20,12 +19,11 @@ func InitTagController(s *tagService.TagService) *TagController {
 }
 
 func (controller *TagController) HandleFindAll(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
-	var paginationDTO appDto.PaginationDTO
-	c.QueryParser(&paginationDTO)
+	var queryTagDTO tagDTO.QueryTagDTO
+	c.QueryParser(&queryTagDTO)
 
-	totalCount, tags, err := controller.tagService.FindAll(paginationDTO)
-
-	return appUtil.Paginate(tags, totalCount, paginationDTO.GetPage(), paginationDTO.GetLimit()), err
+	totalCount, tags, err := controller.tagService.FindAll(queryTagDTO)
+	return appUtil.Paginate(tags, totalCount, queryTagDTO.GetPage(), queryTagDTO.GetLimit()), err
 }
 
 func (controller *TagController) HandleFindByID(c *fiber.Ctx) (appUtil.PaginateResponse, error) {

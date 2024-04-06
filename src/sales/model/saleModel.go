@@ -14,7 +14,7 @@ type Sale struct {
 	CustomerCare   customerCareModel.CustomerCare `gorm:"foreignKey:CustomerCareID" json:"customer_care"`
 	TotalValue     float32                        `gorm:"not null" json:"total_value"`
 	Status         saleEnum.SaleStatus            `gorm:"type:varchar(45);not null" json:"status"`
-	PaymentMethod  string                         `gorm:"type:varchar(45);not null" json:"payment_method"`
+	PaymentMethod  saleEnum.PaymentMethod         `gorm:"not null" json:"payment_method"`
 	CreatedAt      time.Time                      `json:"created_at"`
 	UpdatedAt      time.Time                      `json:"updated_at"`
 }

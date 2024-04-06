@@ -66,6 +66,7 @@ func main() {
 	productEnum.RegisterModelValidation(Validator)
 	saleStatusEnum.RegisterStatusValidation(Validator)
 	saleStatusEnum.RegisterTransitionValidation(Validator)
+	saleStatusEnum.RegisterPaymentMethodValidation(Validator)
 
 	appRouter.InitAppRouter(app, db, Validator)
 

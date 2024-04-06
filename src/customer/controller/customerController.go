@@ -3,7 +3,6 @@ package customerController
 import (
 	"github.com/gofiber/fiber/v2"
 
-	appDto "github.com/chronicler-org/core/src/app/dto"
 	appUtil "github.com/chronicler-org/core/src/app/utils"
 	customerDTO "github.com/chronicler-org/core/src/customer/dto"
 	customerService "github.com/chronicler-org/core/src/customer/service"
@@ -20,11 +19,11 @@ func InitCustomerController(s *customerService.CustomerService) *CustomerControl
 }
 
 func (controller *CustomerController) HandleFindAllCustomers(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
-	var customerQueryDTO customerDTO.CustomerQueryDTO
-	c.QueryParser(&customerQueryDTO)
+	var queryCustomerDTO customerDTO.QueryCustomerDTO
+	c.QueryParser(&queryCustomerDTO)
 
-	totalCount, customers, err := controller.customerService.FindAllCustomers(customerQueryDTO)
-	return appUtil.Paginate(customers, totalCount, customerQueryDTO.GetPage(), customerQueryDTO.GetLimit()), err
+	totalCount, customers, err := controller.customerService.FindAllCustomers(queryCustomerDTO)
+	return appUtil.Paginate(customers, totalCount, queryCustomerDTO.GetPage(), queryCustomerDTO.GetLimit()), err
 }
 
 func (controller *CustomerController) HandleFindCustomerByCPF(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
@@ -76,12 +75,11 @@ func (controller *CustomerController) HandleFindCustomerAddressByID(c *fiber.Ctx
 }
 
 func (controller *CustomerController) HandleFindAllCustomerAddresses(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
-	var paginationDto appDto.PaginationDTO
-	c.QueryParser(&paginationDto)
+	var queryCustomerAddressDTO customerDTO.QueryCustomerAddressDTO
+	c.QueryParser(&queryCustomerAddressDTO)
 
-	totalCount, customerAddresses, err := controller.customerService.FindAllCustomerAddresses(paginationDto)
-
-	return appUtil.Paginate(customerAddresses, totalCount, paginationDto.GetPage(), paginationDto.GetLimit()), err
+	totalCount, customerAddresses, err := controller.customerService.FindAllCustomerAddresses(queryCustomerAddressDTO)
+	return appUtil.Paginate(customerAddresses, totalCount, queryCustomerAddressDTO.GetPage(), queryCustomerAddressDTO.GetLimit()), err
 }
 
 func (controller *CustomerController) HandleCreateCustomerAddress(c *fiber.Ctx) (appUtil.PaginateResponse, error) {

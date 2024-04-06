@@ -64,6 +64,7 @@ func (service *CustomerCareService) CreateCustomerCare(
 	}
 
 	model := customerCareModel.CustomerCare{
+		ID:          uuid.New(),
 		Date:        dto.Date,
 		CustomerCPF: customerExists.CPF,
 		TeamID:      teamId,

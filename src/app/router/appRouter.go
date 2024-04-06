@@ -13,6 +13,7 @@ import (
 	customerCareRouter "github.com/chronicler-org/core/src/customerCare/router"
 	managerRouter "github.com/chronicler-org/core/src/manager/router"
 	productRouter "github.com/chronicler-org/core/src/product/router"
+	salesRouter "github.com/chronicler-org/core/src/sales/router"
 	tagRouter "github.com/chronicler-org/core/src/tag/router"
 	teamRouter "github.com/chronicler-org/core/src/team/router"
 )
@@ -20,14 +21,14 @@ import (
 func InitAppRouter(app *fiber.App, db *gorm.DB, Validator *validator.Validate) {
 
 	tagController, tagService := tagRouter.InitTagModule(db)
-	productController, _ := productRouter.InitProductModule(db)
+	productController, productService := productRouter.InitProductModule(db)
 	teamController, teamService := teamRouter.InitTeamModule(db)
 	managerController, managerService := managerRouter.InitManagerModule(db, teamService)
 	customerController, customerService := customerRouter.InitCustomerModule(db, tagService)
 	attendantController, attendantService := attendantRouter.InitAttendantModule(db, teamService)
 	authRouterController, _ := authRouter.InitAuthModule(db, managerService, attendantService)
-
-	customerCareController, _ := customerCareRouter.InitCustomerCareModule(db, customerService, teamService)
+	customerCareController, customerCareService := customerCareRouter.InitCustomerCareModule(db, customerService, teamService)
+	salesController, _ := salesRouter.InitSalesModule(db, customerCareService, productService)
 
 	validatorMiddleware := appMiddleware.Validate(Validator)
 	authRouter.InitAuthRouter(app, authRouterController, validatorMiddleware)
@@ -41,4 +42,5 @@ func InitAppRouter(app *fiber.App, db *gorm.DB, Validator *validator.Validate) {
 	customerRouter.InitCustomerRouter(app, customerController, validatorMiddleware)
 	attendantRouter.InitAttendantRouter(app, attendantController, validatorMiddleware)
 	customerCareRouter.InitCustomerCareRouter(app, customerCareController, validatorMiddleware)
+	salesRouter.InitSalesRouter(app, salesController, validatorMiddleware)
 }

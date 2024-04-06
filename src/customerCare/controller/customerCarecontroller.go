@@ -41,10 +41,10 @@ func (controller *CustomerCareController) HandleCreateCustomerCare(c *fiber.Ctx)
 	var teamId uuid.UUID
 	if c.Locals(authEnum.ManagerRole) != nil {
 		loggedManager := c.Locals(authEnum.ManagerRole).(managerModel.Manager)
-		teamId = loggedManager.ID
+		teamId = loggedManager.Team.ID
 	} else {
 		loggedAttendant := c.Locals(authEnum.AttendantRole).(attendantModel.Attendant)
-		teamId = loggedAttendant.ID
+		teamId = loggedAttendant.Team.ID
 	}
 
 	var createCustomerCareDTO customerCareDTO.CreateCustomerCareDTO

@@ -5,5 +5,5 @@ type CreateProductDTO struct {
 	Size   string  `validate:"required,size" json:"size"`
 	Value  float32 `validate:"required,number,min=0" json:"value"`
 	Fabric string  `validate:"required,min=2" json:"fabric"`
-	Stock  int64   `validate:"required,number,min=0" json:"stock"`
+	Stock  uint32   `validate:"required,number,min=0" json:"stock"`
 }

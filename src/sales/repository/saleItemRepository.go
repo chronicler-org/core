@@ -23,6 +23,29 @@ func InitSaleItemRepository(db *gorm.DB) *SaleItemRepository {
 	}
 }
 
+func (r *SaleItemRepository) FindAll(dto interface{}, results interface{}, preloads ...string) (int64, error) {
+	query := r.Db.Model(&salesModel.SaleItem{})
+	query.Joins("INNER JOIN sales ON sales.customer_care_id = sale_items.sale_id")
+
+	queryBuilder := appUtil.QueryBuilder(dto, query)
+	queryBuilder.BuildQuery()
+	queryBuilder.ApplyOrder()
+
+	var count int64
+	err := query.Count(&count).Error
+	if err != nil {
+		return 0, err
+	}
+
+	for _, preload := range preloads {
+		query = query.Preload(preload)
+	}
+
+	offset, limit := queryBuilder.GetPagination()
+
+	return count, query.Limit(limit).Offset(offset).Find(results).Error
+}
+
 func (r *SaleItemRepository) GetSaleProductSummary(
 	dto salesDTO.QuerySalesProductSummaryDTO,
 	results interface{},

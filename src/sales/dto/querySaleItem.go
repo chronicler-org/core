@@ -11,4 +11,5 @@ type QuerySaleItemDTO struct {
 	CreatedMonth int    `validate:"omitempty,min=1,max=12" query:"created_month" pg:"operation=equal,date_extract=MONTH,name=sale_items.created_at" `
 	CreatedYear  int    `validate:"omitempty,number" query:"created_year" pg:"operation=equal,date_extract=YEAR,name=sale_items.created_at" `
 	Order        string `validate:"omitempty" json:"order" query:"order"`
+	Status       string `validate:"omitempty,status" json:"status" query:"status" pg:"name=sales.status"`
 }

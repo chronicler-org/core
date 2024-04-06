@@ -7,7 +7,6 @@ import (
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 
-	appDto "github.com/chronicler-org/core/src/app/dto"
 	appException "github.com/chronicler-org/core/src/app/exceptions"
 	appUtil "github.com/chronicler-org/core/src/app/utils"
 	customerDTO "github.com/chronicler-org/core/src/customer/dto"
@@ -118,7 +117,7 @@ func (service *CustomerService) UpdateCustomer(cpf string, dto customerDTO.Updat
 	return customerUpdated, err
 }
 
-func (service *CustomerService) FindAllCustomers(dto customerDTO.CustomerQueryDTO) (int64, []customerModel.Customer, error) {
+func (service *CustomerService) FindAllCustomers(dto customerDTO.QueryCustomerDTO) (int64, []customerModel.Customer, error) {
 	var customers []customerModel.Customer
 	totalCount, err := service.customerRepository.FindAll(dto, &customers, "Tags", "Address")
 	if err != nil {
@@ -229,7 +228,7 @@ func (service *CustomerService) UpdateCustomerAddress(id string, dto customerDTO
 	return customerAddressExists, err
 }
 
-func (service *CustomerService) FindAllCustomerAddresses(dto appDto.PaginationDTO) (int64, []customerModel.CustomerAddress, error) {
+func (service *CustomerService) FindAllCustomerAddresses(dto customerDTO.QueryCustomerAddressDTO) (int64, []customerModel.CustomerAddress, error) {
 	var customerAddresses []customerModel.CustomerAddress
 	totalCount, err := service.customerAddressRepository.FindAll(dto, &customerAddresses)
 	if err != nil {

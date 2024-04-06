@@ -3,7 +3,6 @@ package attendantController
 import (
 	"github.com/gofiber/fiber/v2"
 
-	appDto "github.com/chronicler-org/core/src/app/dto"
 	appUtil "github.com/chronicler-org/core/src/app/utils"
 	attendantDTO "github.com/chronicler-org/core/src/attendant/dto"
 	attendantModel "github.com/chronicler-org/core/src/attendant/model"
@@ -21,11 +20,11 @@ func InitAttendantController(s *attendantService.AttendantService) *AttendantCon
 	}
 }
 func (controller *AttendantController) HandleFindAllAttendants(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
-	var paginationDto appDto.PaginationDTO
-	c.QueryParser(&paginationDto)
+	var attendantQueryDTO attendantDTO.AttendantQueryDTO
+	c.QueryParser(&attendantQueryDTO)
 
-	totalCount, attendants, err := controller.attendantService.FindAllAttendants(paginationDto)
-	return appUtil.Paginate(attendants, totalCount, paginationDto.GetPage(), paginationDto.GetLimit()), err
+	totalCount, attendants, err := controller.attendantService.FindAllAttendants(attendantQueryDTO)
+	return appUtil.Paginate(attendants, totalCount, attendantQueryDTO.GetPage(), attendantQueryDTO.GetLimit()), err
 }
 
 func (controller *AttendantController) HandleFindAttendantByID(c *fiber.Ctx) (appUtil.PaginateResponse, error) {

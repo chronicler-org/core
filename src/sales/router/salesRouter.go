@@ -34,6 +34,12 @@ func InitSalesRouter(
 	salesRouter := router.Group("/sale")
 
 	salesRouter.Get(
+		"/item",
+		validatorMiddleware(nil, &salesDTO.QuerySaleItemDTO{}),
+		appUtil.Controller(salesController.HandleFindAllSaleItems),
+	)
+
+	salesRouter.Get(
 		"/",
 		validatorMiddleware(nil, &salesDTO.QuerySalesDTO{}),
 		appUtil.Controller(salesController.HandleFindAllSales),

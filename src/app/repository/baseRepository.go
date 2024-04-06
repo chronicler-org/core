@@ -58,6 +58,7 @@ func (r *BaseRepository) UpdateWithTransaction(tx *gorm.DB, data interface{}) er
 func (r *BaseRepository) FindAll(dto interface{}, results interface{}, preloads ...string) (int64, error) {
 	queryBuilder := appUtil.QueryBuilder(dto, r.Db.Model(r.Model))
 	query := queryBuilder.BuildQuery()
+	queryBuilder.ApplyOrder()
 
 	var count int64
 	err := query.Count(&count).Error
@@ -70,8 +71,8 @@ func (r *BaseRepository) FindAll(dto interface{}, results interface{}, preloads 
 	}
 
 	offset, limit := queryBuilder.GetPagination()
-	err = query.Limit(limit).Offset(offset).Find(results).Error
-	return count, err
+
+	return count, query.Limit(limit).Offset(offset).Find(results).Error
 }
 
 func (r *BaseRepository) Count() (int64, error) {

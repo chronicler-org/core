@@ -69,3 +69,12 @@ func (controller *SalesController) HandleGetProductQuantitySoldVariation(c *fibe
 	productQuantitySoldVariation, err := controller.salesService.GetProductQuantitySoldVariation()
 	return appUtil.PaginateSingle(productQuantitySoldVariation), err
 }
+
+func (controller *SalesController) HandleFindAllSaleItems(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
+	var querySaleItemDTO salesDTO.QuerySaleItemDTO
+	c.QueryParser(&querySaleItemDTO)
+
+	produtsSummary, count, err := controller.salesService.FindAllSaleItems(querySaleItemDTO)
+	return appUtil.Paginate(produtsSummary, count, querySaleItemDTO.GetPage(), querySaleItemDTO.GetLimit()), err
+}
+

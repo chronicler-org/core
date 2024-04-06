@@ -8,7 +8,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 
-	appDto "github.com/chronicler-org/core/src/app/dto"
 	appException "github.com/chronicler-org/core/src/app/exceptions"
 	appUtil "github.com/chronicler-org/core/src/app/utils"
 	attendantDTO "github.com/chronicler-org/core/src/attendant/dto"
@@ -111,7 +110,7 @@ func (service *AttendantService) UpdateAttendant(id string, dto attendantDTO.Upd
 	return attendantExists, err
 }
 
-func (service *AttendantService) FindAllAttendants(dto appDto.PaginationDTO) (int64, []attendantModel.Attendant, error) {
+func (service *AttendantService) FindAllAttendants(dto attendantDTO.AttendantQueryDTO) (int64, []attendantModel.Attendant, error) {
 	var attendants []attendantModel.Attendant
 	totalCount, err := service.attendantRepository.FindAll(dto, &attendants, "Team")
 	if err != nil {
@@ -195,7 +194,6 @@ func (service *AttendantService) UpdateAttendantEvaluation(
 
 	return attendantEvaluationExists, err
 }
-
 
 func (service *AttendantService) FindAllAttedantEvaluations(
 	dto attendantDTO.QueryAttendantEvaluationDTO,

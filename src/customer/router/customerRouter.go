@@ -4,7 +4,6 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
 
-	appDto "github.com/chronicler-org/core/src/app/dto"
 	appUtil "github.com/chronicler-org/core/src/app/utils"
 	customerController "github.com/chronicler-org/core/src/customer/controller"
 	customerDTO "github.com/chronicler-org/core/src/customer/dto"
@@ -33,7 +32,7 @@ func InitCustomerRouter(
 	customerRouter := router.Group("/customer")
 
 	customerRouter.Get("/address",
-		validatorMiddleware(nil, &appDto.PaginationDTO{}),
+		validatorMiddleware(nil, &customerDTO.QueryCustomerAddressDTO{}),
 		appUtil.Controller(customerController.HandleFindAllCustomerAddresses),
 	)
 	customerRouter.Get("/address/:id",
@@ -52,7 +51,7 @@ func InitCustomerRouter(
 	)
 
 	customerRouter.Get("/",
-		validatorMiddleware(nil, &customerDTO.CustomerQueryDTO{}),
+		validatorMiddleware(nil, &customerDTO.QueryCustomerDTO{}),
 		appUtil.Controller(customerController.HandleFindAllCustomers),
 	)
 	customerRouter.Get("/new-variation-percent",

@@ -58,7 +58,7 @@ func InitAttendantRouter(
 	)
 
 	attendantRoute.Get("/",
-		validatorMiddleware(nil, &appDto.PaginationDTO{}),
+		validatorMiddleware(nil, &attendantDTO.AttendantQueryDTO{}),
 		appUtil.Controller(attendantController.HandleFindAllAttendants),
 	)
 	attendantRoute.Get("/me",

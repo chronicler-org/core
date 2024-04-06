@@ -4,7 +4,6 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
 
-	appDto "github.com/chronicler-org/core/src/app/dto"
 	appMiddleware "github.com/chronicler-org/core/src/app/middleware"
 	appUtil "github.com/chronicler-org/core/src/app/utils"
 	authEnum "github.com/chronicler-org/core/src/auth/enum"
@@ -32,7 +31,7 @@ func InitTagRouter(
 	tagRouter := router.Group("/tag")
 
 	tagRouter.Get("/",
-		validatorMiddleware(nil, &appDto.PaginationDTO{}),
+		validatorMiddleware(nil, &tagDTO.QueryTagDTO{}),
 		appUtil.Controller(tagController.HandleFindAll),
 	)
 	tagRouter.Get("/:id",

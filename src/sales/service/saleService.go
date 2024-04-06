@@ -221,6 +221,20 @@ func (service *SaleService) DeleteSale(id string) (salesModel.Sale, error) {
 	return sale, err
 }
 
+func (s *SaleService) GetTotalValuesSold(dto salesDTO.QueryTotalSalesSoldDTO) (interface{}, int64, error) {
+	results := []struct {
+		TotalValue float32   `json:"total_value"`
+		SaleDate   time.Time `json:"sale_date"`
+	}{}
+
+	count, err := s.saleItemRepository.GetTotalValuesSold(dto, &results)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return results, count, nil
+}
+
 func (service *SaleService) GetSaleProductsSummary(dto salesDTO.QuerySalesProductSummaryDTO) (interface{}, int64, error) {
 	produtsSummary := []struct {
 		ProductID     uuid.UUID                 `json:"product_id"`

@@ -13,6 +13,7 @@ import (
 type TQueryBuilder struct {
 	dto           interface{}
 	query         *gorm.DB
+	order         string
 	paginationDTO appDto.PaginationDTO
 }
 
@@ -56,6 +57,10 @@ func (qb *TQueryBuilder) BuildQuery() *gorm.DB {
 			if value.IsValid() && value.Type().Kind() == reflect.Int {
 				qb.paginationDTO.Limit = int(value.Int())
 			}
+		case "Order":
+			if value.IsValid() && value.Type().Kind() == reflect.String && value.String() != "" {
+				qb.order = value.String()
+			}
 		case "Page":
 			if value.IsValid() && value.Type().Kind() == reflect.Int {
 				qb.paginationDTO.Page = int(value.Int())
@@ -79,6 +84,41 @@ func (qb *TQueryBuilder) BuildQuery() *gorm.DB {
 	}
 
 	return qb.query
+}
+
+func (qb *TQueryBuilder) GetPagination() (int, int) {
+	page := qb.paginationDTO.GetPage()
+	limit := qb.paginationDTO.GetLimit()
+	offset := (page - 1) * limit
+
+	return offset, limit
+}
+
+func (qb *TQueryBuilder) ApplyOrder() *gorm.DB {
+	for fieldName, direction := range qb.getOrder() {
+		qb.query = qb.query.Order(fmt.Sprintf("%s %s", fieldName, direction))
+	}
+	return qb.query
+}
+
+func (qb *TQueryBuilder) getOrder() map[string]string {
+	orderMap := make(map[string]string)
+
+	if qb.order != "" {
+		orders := strings.Split(qb.order, ",")
+		for _, order := range orders {
+			orderParts := strings.Split(order, ":")
+			if len(orderParts) != 2 {
+				continue
+			}
+			fieldName := strings.TrimSpace(orderParts[0])
+			direction := strings.TrimSpace(orderParts[1])
+
+			orderMap[fieldName] = direction
+		}
+	}
+
+	return orderMap
 }
 
 func parseTags(tags string) map[string]string {
@@ -112,12 +152,4 @@ func buildQueryString(fieldName string, tags map[string]string) string {
 	}
 
 	return queryString
-}
-
-func (qb *TQueryBuilder) GetPagination() (int, int) {
-	page := qb.paginationDTO.GetPage()
-	limit := qb.paginationDTO.GetLimit()
-	offset := (page - 1) * limit
-
-	return offset, limit
 }

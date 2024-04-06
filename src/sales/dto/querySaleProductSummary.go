@@ -8,7 +8,7 @@ type QuerySalesProductSummaryDTO struct {
 	appDto.PaginationDTO
 	SaleID       string `validate:"omitempty,uuid" json:"sale_id" query:"sale_id" `
 	ProductID    string `validate:"omitempty,uuid" json:"product_id" query:"product_id" `
-	Status       string `validate:"omitempty,status" json:"status" query:"status" name:"sales.status"`
+	Status       string `validate:"omitempty,status" json:"status" query:"status" pg:"name=sales.status"`
 	CreatedMonth int    `validate:"omitempty,min=1,max=12" query:"created_month" pg:"operation=equal,date_extract=MONTH,name=sale_items.created_at" `
 	CreatedYear  int    `validate:"omitempty,number" query:"created_year" pg:"operation=equal,date_extract=YEAR,name=sale_items.created_at" `
 }

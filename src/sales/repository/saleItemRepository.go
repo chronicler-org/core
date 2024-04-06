@@ -27,9 +27,11 @@ func (r *SaleItemRepository) GetSaleProductSummary(
 	dto salesDTO.QuerySalesProductSummaryDTO,
 	results interface{},
 ) (int64, error) {
+	query := r.Db.Model(&salesModel.SaleItem{})
+	query.Joins("INNER JOIN sales ON sales.customer_care_id = sale_items.sale_id")
 
-	queryBuilder := appUtil.QueryBuilder(dto, r.Db.Model(&salesModel.SaleItem{}))
-	query := queryBuilder.BuildQuery()
+	queryBuilder := appUtil.QueryBuilder(dto, query)
+	queryBuilder.BuildQuery()
 
 	// Query to count total number of records
 	var totalCount int64
@@ -40,7 +42,6 @@ func (r *SaleItemRepository) GetSaleProductSummary(
 
 	offset, limit := queryBuilder.GetPagination()
 	err = query.
-		Joins("INNER JOIN sales ON sales.customer_care_id = sale_items.sale_id").
 		Joins("JOIN products ON products.id = sale_items.product_id").
 		Select("sale_items.product_id, products.model, SUM(sale_items.quantity) as total_quantity").
 		Group("sale_items.product_id, products.model").

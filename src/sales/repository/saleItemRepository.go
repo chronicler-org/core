@@ -28,13 +28,8 @@ func (r *SaleItemRepository) GetSaleProductSummary(
 	results interface{},
 ) (int64, error) {
 
-	query := r.Db.Model(&salesModel.SaleItem{})
-	if dto.Status != "" {
-		query = query.
-			Joins("INNER JOIN sales ON sales.customer_care_id = sale_items.sale_id")
-	}
-	queryBuilder := appUtil.QueryBuilder(dto, query)
-	query = queryBuilder.BuildQuery()
+	queryBuilder := appUtil.QueryBuilder(dto, r.Db.Model(&salesModel.SaleItem{}))
+	query := queryBuilder.BuildQuery()
 
 	// Query to count total number of records
 	var totalCount int64
@@ -45,6 +40,7 @@ func (r *SaleItemRepository) GetSaleProductSummary(
 
 	offset, limit := queryBuilder.GetPagination()
 	err = query.
+		Joins("INNER JOIN sales ON sales.customer_care_id = sale_items.sale_id").
 		Joins("JOIN products ON products.id = sale_items.product_id").
 		Select("sale_items.product_id, products.model, SUM(sale_items.quantity) as total_quantity").
 		Group("sale_items.product_id, products.model").
@@ -79,7 +75,7 @@ func (r *SaleItemRepository) GetTotalQuantitySoldByCreatedMonth(month time.Month
 	return TotalQuantity, nil
 }
 
-func (r *SaleItemRepository) GetLastSoldProducts(
+func (r *SaleItemRepository) GetSoldProducts(
 	dto interface{},
 	results interface{},
 ) (int64, error) {
@@ -96,8 +92,6 @@ func (r *SaleItemRepository) GetLastSoldProducts(
 	offset, limit := queryBuilder.GetPagination()
 	err = query.
 		Joins("JOIN products ON products.id = sale_items.product_id").
-		Select("products.model as total_quantity").
-		Order("total_quantity DESC").
 		Limit(limit).
 		Offset(offset).
 		Scan(results).Error

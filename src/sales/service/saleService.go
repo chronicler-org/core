@@ -270,7 +270,7 @@ func (service *SaleService) GetLastSoldProducts(dto salesDTO.QuerySalesProductSu
 		Model     productEnum.ClothingModel `json:"model"`
 	}{}
 
-	totalCount, err := service.saleItemRepository.GetSaleProductSummary(dto, &lastSoldProducts)
+	totalCount, err := service.saleItemRepository.GetSoldProducts(dto, &lastSoldProducts)
 	if err != nil {
 		return nil, 0, err
 	}

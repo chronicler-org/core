@@ -22,7 +22,6 @@ func (controller *ProductController) HandleFindAllProducts(c *fiber.Ctx) (appUti
 	c.QueryParser(&queryProductDTO)
 
 	totalCount, products, err := controller.productService.FindAllProducts(queryProductDTO)
-
 	return appUtil.Paginate(products, totalCount, queryProductDTO.GetPage(), queryProductDTO.GetLimit()), err
 }
 

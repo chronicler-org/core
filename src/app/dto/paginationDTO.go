@@ -1,8 +1,8 @@
 package appDto
 
 type PaginationDTO struct {
-	Limit int `validate:"omitempty,min=1,max=100" query:"limit" `
-	Page  int `validate:"omitempty,min=1" query:"page" `
+	Limit int `validate:"omitempty,min=1,max=100" json:"limit" query:"limit" `
+	Page  int `validate:"omitempty,min=1" json:"page" query:"page" `
 }
 
 func (p *PaginationDTO) GetLimit() int {

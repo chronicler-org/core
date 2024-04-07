@@ -142,10 +142,10 @@ func (service *SaleService) UpdateSale(updateSaleDTO salesDTO.UpdateSaleDTO, id 
 	case saleEnum.AWAITING_PAYMENT:
 		switch updateSaleDTO.Transition {
 
-		case string(saleEnum.PAGAMENTO_CONFIRMADO):
+		case string(saleEnum.PAYMENT_CONFIRMED):
 			sale.Status = saleEnum.PURCHASE_CONFIRMED
 
-		case string(saleEnum.CANCELAR_COMPRA):
+		case string(saleEnum.CANCELLED_PURCHASE):
 			sale.Status = saleEnum.CANCELLED_PURCHASE
 
 		default:
@@ -155,10 +155,10 @@ func (service *SaleService) UpdateSale(updateSaleDTO salesDTO.UpdateSaleDTO, id 
 	case saleEnum.PURCHASE_CONFIRMED:
 		switch updateSaleDTO.Transition {
 
-		case string(saleEnum.CONCLUIR_COMPRA):
+		case string(saleEnum.COMPLETE_PURCHASE):
 			sale.Status = saleEnum.PURCHASE_COMPLETED
 
-		case string(saleEnum.CANCELAR_COMPRA):
+		case string(saleEnum.CANCEL_PURCHASE):
 			sale.Status = saleEnum.CANCELLED_PURCHASE
 
 		default:

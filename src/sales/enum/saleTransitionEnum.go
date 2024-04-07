@@ -7,16 +7,16 @@ import (
 type Transition string
 
 const (
-	PAGAMENTO_CONFIRMADO Transition = "Pagamento confirmado"
-	CONCLUIR_COMPRA      Transition = "Concluir compra"
-	CANCELAR_COMPRA      Transition = "Cancelar compra"
+	PAYMENT_CONFIRMED Transition = "Pagamento confirmado"
+	COMPLETE_PURCHASE      Transition = "Concluir compra"
+	CANCEL_PURCHASE      Transition = "Cancelar compra"
 )
 
 func validateTransition(fl validator.FieldLevel) bool {
 	transition := fl.Field().String()
 	validTransition := []string{
-		string(PAGAMENTO_CONFIRMADO),
-		string(CONCLUIR_COMPRA),
+		string(PAYMENT_CONFIRMED),
+		string(COMPLETE_PURCHASE),
 		string(CANCELLED_PURCHASE),
 	}
 

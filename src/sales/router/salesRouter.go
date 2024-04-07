@@ -59,6 +59,10 @@ func InitSalesRouter(
 		appUtil.Controller(salesController.HandleGetTotalValuesSold),
 	)
 	salesRouter.Get(
+		"/total-values-sold-variation",
+		appUtil.Controller(salesController.HandleGetTotalValueSoldVariation),
+	)
+	salesRouter.Get(
 		"/:id",
 		appUtil.Controller(salesController.HandleFindSaleByID),
 	)

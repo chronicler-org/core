@@ -1,10 +1,11 @@
 package salesController
 
 import (
+	"github.com/gofiber/fiber/v2"
+
 	appUtil "github.com/chronicler-org/core/src/app/utils"
 	salesDTO "github.com/chronicler-org/core/src/sales/dto"
 	saleService "github.com/chronicler-org/core/src/sales/service"
-	"github.com/gofiber/fiber/v2"
 )
 
 type SalesController struct {
@@ -57,6 +58,19 @@ func (controller *SalesController) HandleDeleteSale(c *fiber.Ctx) (appUtil.Pagin
 	return appUtil.PaginateSingle(deletedSale), err
 }
 
+func (controller *SalesController) HandleGetTotalValuesSold(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
+	var queryTotalSalesSoldDTO salesDTO.QueryTotalSalesSoldDTO
+	c.QueryParser(&queryTotalSalesSoldDTO)
+
+	produtsSummary, count, err := controller.salesService.GetTotalValuesSold(queryTotalSalesSoldDTO)
+	return appUtil.Paginate(produtsSummary, count, queryTotalSalesSoldDTO.GetPage(), queryTotalSalesSoldDTO.GetLimit()), err
+}
+
+func (controller *SalesController) HandleGetTotalValueSoldVariation(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
+	totalValueSoldVariation, err := controller.salesService.GetTotalValueSoldVariation()
+	return appUtil.PaginateSingle(totalValueSoldVariation), err
+}
+
 func (controller *SalesController) HandleGetSaleProductsSummary(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
 	var querySalesProductSummaryDTO salesDTO.QuerySalesProductSummaryDTO
 	c.QueryParser(&querySalesProductSummaryDTO)
@@ -77,4 +91,3 @@ func (controller *SalesController) HandleFindAllSaleItems(c *fiber.Ctx) (appUtil
 	produtsSummary, count, err := controller.salesService.FindAllSaleItems(querySaleItemDTO)
 	return appUtil.Paginate(produtsSummary, count, querySaleItemDTO.GetPage(), querySaleItemDTO.GetLimit()), err
 }
-

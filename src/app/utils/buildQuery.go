@@ -66,7 +66,9 @@ func (qb *TQueryBuilder) BuildQuery() *gorm.DB {
 				qb.order = value.String()
 			}
 		default:
-
+			if len(tags) == 0 {
+				continue
+			}
 			if tags["date_extract"] != "" && value.Int() != 0 {
 				queryString = buildQueryString(fmt.Sprintf("EXTRACT(%s FROM %s)", tags["date_extract"], fieldName), tags)
 				qb.query = qb.query.Where(queryString, int(value.Int()))

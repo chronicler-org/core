@@ -1,8 +1,6 @@
 package salesRepository
 
 import (
-	"time"
-
 	"gorm.io/gorm"
 
 	appRepository "github.com/chronicler-org/core/src/app/repository"
@@ -27,36 +25,19 @@ func (r *SaleItemRepository) GetTotalValuesSold(
 ) (int64, error) {
 	query := r.Db.Model(&salesModel.Sale{})
 	queryBuilder := appUtil.QueryBuilder(dto, query)
+	queryBuilder.BuildQuery()
 
-	applyDateFilter := dto.Month != 0 || dto.Year != 0
-	var (
-		startTime, endTime time.Time
-	)
-
-	// Set the time period to the specified month and year if provided
-	if applyDateFilter {
-		switch {
-		case dto.Month != 0 && dto.Year != 0:
-			startTime = time.Date(dto.Year, time.Month(dto.Month), 1, 0, 0, 0, 0, time.UTC)
-			endTime = startTime.AddDate(0, 1, 0).Add(-time.Nanosecond)
-		case dto.Month != 0:
-			year, _, _ := time.Now().Date()
-			startTime = time.Date(year, time.Month(dto.Month), 1, 0, 0, 0, 0, time.UTC)
-			endTime = time.Date(year, time.Month(dto.Month)+1, 1, 0, 0, 0, -1, time.UTC)
-		case dto.Year != 0:
-			startTime = time.Date(dto.Year, time.January, 1, 0, 0, 0, 0, time.UTC)
-			endTime = time.Date(dto.Year+1, time.January, 1, 0, 0, 0, -1, time.UTC)
-		}
-	}
+	startDateStr := dto.StartDate.Format("2006-01-02 15:04:05")
+	endDateStr := dto.EndDate.Format("2006-01-02 15:04:05")
 
 	query = query.
-		Select("DATE(created_at) as sale_date, SUM(total_value) as total_value")
-	queryBuilder.BuildQuery()
-	query = query.Group("DATE(created_at)")
-
-	if applyDateFilter {
-		query = query.Where("created_at BETWEEN ? AND ?", startTime, endTime)
-	}
+		Select(`
+			date_series::date AS sale_date,
+			COALESCE(SUM(CASE WHEN sales.status = 'Compra concluida' THEN total_value ELSE 0 END), 0) AS total_value
+		`).
+		Joins("RIGHT JOIN generate_series(?::timestamp, ?::timestamp, '1 day') AS date_series ON DATE(sales.created_at) = date_series", startDateStr, endDateStr).
+		Group("date_series::date").
+		Order("date_series::date")
 
 	// Query to count total number of records
 	var totalCount int64
@@ -66,7 +47,6 @@ func (r *SaleItemRepository) GetTotalValuesSold(
 	}
 
 	offset, limit := queryBuilder.GetPagination()
-	queryBuilder.ApplyOrder()
 	err = query.
 		Limit(limit).
 		Offset(offset).

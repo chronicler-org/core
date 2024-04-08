@@ -142,7 +142,7 @@ func buildQueryString(fieldName string, tags map[string]string) string {
 
 	switch tags["operation"] {
 	case "like":
-		queryString = fmt.Sprintf("%s LIKE ?", fieldName)
+		queryString = fmt.Sprintf("LOWER(%s) LIKE LOWER(?)", fieldName)
 	case "equal":
 		queryString = fmt.Sprintf("%s = ?", fieldName)
 	case "less":

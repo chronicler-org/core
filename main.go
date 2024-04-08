@@ -65,6 +65,8 @@ func main() {
 	Validator := validator.New()
 
 	appUtil.RegisterCPFValidation(Validator)
+	appUtil.RegisterBirthDateFormatValidation(Validator)
+	appUtil.RegisterNotFutureDateValidation(Validator)
 	productEnum.RegisterSizeValidation(Validator)
 	productEnum.RegisterModelValidation(Validator)
 	saleStatusEnum.RegisterStatusValidation(Validator)

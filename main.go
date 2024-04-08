@@ -7,6 +7,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 
@@ -52,6 +53,8 @@ func main() {
 
 	// instancia logger que permite visualizacao das rotas acessadas e status codes retornados
 	app.Use(logger.New())
+
+	app.Use(cors.New())
 
 	// rota raiz
 	app.Get("/", func(c *fiber.Ctx) error {

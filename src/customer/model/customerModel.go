@@ -14,7 +14,7 @@ type Customer struct {
 	Email     string          `gorm:"uniqueIndex" json:"email"`
 	Phone     string          `json:"phone"`
 	Job       string          `json:"job"`
-	BirthDate time.Time       `json:"birth_date"`
+	BirthDate string          `json:"birth_date"`
 	CreatedAt time.Time       `json:"created_at"`
 	UpdatedAt time.Time       `json:"updated_at"`
 	Tags      []*tagModel.Tag `gorm:"many2many:customer_tags;onDelete:CASCADE" json:"tags"`

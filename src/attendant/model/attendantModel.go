@@ -16,7 +16,7 @@ type Attendant struct {
 	Password  string         `json:"-"`
 	TeamID    uuid.UUID      `gorm:"column:team_id;not null" json:"-"`
 	Team      teamModel.Team `gorm:"foreignKey:TeamID" json:"team"`
-	BirthDate time.Time      `json:"birth_date"`
+	BirthDate string         `json:"birth_date"`
 	CreatedAt time.Time      `json:"created_at"`
 	UpdatedAt time.Time      `json:"updated_at"`
 }

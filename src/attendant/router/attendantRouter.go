@@ -45,7 +45,7 @@ func InitAttendantRouter(
 	)
 	attendantRoute.Post("/evaluation",
 		attendantAccessMiddleware,
-		validatorMiddleware(&attendantDTO.CreateAttendantDTO{}, nil),
+		validatorMiddleware(&attendantDTO.CreateAttendantEvaluationDTO{}, nil),
 		appUtil.Controller(attendantController.HandleCreateAttendantEvaluation),
 	)
 	attendantRoute.Patch("/evaluation/:id",

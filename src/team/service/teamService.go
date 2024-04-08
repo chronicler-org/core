@@ -7,7 +7,6 @@ import (
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 
-	appDto "github.com/chronicler-org/core/src/app/dto"
 	appException "github.com/chronicler-org/core/src/app/exceptions"
 	appUtil "github.com/chronicler-org/core/src/app/utils"
 	teamDTO "github.com/chronicler-org/core/src/team/dto"
@@ -61,7 +60,7 @@ func (service *TeamService) Update(id string, dto teamDTO.UpdateTeamDTO) (teamMo
 	return teamExists, err
 }
 
-func (service *TeamService) FindAll(dto appDto.PaginationDTO) (int64, []teamModel.Team, error) {
+func (service *TeamService) FindAll(dto teamDTO.QueryTeamDTO) (int64, []teamModel.Team, error) {
 	var teams []teamModel.Team
 	totalCount, err := service.teamRepository.FindAll(dto, &teams)
 	if err != nil {

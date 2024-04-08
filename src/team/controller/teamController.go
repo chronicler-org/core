@@ -3,7 +3,6 @@ package teamController
 import (
 	"github.com/gofiber/fiber/v2"
 
-	appDto "github.com/chronicler-org/core/src/app/dto"
 	appUtil "github.com/chronicler-org/core/src/app/utils"
 	teamDTO "github.com/chronicler-org/core/src/team/dto"
 	teamService "github.com/chronicler-org/core/src/team/service"
@@ -20,12 +19,12 @@ func InitTeamController(s *teamService.TeamService) *TeamController {
 }
 
 func (controller *TeamController) HandleFindAll(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
-	var paginationDTO appDto.PaginationDTO
-	c.QueryParser(&paginationDTO)
+	var queryTeamDTO teamDTO.QueryTeamDTO
+	c.QueryParser(&queryTeamDTO)
 
-	totalCount, teams, err := controller.teamService.FindAll(paginationDTO)
+	totalCount, teams, err := controller.teamService.FindAll(queryTeamDTO)
 
-	return appUtil.Paginate(teams, totalCount, paginationDTO.GetPage(), paginationDTO.GetLimit()), err
+	return appUtil.Paginate(teams, totalCount, queryTeamDTO.GetPage(), queryTeamDTO.GetLimit()), err
 }
 
 func (controller *TeamController) HandleFindByID(c *fiber.Ctx) (appUtil.PaginateResponse, error) {

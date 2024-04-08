@@ -4,7 +4,6 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
 
-	appDto "github.com/chronicler-org/core/src/app/dto"
 	appMiddleware "github.com/chronicler-org/core/src/app/middleware"
 	appUtil "github.com/chronicler-org/core/src/app/utils"
 	authEnum "github.com/chronicler-org/core/src/auth/enum"
@@ -31,16 +30,16 @@ func InitTeamRouter(
 ) {
 	teamRouter := router.Group("/team")
 
-	teamRouter.Get("/",
-		validatorMiddleware(nil, &appDto.PaginationDTO{}),
-		appUtil.Controller(teamController.HandleFindAll),
-	)
 	teamRouter.Get("/:id",
 		appUtil.Controller(teamController.HandleFindByID),
 	)
 
 	teamRouter.Use(appMiddleware.RouteAccessMiddleware([]authEnum.Role{authEnum.ManagerRole}))
 
+	teamRouter.Get("/",
+		validatorMiddleware(nil, &teamDTO.QueryTeamDTO{}),
+		appUtil.Controller(teamController.HandleFindAll),
+	)
 	teamRouter.Post("/",
 		validatorMiddleware(&teamDTO.CreateTeamDTO{}, nil),
 		appUtil.Controller(teamController.HandleCreateTeam),

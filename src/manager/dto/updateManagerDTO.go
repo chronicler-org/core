@@ -6,5 +6,5 @@ type UpdateManagerDTO struct {
 	Email     string `validate:"omitempty,email,max=50" json:"email,omitempty"`
 	Password  string `validate:"omitempty,min=8" json:"Password,omitempty"`
 	TeamId    string `validate:"omitempty,uuid" json:"team_id"`
-	BirthDate string `json:"birth_date,omitempty"`
+	BirthDate string `validate:"omitempty,birthdate,notfuturedate" json:"birth_date,omitempty"`
 }

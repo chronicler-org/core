@@ -84,7 +84,7 @@ func (service *CustomerCareService) CreateCustomerCare(
 
 func (service *CustomerCareService) FindAllCustomerCares(dto customerCareDTO.QueryCustomerCareDTO) (int64, []customerCareModel.CustomerCare, error) {
 	var customerCares []customerCareModel.CustomerCare
-	totalCount, err := service.customerCareRepository.FindAll(dto, &customerCares, "Team", "Customer")
+	totalCount, err := service.customerCareRepository.FindAll(dto, &customerCares, "Team", "Customer", "Customer.Address")
 	if err != nil {
 		return 0, nil, err
 	}

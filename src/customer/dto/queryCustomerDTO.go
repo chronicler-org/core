@@ -7,5 +7,7 @@ type QueryCustomerDTO struct {
 	CreatedMonth int    `validate:"omitempty,min=1,max=12" query:"created_month" pg:"operation=equal,date_extract=MONTH,name=created_at" `
 	CreatedYear  int    `validate:"omitempty,number" query:"created_year" pg:"operation=equal,date_extract=YEAR,name=created_at" `
 	CPF          string `validate:"omitempty,cpf" query:"cpf" pg:"operation=like" `
+	Name         string `validate:"omitempty" query:"name" pg:"operation=like" `
+	Email        string `validate:"omitempty" query:"email" pg:"operation=like" `
 	Order        string `validate:"omitempty" json:"order" query:"order"`
 }

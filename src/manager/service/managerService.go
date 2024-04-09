@@ -81,6 +81,21 @@ func (service *ManagerService) Create(dto managerDTO.CreateManagerDTO) (managerM
 	return model, err
 }
 
+func (service *ManagerService) UpdateManagerPassword(
+	loggedManager managerModel.Manager,
+	dto managerDTO.UpdateManagerPasswordDTO,
+) (managerModel.Manager, error) {
+	if dto.NewPassword != dto.ConfirmNewPassword {
+		return managerModel.Manager{}, appException.UnauthorizedException(managerExceptionMessage.MANAGER_PASSWORDS_DONT_MATCH)
+	}
+
+	manager, err := service.Update(loggedManager.CPF, managerDTO.UpdateManagerDTO{Password: dto.NewPassword})
+	if err != nil {
+		return managerModel.Manager{}, err
+	}
+
+	return manager, err
+}
 func (service *ManagerService) Update(id string, dto managerDTO.UpdateManagerDTO) (managerModel.Manager, error) {
 	managerExists, err := service.FindByID(id)
 	if err != nil {

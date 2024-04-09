@@ -47,6 +47,10 @@ func InitManagerRouter(
 		validatorMiddleware(&managerDTO.CreateManagerDTO{}, nil),
 		appUtil.Controller(managerController.HandleCreateManager),
 	)
+	managerRouter.Patch("/updatePassword",
+		validatorMiddleware(&managerDTO.UpdateManagerPasswordDTO{}, nil),
+		appUtil.Controller(managerController.HandleUpdateManagerPassword),
+	)
 	managerRouter.Patch("/:id",
 		validatorMiddleware(&managerDTO.UpdateManagerDTO{}, nil),
 		appUtil.Controller(managerController.HandleUpdateManager),

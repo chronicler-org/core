@@ -51,6 +51,17 @@ func (controller *ManagerController) HandleCreateManager(c *fiber.Ctx) (appUtil.
 	return appUtil.PaginateSingle(managerCreated), err
 }
 
+func (controller *ManagerController) HandleUpdateManagerPassword(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
+	loggedManager := c.Locals(authEnum.ManagerRole).(managerModel.Manager)
+
+	var updateManagerPasswordDTO managerDTO.UpdateManagerPasswordDTO
+	c.BodyParser(&updateManagerPasswordDTO)
+
+	manager, err := controller.managerService.UpdateManagerPassword(loggedManager, updateManagerPasswordDTO)
+
+	return appUtil.PaginateSingle(manager), err
+}
+
 func (controller *ManagerController) HandleUpdateManager(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
 	var updateManagerDTO managerDTO.UpdateManagerDTO
 	c.BodyParser(&updateManagerDTO)

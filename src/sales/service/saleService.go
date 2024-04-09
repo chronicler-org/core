@@ -124,7 +124,7 @@ func (service *SaleService) CreateSale(
 func (service *SaleService) FindAllSales(dto salesDTO.QuerySalesDTO) (int64, []salesModel.Sale, error) {
 	var sales []salesModel.Sale
 
-	count, err := service.saleRepository.FindAll(dto, &sales, "CustomerCare")
+	count, err := service.saleRepository.FindAll(dto, &sales, "CustomerCare", "CustomerCare.Customer")
 	if err != nil {
 		return 0, nil, err
 	}

@@ -164,7 +164,7 @@ func (service *CustomerCareService) UpdateCustomerCareEvaluation(
 	appUtil.UpdateModelFromDTO(&customerCareEvaluationExists, &dto)
 
 	customerCareEvaluationExists.UpdatedAt = time.Now()
-	err = service.customerCareEvaluationRepository.Update(customerCareEvaluationExists)
+	err = service.customerCareEvaluationRepository.Update(&customerCareEvaluationExists)
 	if err != nil {
 		return customerCareModel.CustomerCareEvaluation{}, err
 	}

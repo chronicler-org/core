@@ -106,7 +106,7 @@ func (service *AttendantService) UpdateAttendant(id string, dto attendantDTO.Upd
 	}
 
 	attendantExists.UpdatedAt = time.Now()
-	err = service.attendantRepository.Update(attendantExists)
+	err = service.attendantRepository.Update(&attendantExists)
 	return attendantExists, err
 }
 
@@ -187,7 +187,7 @@ func (service *AttendantService) UpdateAttendantEvaluation(
 	appUtil.UpdateModelFromDTO(&attendantEvaluationExists, &dto)
 
 	attendantEvaluationExists.UpdatedAt = time.Now()
-	err = service.attendantEvaluationRepository.Update(attendantEvaluationExists)
+	err = service.attendantEvaluationRepository.Update(&attendantEvaluationExists)
 	if err != nil {
 		return attendantModel.AttendantEvaluation{}, err
 	}

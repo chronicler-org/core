@@ -31,3 +31,11 @@ func (r *CustomerRepository) CountCustomersByCreatedMonth(month time.Month, year
 		Count(&count).Error
 	return count, err
 }
+
+func (r *CustomerRepository) ReplaceAssociationsByField(customer *customerModel.Customer, associations interface{}, associationName string) error {
+	return r.Db.Model(&customer).Association(associationName).Replace(associations)
+}
+
+func (r *CustomerRepository) ClearAssociationsByField(customer *customerModel.Customer, associationName string) error {
+	return r.Db.Model(&customer).Association(associationName).Clear()
+}

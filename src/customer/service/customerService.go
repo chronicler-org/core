@@ -94,11 +94,6 @@ func (service *CustomerService) UpdateCustomer(cpf string, dto customerDTO.Updat
 		}
 		customerAddress = customerAddressExists
 	}
-
-	if err != nil {
-		return customerModel.Customer{}, err
-	}
-
 	appUtil.UpdateModelFromDTO(&customerExists, &dto)
 
 	err = service.updateCustomerTags(&customerExists, dto.TagIDs)
@@ -107,7 +102,7 @@ func (service *CustomerService) UpdateCustomer(cpf string, dto customerDTO.Updat
 	}
 
 	customerExists.UpdatedAt = time.Now()
-	err = service.customerRepository.Update(customerExists)
+	err = service.customerRepository.Update(&customerExists)
 	if err != nil {
 		return customerModel.Customer{}, err
 	}
@@ -164,10 +159,11 @@ func (service *CustomerService) GetNewCustomersVariationPercent() (any, error) {
 }
 
 func (service *CustomerService) updateCustomerTags(customer *customerModel.Customer, tagIDs []string) error {
-	err := service.customerRepository.ClearAssociationsByField("CPF", customer.CPF, "Tags")
+	err := service.customerRepository.ClearAssociationsByField(customer, "Tags")
 	if err != nil {
 		return err
 	}
+
 	var tags []*tagModel.Tag
 	for _, tagID := range tagIDs {
 		tag, err := service.tagService.FindByID(tagID)
@@ -177,7 +173,7 @@ func (service *CustomerService) updateCustomerTags(customer *customerModel.Custo
 		tags = append(tags, &tag)
 	}
 
-	err = service.customerRepository.ReplaceAssociationsByField("CPF", customer.CPF, tags, "Tags")
+	err = service.customerRepository.ReplaceAssociationsByField(customer, tags, "Tags")
 	if err != nil {
 		return err
 	}
@@ -224,7 +220,7 @@ func (service *CustomerService) UpdateCustomerAddress(id string, dto customerDTO
 	appUtil.UpdateModelFromDTO(&customerAddressExists, &dto)
 
 	customerAddressExists.UpdatedAt = time.Now()
-	err = service.customerAddressRepository.Update(customerAddressExists)
+	err = service.customerAddressRepository.Update(&customerAddressExists)
 	return customerAddressExists, err
 }
 

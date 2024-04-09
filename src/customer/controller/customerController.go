@@ -48,7 +48,6 @@ func (controller *CustomerController) HandleUpdateCustomer(c *fiber.Ctx) (appUti
 	c.BodyParser(&updateCustomerDTO)
 
 	cpf := c.Params("cpf")
-
 	customerUpdated, err := controller.customerService.UpdateCustomer(cpf, updateCustomerDTO)
 
 	return appUtil.PaginateSingle(customerUpdated), err

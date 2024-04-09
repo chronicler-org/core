@@ -16,3 +16,5 @@ func InitCustomerAddressRepository(db *gorm.DB) *CustomerAddressRepository {
 		BaseRepository: appRepository.NewRepository(db, customerModel.CustomerAddress{}),
 	}
 }
+
+

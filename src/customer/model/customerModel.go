@@ -17,7 +17,7 @@ type Customer struct {
 	BirthDate string          `json:"birth_date"`
 	CreatedAt time.Time       `json:"created_at"`
 	UpdatedAt time.Time       `json:"updated_at"`
-	Tags      []*tagModel.Tag `gorm:"many2many:customer_tags;onDelete:CASCADE" json:"tags"`
+	Tags      []*tagModel.Tag `gorm:"many2many:customer_tags;ForeignKey:cpf;References:id;onDelete:CASCADE" json:"tags"`
 	AddressID uuid.UUID       `gorm:"column:address_id;not null" json:"-"`
 	Address   CustomerAddress `gorm:"foreignKey:AddressID" json:"address"`
 }

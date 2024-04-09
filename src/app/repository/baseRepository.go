@@ -88,33 +88,3 @@ func (r *BaseRepository) Delete(field, value string) error {
 func (r *BaseRepository) DeleteWithTransaction(tx *gorm.DB, field, value string) error {
 	return tx.Delete(&r.Model, fmt.Sprintf("%s = ?", field), value).Error
 }
-
-func (r *BaseRepository) ReplaceAssociationsByField(field, value string, associations interface{}, associationName string) error {
-	modelType := reflect.TypeOf(r.Model)
-	modelPtr := reflect.New(modelType).Interface()
-
-	if err := r.Db.First(modelPtr, fmt.Sprintf("%s = ?", field), value).Error; err != nil {
-		return err
-	}
-
-	if err := r.Db.Model(modelPtr).Association(associationName).Replace(associations); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (r *BaseRepository) ClearAssociationsByField(field, value string, associationName string) error {
-	modelType := reflect.TypeOf(r.Model)
-	modelPtr := reflect.New(modelType).Interface()
-
-	if err := r.Db.First(modelPtr, fmt.Sprintf("%s = ?", field)).Error; err != nil {
-		return err
-	}
-
-	if err := r.Db.Model(modelPtr).Association(associationName).Clear(); err != nil {
-		return err
-	}
-
-	return nil
-}

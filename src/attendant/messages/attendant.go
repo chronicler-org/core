@@ -19,3 +19,9 @@ var ATTENDANT_EVALUATION_SELF_EVALUATION = appDto.CustomErrorDTO{
 	Title:  "Avaliação do Atendente Inválida",
 	Detail: "Um atendente não pode avaliar a si mesmo.",
 }
+
+var ATTENDANT_PASSWORDS_DONT_MATCH = appDto.CustomErrorDTO{
+	Code:   "ATTENDANT_PASSWORDS_DONT_MATCH",
+	Title:  "Senhas enviadas não são iguais",
+	Detail: "A confirmação de senha e a senha enviada não conferem.",
+}

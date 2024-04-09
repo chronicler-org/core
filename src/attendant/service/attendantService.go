@@ -84,6 +84,23 @@ func (service *AttendantService) CreateAttendant(dto attendantDTO.CreateAttendan
 	return model, err
 }
 
+func (service *AttendantService) UpdateAttendantPassword(
+	loggedAttendant attendantModel.Attendant,
+	dto attendantDTO.UpdateAttendantPasswordDTO,
+) (attendantModel.Attendant, error) {
+
+	if dto.NewPassword != dto.ConfirmNewPassword {
+		return attendantModel.Attendant{}, appException.UnauthorizedException(attendantExceptionMessage.ATTENDANT_PASSWORDS_DONT_MATCH)
+	}
+
+	attendant, err := service.UpdateAttendant(loggedAttendant.CPF, attendantDTO.UpdateAttendantDTO{Password: dto.NewPassword})
+	if err != nil {
+		return attendantModel.Attendant{}, err
+	}
+
+	return attendant, err
+}
+
 func (service *AttendantService) UpdateAttendant(id string, dto attendantDTO.UpdateAttendantDTO) (attendantModel.Attendant, error) {
 	attendantExists, err := service.FindAttendantByID(id)
 	if err != nil {

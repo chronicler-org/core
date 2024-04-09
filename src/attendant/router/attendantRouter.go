@@ -73,6 +73,11 @@ func InitAttendantRouter(
 		validatorMiddleware(&attendantDTO.CreateAttendantDTO{}, nil),
 		appUtil.Controller(attendantController.HandleCreateAttendant),
 	)
+	attendantRoute.Patch("/updatePassword",
+		attendantAccessMiddleware,
+		validatorMiddleware(&attendantDTO.UpdateAttendantPasswordDTO{}, nil),
+		appUtil.Controller(attendantController.HandleUpdateAttendantPassword),
+	)
 	attendantRoute.Patch("/:id",
 		validatorMiddleware(&attendantDTO.UpdateAttendantDTO{}, nil),
 		appUtil.Controller(attendantController.HandleUpdateAttendant),

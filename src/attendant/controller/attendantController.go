@@ -49,6 +49,17 @@ func (controller *AttendantController) HandleCreateAttendant(c *fiber.Ctx) (appU
 	return appUtil.PaginateSingle(attendantCreated), err
 }
 
+func (controller *AttendantController) HandleUpdateAttendantPassword(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
+	loggedAttendant := c.Locals(authEnum.AttendantRole).(attendantModel.Attendant)
+
+	var updateAttendantPassword attendantDTO.UpdateAttendantPasswordDTO
+	c.BodyParser(&updateAttendantPassword)
+
+	attendant, err := controller.attendantService.UpdateAttendantPassword(loggedAttendant, updateAttendantPassword)
+
+	return appUtil.PaginateSingle(attendant), err
+}
+
 func (controller *AttendantController) HandleUpdateAttendant(c *fiber.Ctx) (appUtil.PaginateResponse, error) {
 	var updatedAttendantDTO attendantDTO.UpdateAttendantDTO
 	c.BodyParser(&updatedAttendantDTO)

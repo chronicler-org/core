@@ -1,0 +1,141 @@
+package core
+
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
+
+type AttendantEvaluation struct {
+	ID          uuid.UUID `gorm:"primarykey"  json:"id"`
+	Score       uint8     `gorm:"not null" json:"score"`
+	Description string    `gorm:"not null" json:"description"`
+	AvaluatedID uuid.UUID `gorm:"type:uuid;column:avaluated_id;not null" json:"-"`
+	Avaluated   Attendant `gorm:"foreignKey:AvaluatedID" json:"avaluated"`
+	AvaluatorID uuid.UUID `gorm:"type:uuid;column:avaluator_id;not null" json:"-"`
+	Avaluator   Attendant `gorm:"foreignKey:AvaluatorID" json:"avaluator"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
+}
+
+type Attendant struct {
+	ID        uuid.UUID `gorm:"primarykey"  json:"id"`
+	CPF       string    `gorm:"unique" json:"cpf"`
+	Name      string    `json:"name"`
+	Email     string    `gorm:"unique" json:"email"`
+	Password  string    `json:"-"`
+	TeamID    uuid.UUID `gorm:"column:team_id;not null" json:"-"`
+	Team      Team      `gorm:"foreignKey:TeamID" json:"team"`
+	BirthDate string    `json:"birth_date"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
+type CustomerAddress struct {
+	ID           uuid.UUID `gorm:"primarykey" json:"id"`
+	CEP          string    `gorm:"not null" json:"cep"`
+	City         string    `gorm:"not null" json:"city"`
+	Number       string    `gorm:"not null" json:"number"`
+	Estate       string    `gorm:"not null" json:"estate"`
+	StreetName   string    `json:"street_name"`
+	Complement   string    `json:"complement"`
+	Neighborhood string    `json:"neighborhood"`
+	CreatedAt    time.Time `json:"created_at"`
+	UpdatedAt    time.Time `json:"updated_at"`
+}
+
+type Customer struct {
+	CPF       string          `gorm:"primaryKey;type:varchar(11)" json:"cpf"`
+	Name      string          `json:"name"`
+	Email     string          `gorm:"uniqueIndex" json:"email"`
+	Phone     string          `json:"phone"`
+	Job       string          `json:"job"`
+	BirthDate string          `json:"birth_date"`
+	CreatedAt time.Time       `json:"created_at"`
+	UpdatedAt time.Time       `json:"updated_at"`
+	Tags      []*Tag          `gorm:"many2many:customer_tags;ForeignKey:cpf;References:id;onDelete:CASCADE" json:"tags"`
+	AddressID uuid.UUID       `gorm:"column:address_id;not null" json:"-"`
+	Address   CustomerAddress `gorm:"foreignKey:AddressID" json:"address"`
+}
+
+type CustomerCare struct {
+	ID          uuid.UUID `gorm:"primarykey"  json:"id"`
+	Date        time.Time `json:"date"`
+	CustomerCPF string    `gorm:"column:customer_cpf;type:varchar(11);not null" json:"-"`
+	Customer    Customer  `gorm:"foreignKey:CustomerCPF" json:"customer"`
+	TeamID      uuid.UUID `gorm:"column:team_id;not null" json:"-"`
+	Team        Team      `gorm:"foreignKey:TeamID" json:"team"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
+}
+
+type CustomerCareEvaluation struct {
+	ID             uuid.UUID    `gorm:"primarykey"  json:"id"`
+	Score          uint8        `gorm:"not null" json:"score"`
+	Description    string       `gorm:"not null" json:"description"`
+	CustomerCareID uuid.UUID    `gorm:"type:uuid;column:customer_care_id;unique;not null" json:"-"`
+	CustomerCare   CustomerCare `gorm:"foreignKey:CustomerCareID" json:"customer_care"`
+	CustomerCPF    string       `gorm:"column:customer_cpf;type:varchar(11);not null" json:"-"`
+	Customer       Customer     `gorm:"foreignKey:CustomerCPF" json:"customer"`
+	CreatedAt      time.Time    `json:"created_at"`
+	UpdatedAt      time.Time    `json:"updated_at"`
+}
+
+type Manager struct {
+	ID        uuid.UUID `gorm:"primarykey"  json:"id"`
+	CPF       string    `gorm:"unique" json:"cpf"`
+	Name      string    `gorm:"column:name" json:"name"`
+	Email     string    `gorm:"unique" json:"email"`
+	Password  string    `json:"-"`
+	TeamID    uuid.UUID `gorm:"column:team_id" json:"-"`
+	Team      Team      `gorm:"foreignKey:TeamID" json:"team"`
+	BirthDate string    `json:"birth_date"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
+type Product struct {
+	ID        uuid.UUID                 `gorm:"primarykey"  json:"id"`
+	Model     productEnum.ClothingModel `gorm:"not null" json:"model"`
+	Size      productEnum.Size          `gorm:"not null" json:"size"`
+	Value     float32                   `gorm:"not null" json:"value"`
+	Fabric    string                    `gorm:"not null" json:"fabric"`
+	Stock     uint32                    `gorm:"not null" json:"stock"`
+	CreatedAt time.Time                 `json:"created_at"`
+	UpdatedAt time.Time                 `json:"updated_at"`
+}
+
+type Sale struct {
+	CustomerCareID uuid.UUID              `gorm:"column:customer_care_id;primarykey" json:"id"`
+	CustomerCare   CustomerCare           `gorm:"foreignKey:CustomerCareID" json:"customer_care"`
+	TotalValue     float32                `gorm:"type:decimal(10,2);not null" json:"total_value"`
+	Status         saleEnum.SaleStatus    `gorm:"type:varchar(45);not null" json:"status"`
+	PaymentMethod  saleEnum.PaymentMethod `gorm:"not null" json:"payment_method"`
+	CreatedAt      time.Time              `json:"created_at"`
+	UpdatedAt      time.Time              `json:"updated_at"`
+}
+
+type SaleItem struct {
+	SaleID    uuid.UUID `gorm:"column:sale_id;primaryKey;not null" json:"-"`
+	Sale      Sale      `gorm:"foreignKey:SaleID;references:CustomerCareID;constraint:OnDelete:CASCADE" json:"sale"`
+	ProductID uuid.UUID `gorm:"column:product_id;primaryKey;not null" json:"-"`
+	Product   Product   `gorm:"foreignKey:ProductID" json:"product"`
+	Quantity  uint32    `gorm:"not null" json:"quantity"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
+type Tag struct {
+	ID        uuid.UUID `gorm:"primarykey"  json:"id"`
+	Name      string    `gorm:"uniqueIndex" json:"name"`
+	Color     string    `json:"color"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
+type Team struct {
+	ID        uuid.UUID `gorm:"primarykey"  json:"id"`
+	Name      string    `gorm:"unique" json:"name"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
